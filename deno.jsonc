@@ -11,13 +11,14 @@
 		"test": "deno test --parallel"
 	},
 	"lint": {
-		"exclude": [],
+		"exclude": [
+			"old",
+			"lib"
+		],
 		"rules": {
 			"tags": ["recommended"],
 			"include": [],
-			"exclude": [
-				"old"
-			]
+			"exclude": []
 		}
 	},
 	"fmt": {
@@ -28,7 +29,8 @@
 		"singleQuote": true,
 		"proseWrap": "always",
 		"exclude": [
-			"old"
+			"old",
+			"lib"
 		]
 	}
 }
