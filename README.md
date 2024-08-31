@@ -13,15 +13,13 @@
 ```typescript
 type ObjectProperty = {
 	id?: string;
-	kind?: KindsEnum;
-	meta: Set<MetaEnum> = new Set();
+	kind?: ts.SyntaxKind;
+	meta: Set<Meta> = new Set();
 	name?: string;
-	/** Function parameters and nothing else */
-	parameters: ObjectProperty[] = [];
+	parameters: Ast[] = [];
 	text?: string;
-	/** The type of thing (can be return type, or simply type) */
-	type: ObjectProperty[] = [];
-	typeParameters: ObjectPropert[] = [];
+	type: Ast[] = [];
+	typeParameters: Ast[] = [];
 }
 ```
 
@@ -31,53 +29,32 @@ The id of the object. This is used to uniquely identify the object.
 
 ### `kind`
 
-The kind of the object. This is used to determine the type of the object. This is a simplied version of the TypeScript API's `SyntaxKinds`. Here are the types with examples of each:
-
-- **Array:** a value followed by brackets, e.g. `string[]`
-- **Constructor:** a constructor interface, e.g. `new (...args: any[]) => any`
-- **Function:** a function with parameters and a return type, e.g. `(a: string, b: string) => number`
-- **Identifier:** the name of an object or property. This is always represented by a string value, not an object.
-- **IndexAccess:** a type with a type surrounded by brackets, e.g. `A[B]`
-- **IndexSignature:** parameters surrounded by brackets, followed by a type, e.g. `[key: string]: number`
-- **Intersection:** an list of types separated by `&`, e.g. `{ foo: true } & { bar: false }`
-- **Literal:** A literal value, e.g. `"default"`
-- **Mapped:** a map of parameters, each surrounded by brackets, followed by a type, e.g. `{ [A]?: B }`
-- **Method:** a method with parameters and a return type, e.g. `A(B): C`
-- **Operator:** a type preceded by an operator, e.g. `readonly A`, `keyof A`, `unique A`
-- **Parenthesized:** a type surrounded by parentheses, e.g. `(A)`
-- **Property:** a property with a type, e.g. `A: B`
-- **Reference:** a reference to another interface, e.g. `Array<T>` or `ArrayConstructor`
-- **This:** The literal `this` which will probably be removed in favor of Token for simplicity.
-- **Token:** language-defined words such as `number`, `void`, `any`, etc.
-- **Tuple:** elements surrounded by brackets and separated by commas, e.g. `[string, number, boolean]`
-- **Type:** currently a catch-all for any unhandled values. This should be better specified as the type of an object or property.
-- **TypeLiteral:** object-literal notation (members surrounded by braces), e.g. `{ a: string, b: number }`
-- **Union:** `string | number | boolean`
-- **Variable:** a variable declaration, usually preceded by the `declare` modifier, e.g. `declare var a: string`
+The kind of the object. This is used to determine the type of the object. The `SyntaxKinds` object is defined in the TypeScript compiler API.
 
 ### `meta`
 
-Meta information about the object as boolean flags (if present it's true, absent is false) This includes metadata about the object such as whether it is a declaration, extends another object, or is read-only. This is a list of the available types:
+Meta information about the object as boolean flags (if present it's true, absent is false). 
+This includes metadata about the object such as whether it is a declaration, extends another object, or is read-only.
+THis is mostly made up of TypeScript "modifiers" plus a few extra types that represent boollean values.
 
-- **Abstract:** indicates that a class is marked `abstract`
-- **Accessor:** indicates that a property is an accessor, e.g. `A[B]`
-- **Async:** indicates that a function is marked `async`
-- **Const:** indicates that a value is a constant variabale, `const`
-- **Declare:** indicates a variable or function declaration, `declare`
-- **Default:** indicates that a value is the default export `default`
-- **Export:** indicates that a value is exported, `export`
-- **Extends:** indicates that an object extends another object, marked `extends`
-- **Generator:** indicates that a function is a generator function, marked with an `*`
-- **In:** indicates that a value is in a set, e.g. `a in b`
-- **Optional:** indicates that a value is optional, marked with a `?`
-- **Out:** indicates that a value is out of a set, e.g. `a out of b`
-- **Override:** indiciates that a method overrides a method in a parent class, marked `override`
-- **Private:** indicates that a value is private, `private` (TODO: does this include `#`?)
-- **Protected:** indicates that a value is protected, `protected`
-- **Public:** indicates that a value is public, `public`
-- **ReadOnly:** indicates that a value is read-only, `readonly`
-- **Rest:** indicates that a value is a rest parameter, marked with `...`
-- **Static:** indicates that a value is marked as static, `static`
+- `ts.SyntaxKind.AbstractKeyword`: indicates that a class is marked `abstract`
+- `ts.SyntaxKind.AccessorKeyword`: indicates that a property is an accessor, e.g. `A[B]`
+- `ts.SyntaxKind.AsyncKeyword`: indicates that a function is marked `async`
+- `ts.SyntaxKind.ConstKeyword`: indicates that a value is a constant variabale, `const`
+- `ts.SyntaxKind.DeclareKeyword`: indicates a variable or function declaration, `declare`
+- `ts.SyntaxKind.DefaultKeyword`: indicates that a value is the default export `default`
+- `ts.SyntaxKind.DotDotDotToken`: Extended value: indicates that a value is a **rest parameter**, marked with `...`
+- `ts.SyntaxKind.ExportKeyword`: indicates that a value is exported, `export`
+- `ts.SyntaxKind.ExtendsKeyword`: Extended value: Indicates that a value extends another, marked with `extends` 
+- `ts.SyntaxKind.InKeyword`: indicates that a value is in a set, e.g. `a in b`
+- `ts.SyntaxKind.OutKeyword`: indicates that a value is out of a set, e.g. `a out of b` 
+- `ts.SyntaxKind.OverrideKeyword`: indiciates that a method overrides a method in a parent class, marked `override`
+- `ts.SyntaxKind.PrivateKeyword`: indicates that a value is private, `private` (TODO: does this include `#`?)
+- `ts.SyntaxKind.ProtectedKeyword`: indicates that a value is protected, `protected`
+- `ts.SyntaxKind.PublicKeyword`: indicates that a value is public, `public`
+- `ts.SyntaxKind.QuestionToken`: Extended vaue: indicates that a value is **optional**, marked with a `?`
+- `ts.SyntaxKind.ReadonlyKeyword`: indicates that a value is read-only, `readonly`
+- `ts.SyntaxKind.StaticKeyword`: indicates that a value is marked as static, `static`
 
 ### `name`
 
@@ -85,7 +62,7 @@ The name of the objects and properties such as `String`, `ArrayConstructor`, and
 
 ### `parameters`
 
-An array of `ObjectProperty` objects that represent function/method parameters.
+An array of `Ast` objects that represent function/method parameters.
 
 ### `text`
 
@@ -93,11 +70,11 @@ Actual text of a language-defined keyword or token value, such as `string`, `awa
 
 ### `type`
 
-An array of `ObjectProperty` objects that represent the type(s) of an object, property, function return, etc.
+An array of `Ast` objects that represent the type(s) of an object, property, function return, etc.
 
 ### `typeParameters`
 
-An array of `ObjectProperty` objects that represent the type parameters of a generic type like `T`, `U`, etc.
+An array of `Ast` objects that represent the type parameters of a generic type like `T`, `U`, etc.
 
  ## Parsing
 
@@ -173,7 +150,7 @@ An array of `ObjectProperty` objects that represent the type parameters of a gen
  
  ## Stability
 
- - The `ObjectProperty` object is stable in that it represents all of the values it needs to, however, the names may change slightly.
+ - The `Ast` object is stable in that it represents all of the values it needs to, however, the names may change slightly.
  - The rendered JSON is **NOT STABLE**. At present there are missing values, or values associated with an incorrect property (e.g. `type` instead of `typeParameter`)
  - There aren't any tests at the moment.
 
