@@ -131,10 +131,10 @@ An array of `Ast` objects that represent the type parameters of a generic type l
  same name, but the type is different.
  
  ```typescript
- interface Math {
-     abs(x: number): number;
+ interface Date {
+    setMonth(month: number, date?: number): number;
  }
- declare var Math: Math;
+ declare var Date: DateConstructor;
  ```
  
 ### Example: Constructors

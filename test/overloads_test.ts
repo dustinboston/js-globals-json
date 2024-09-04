@@ -1,29 +1,27 @@
-import { assert } from './deps.ts';
+import { assert, assertEquals } from './deps.ts';
 import globalsJson from '../js-globals.json' with { type: 'json' };
-import { assertEquals } from './deps.ts';
+import { SerializedAst } from '../src/types.ts';
 
 Deno.test('new Array()', () => {
-    const globalArray = globalsJson['Array'];
-    const found = globalArray.filter((a) => {
+    const globalArray = globalsJson['Array.new'];
+    const found: SerializedAst[] = globalArray.filter((a: SerializedAst) => {
         return (
-            a.kind === 'Constructor' &&
-            a.parameters.length === 1 &&
-            a.parameters[0] &&
-            a.parameters[0].meta[0] === 'Optional'
+            a.kind === 'ConstructSignature' &&
+            a.parameters?.length === 1 &&
+            a.parameters[0]?.meta?.[0] === 'QuestionToken'
         );
     });
 
-    assert(found.length === 1);
+    assertEquals(found.length, 1);
 });
 
 Deno.test('new Array(n)', () => {
-    const globalArray = globalsJson['Array'];
-    const found = globalArray.filter((a) => {
+    const globalArray = globalsJson['Array.new'];
+    const found: SerializedAst[] = globalArray.filter((a: SerializedAst) => {
         return (
-            a.kind === 'Constructor' &&
-            a.parameters.length === 1 &&
-            a.parameters[0] &&
-            a.parameters[0].meta.length === 0
+            a.kind === 'ConstructSignature' &&
+            a.parameters?.length === 1 &&
+            a.parameters[0]?.meta === undefined
         );
     });
 
@@ -31,13 +29,12 @@ Deno.test('new Array(n)', () => {
 });
 
 Deno.test('new Array(...rest)', () => {
-    const globalArray = globalsJson['Array'];
-    const found = globalArray.filter((a) => {
+    const globalArray = globalsJson['Array.new'];
+    const found: SerializedAst[] = globalArray.filter((a: SerializedAst) => {
         return (
-            a.kind === 'Constructor' &&
-            a.parameters.length === 1 &&
-            a.parameters[0] &&
-            a.parameters[0].meta[0] === 'Rest'
+            a.kind === 'ConstructSignature' &&
+            a.parameters?.length === 1 &&
+            a.parameters[0]?.meta?.[0] === 'DotDotDotToken'
         );
     });
 
@@ -46,12 +43,11 @@ Deno.test('new Array(...rest)', () => {
 
 Deno.test('Array()', () => {
     const globalArray = globalsJson['Array'];
-    const found = globalArray.filter((a) => {
+    const found: SerializedAst[] = globalArray.filter((a: SerializedAst) => {
         return (
-            a.kind === 'Function' &&
-            a.parameters.length === 1 &&
-            a.parameters[0] &&
-            a.parameters[0].meta[0] === 'Optional'
+            a.kind === 'CallSignature' &&
+            a.parameters?.length === 1 &&
+            a.parameters[0].meta?.[0] === 'QuestionToken'
         );
     });
 
@@ -60,12 +56,11 @@ Deno.test('Array()', () => {
 
 Deno.test('Array(n)', () => {
     const globalArray = globalsJson['Array'];
-    const found = globalArray.filter((a) => {
+    const found: SerializedAst[] = globalArray.filter((a: SerializedAst) => {
         return (
-            a.kind === 'Function' &&
-            a.parameters.length === 1 &&
-            a.parameters[0] &&
-            a.parameters[0].meta.length === 0
+            a.kind === 'CallSignature' &&
+            a.parameters?.length === 1 &&
+            a.parameters[0]?.meta === undefined
         );
     });
 
@@ -74,12 +69,11 @@ Deno.test('Array(n)', () => {
 
 Deno.test('Array(...rest)', () => {
     const globalArray = globalsJson['Array'];
-    const found = globalArray.filter((a) => {
+    const found: SerializedAst[] = globalArray.filter((a: SerializedAst) => {
         return (
-            a.kind === 'Function' &&
-            a.parameters.length === 1 &&
-            a.parameters[0] &&
-            a.parameters[0].meta[0] === 'Rest'
+            a.kind === 'CallSignature' &&
+            a.parameters?.length === 1 &&
+            a.parameters[0]?.meta?.[0] === 'DotDotDotToken'
         );
     });
 

@@ -38,7 +38,7 @@ export type SerializedAst = Partial<{
     /**
      * An array of `Ast` objects that represent the type(s) of an object, property, function return, etc.
      */
-    type: SerializedAst[];
+    type: (string | SerializedAst)[];
 
     /**
      * An array of `Ast` objects that represent the type parameters of a generic type like `T`, `U`, etc.
@@ -90,4 +90,51 @@ export const validMetaValues = new Set([
 
 export function isValidMeta(kind: ts.SyntaxKind): kind is Meta {
     return validMetaValues.has(kind);
+}
+
+/**
+ * Formats a unique identifier for a global object or property.
+ *
+ * If the `id` is enclosed in square brackets (`[` and `]`), it is treated as a symbol and the `globalPrefix` is prepended to it.
+ * Otherwise, if `globalPrefix` is provided, it is prepended to the `id` with a dot (`.`) separator.
+ * If `globalPrefix` is not provided, the `id` is returned as-is.
+ *
+ * @param id The unique identifier to format.
+ * @param globalPrefix An optional prefix to prepend to the `id`.
+ * @returns The formatted identifier.
+ */
+export function formatId(id: string, globalPrefix = '') {
+    if (id.startsWith('[') && id.endsWith(']')) { // This is a symbol
+        return `${globalPrefix}${id}`;
+    } else if (globalPrefix) {
+        return `${globalPrefix}.${id}`;
+    } else {
+        return id;
+    }
+}
+
+/**
+ * Formats an AST name
+ *
+ * If the `name` is enclosed in square brackets (`[` and `]`), it is treated as a symbol and the `globalPrefix` is prepended to it.
+ * Otherwise, if `globalPrefix` is provided, it is prepended to the `name` with a dot (`.`) separator.
+ * If `globalPrefix` is not provided, the `name` is returned as-is.
+ *
+ * @param name The unique identifier to format.
+ * @param globalPrefix An optional prefix to prepend to the `name`.
+ * @returns The formatted identifier.
+ */
+export function formatName(name: string, globalPrefix = '') {
+    let prefix = globalPrefix;
+    if (name === 'prototype' && globalPrefix.endsWith('.prototype')) {
+        prefix = globalPrefix.replace(/\.prototype/g, '');
+    }
+
+    if (name.startsWith('[') && name.endsWith(']')) { // This is a symbol
+        return `${prefix}${name}`;
+    } else if (prefix) {
+        return `${prefix}.${name}`;
+    } else {
+        return name;
+    }
 }

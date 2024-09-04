@@ -8,7 +8,7 @@ export class Ast {
 	/**
 	 * The id of the object. This is used to uniquely identify the object.
 	 */
-	private id?: string;
+	private id: string = crypto.randomUUID();
 
 	/**
 	 * The kind of the object. This is used to determine the type of the object. This is a simplied version of the TypeScript API's `SyntaxKinds`
@@ -98,9 +98,15 @@ export class Ast {
 	 * @param id The new identifier for this object.
 	 * @returns A reference to this object for method chaining.
 	 */
-	public setId(id: string): this {
-		this.id = id;
+	public setId(id?: string): this {
+		if (id) {
+			this.id = id;
+		}
 		return this;
+	}
+
+	public getId(): string {
+		return this.id;
 	}
 
 	/**
@@ -128,12 +134,15 @@ export class Ast {
 	 * @param metaTypes - An array of meta types to set for this ast.
 	 * @returns A reference to this ast instance for method chaining.
 	 */
-	public setMeta(metaTypes: ts.SyntaxKind[]) {
+	public setMeta(metaTypes?: ts.SyntaxKind[]) {
+		if (!metaTypes) return this;
+
 		for (const meta of metaTypes) {
 			if (isValidMeta(meta)) {
 				this.meta.add(meta);
 			}
 		}
+
 		return this;
 	}
 
@@ -196,6 +205,10 @@ export class Ast {
 			this.type.push(type);
 		}
 		return this;
+	}
+
+	public getParameters(): Ast[] {
+		return this.parameters;
 	}
 
 	/**
