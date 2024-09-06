@@ -6,13 +6,15 @@
  
  There are a few packages that appear to have this data, but are either incomplete or are not machine-readable. [mdn-data](https://github.com/mdn/data) only defines inheritance; [mdn-content](https://github.com/mdn/content) and [js-core](https://github.com/zloirock/core-js) are comprehensive, but not machine readable. However, all of this data is clearly encoded in TypeScript's lib files. This code uses the TypeScript API to parse the lib files and convert them into a simplified JSON format. Honestly, this seems like it must have already been solved and as if this is completely over-engineering the whole thing. So if you know of a better way, or some data that already exists, please leave an issue.
 
- ## Schema
+## Schema
+
+### Ast Class
 
  A single object is used to represent the entirety of the JavaScript API as defined in Typescript. It has this structure:
  
 ```typescript
-type ObjectProperty = {
-	id?: string;
+type Ast = {
+	id: string;
 	kind?: ts.SyntaxKind;
 	meta: Set<Meta> = new Set();
 	name?: string;
@@ -25,7 +27,7 @@ type ObjectProperty = {
 
 ### `id`
 
-The id of the object. This is used to uniquely identify the object.
+The id of the object. This is used to uniquely identify the object. Will be populated with a throwaway GUID if not provided.
 
 ### `kind`
 
@@ -35,10 +37,11 @@ The kind of the object. This is used to determine the type of the object. The `S
 
 Meta information about the object as boolean flags (if present it's true, absent is false). 
 This includes metadata about the object such as whether it is a declaration, extends another object, or is read-only.
-THis is mostly made up of TypeScript "modifiers" plus a few extra types that represent boollean values.
+This is mostly made up of TypeScript "modifiers" plus a few extra types that represent boollean values.
 
 - `ts.SyntaxKind.AbstractKeyword`: indicates that a class is marked `abstract`
 - `ts.SyntaxKind.AccessorKeyword`: indicates that a property is an accessor, e.g. `A[B]`
+- `ts.SyntaxKind.AssertsKeyword`: indicates that the Ast is a type assertion, e.g. `asserts is Foo`
 - `ts.SyntaxKind.AsyncKeyword`: indicates that a function is marked `async`
 - `ts.SyntaxKind.ConstKeyword`: indicates that a value is a constant variabale, `const`
 - `ts.SyntaxKind.DeclareKeyword`: indicates a variable or function declaration, `declare`
@@ -62,7 +65,7 @@ The name of the objects and properties such as `String`, `ArrayConstructor`, and
 
 ### `parameters`
 
-An array of `Ast` objects that represent function/method parameters.
+An array of `Ast` objects that represent function/method parameters and sometimes general "children."
 
 ### `text`
 
@@ -98,21 +101,11 @@ An array of `Ast` objects that represent the type parameters of a generic type l
  declare var String: StringConstructor;
  ```
  
- In the declaration for `String`, the `String` interface defines **instance** methods and properties accesed
- through the prototype, e.g. `String.protototype.toString`. The `StringConstructor` contains **static** methods
- accessed directly from the object, e.g. `String.fromCharCode(...)`.
+In the declaration for `String`, the `String` interface defines **instance** methods and properties accesed through the prototype, e.g. `String.protototype.toString`. The `StringConstructor` contains **static** methods accessed directly from the object, e.g. `String.fromCharCode(...)`.
+
+We can tell the difference programmatically by checking each interface for the presence of the `new` function which TypeScript refers to as a `ConstructSignatureDeclaration`. On the other hand, if an interface name matches a declared variable name, we know that it is _not_ part of a constructor.  Detecting these difference gets a little tricky because TypeScript merges interfaces with the same name. To address this the code pre-caches all of the declarations in the program including whether interfaces are constructors. 
  
- More generically speaking, if the name of an interface is the same as the name of a variable declaration, the
- interface defines **instance** methods and properties. If the interface contains a `prototype` with a type that
- matches the variable declaration name, the interface defines **static** methods and properties.
- 
- There is one exception: If the interface, declaration name, and declaration type have the same, the methods and
- properties defined in the interface name interface are static.
- 
- The code uses a shorthand for this:
- - The variable declaration **name** defines an instance and its members.
- - The variable declaration **type** defines the object's static members.
- - If var name, type name, and interface name are equal the interface defines static members.
+The code takes a shortcut with static interfaces like `Math`. If the declaration name, type and interface name are all the same, all of the interfaces members are treated as static.
  
  ### Example: Static members
 
@@ -148,12 +141,16 @@ An array of `Ast` objects that represent the type parameters of a generic type l
  declare var Array: ArrayConstructor
  ```
  
- ## Stability
+## Stability
 
- - The `Ast` object is stable in that it represents all of the values it needs to, however, the names may change slightly.
- - The rendered JSON is **NOT STABLE**. At present there are missing values, or values associated with an incorrect property (e.g. `type` instead of `typeParameter`)
- - There aren't any tests at the moment.
+- The `Ast` class is **NOT STABLE**: 
+  - The shape of the class might still change.
+- The printed JSON is **NOT STABLE**: 
+  - It currently contains global types (in addition to global objects) that need to be removed.
+  - The JSON is not much simpler than the actual TypeScript ASTs and will be simplified.
+  - Some globals with complex types may have partial type definitions.
+- The tests are currently high-level and they do not test for edge cases.
 
- ## License
+## License
 
- See [LICENSE](./LICENSE)
+See [LICENSE](./LICENSE)

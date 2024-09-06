@@ -7,8 +7,10 @@ import { isValidMeta, Meta, SerializedAst } from './types.ts';
 export class Ast {
 	/**
 	 * The id of the object. This is used to uniquely identify the object.
+	 * Prefixing it with an ~ lets us know not to add it to the globals (there are no global values that start with ~)
+	 * @todo Determin if both id and name should be used as they are often the same.
 	 */
-	private id: string = crypto.randomUUID();
+	private id: string = '~' + crypto.randomUUID();
 
 	/**
 	 * The kind of the object. This is used to determine the type of the object. This is a simplied version of the TypeScript API's `SyntaxKinds`
@@ -52,19 +54,21 @@ export class Ast {
 	 * @returns An object representation of the `Ast` instance.
 	 */
 	public serialize(): SerializedAst {
-		const sparse: SerializedAst = {
-			id: this.id,
-		};
+		const sparse: SerializedAst = {};
+
+		if (!this.id.startsWith('~')) {
+			sparse.id = this.id;
+		}
 
 		if (this.kind !== undefined) {
-			sparse.kind = ts.SyntaxKind[this.kind ?? 0];
+			sparse.kind = this.kind ?? 0;
 		}
 
 		if (this.meta.size > 0) {
-			const metaNames: string[] = [];
+			const metaNames: number[] = [];
 			for (const metaKind of this.meta) {
 				if (isValidMeta(metaKind)) {
-					metaNames.push(ts.SyntaxKind[metaKind]);
+					metaNames.push(metaKind);
 				}
 			}
 			sparse.meta = metaNames;
@@ -91,6 +95,25 @@ export class Ast {
 		}
 
 		return sparse;
+	}
+
+	/**
+	 * Changes the prefix of an Ast object's name and ID.
+	 *
+	 * @param fromOldPrefix - The old prefix to replace.
+	 * @param toNewPrefix - The new prefix to use.
+	 */
+	public changePrefix(fromOldPrefix: string, toNewPrefix: string): void {
+		if (!fromOldPrefix || !toNewPrefix) return;
+
+		if (this.name && this.name.startsWith(fromOldPrefix)) {
+			this.name = this.name.replaceAll(fromOldPrefix, toNewPrefix);
+		}
+
+		if (this.id.startsWith(fromOldPrefix)) {
+			const newId = this.id.replaceAll(fromOldPrefix, toNewPrefix);
+			this.id = newId;
+		}
 	}
 
 	/**

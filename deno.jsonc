@@ -7,8 +7,7 @@
 	},
 	"nodeModulesDir": false,
 	"tasks": {
-		"build-props": "deno run -A ./scripts/build_props.ts > ./src/props.ts",
-		"build-globals": "deno run -A ./scripts/build_globals.ts > js-globals.json",
+		"json": "deno run -A ./scripts/json.ts > globals.json",
 		"test": "deno test --parallel"
 	},
 	"lint": {
