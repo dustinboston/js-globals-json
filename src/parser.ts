@@ -1,5 +1,4 @@
 import ts from 'npm:typescript@5.5.3';
-
 import { Ast } from './ast.ts';
 import { formatName, isValidMeta, Meta } from './types.ts';
 import { formatId } from './types.ts';
@@ -13,47 +12,32 @@ export class Parser {
     /**
      * Map of declaration names to types
      */
-    protected variableDeclarationsByName = new Map<string, string>();
+    private variableDeclarationsByName = new Map<string, string>();
 
     /**
      * Map of declaration types to their declaration names
      */
-    protected variableDeclarationsByType = new Map<string, string>();
+    private variableDeclarationsByType = new Map<string, string>();
 
     /**
      * List of constructors for quick reference
      */
-    protected constructorCache = new Set<string>();
+    private constructorCache = new Set<string>();
 
     /**
      * Cache of all statement nodes by name.
      */
-    protected statementsCache = new Map<string, [ts.SourceFile['fileName'], ts.Node][]>();
-
-    /**
-     * Regular expression to filter out names with invalid characters
-     */
-    protected badCharsRE = new RegExp(/[^a-zA-Z0-9"\[\]]/g);
+    private statementsCache = new Map<string, [ts.SourceFile['fileName'], ts.Node][]>();
 
     /**
      * An array to store the serialized AST objects for the parsed global declarations.
      */
-    protected globals: Record<string, Ast[]> = {};
+    private globals: Record<string, Ast[]> = {};
 
     /**
      * The Program contains information about the program, including the source files, compiler options, and diagnostics.
      */
-    protected program: ts.Program;
-
-    /**
-     * The index of the current source file being processed.
-     */
-    protected currentSourceFile: ts.SourceFile;
-
-    /**
-     * An instance of the type checker
-     */
-    protected checker: ts.TypeChecker;
+    private program: ts.Program;
 
     /**
      * Initializes the parser with the provided file paths. Only the entry point files are necessary as the Typescript
@@ -61,14 +45,30 @@ export class Parser {
      *
      * @param filePaths - An array of file paths to be parsed.
      */
-    constructor(filePaths: string[]) {
-        if (filePaths.length === 0) {
-            throw new Error('No files to parse');
+    constructor(program: ts.Program) {
+        if (!program) {
+            throw new TypeError('A program is required');
         }
+        this.program = program;
+    }
 
-        this.program = ts.createProgram(filePaths, { noLib: true });
-        this.checker = this.program.getTypeChecker();
-        this.currentSourceFile = this.program.getSourceFiles()[0];
+    /**
+     * This is the main entry point for the parser.
+     * It iterates over the statements in a source file and converts each of them into an Ast object.
+     * @returns An array of Ast objects representing the parsed source file.
+     */
+    public parse() {
+        // Collect all the declarations in the program
+        this.collectDeclarations();
+
+        // Then process the program, resolving declarations along the way.
+        this.program.getSourceFiles().forEach((sourceFile) => {
+            sourceFile.forEachChild((node) => {
+                this.visitStatements(node, sourceFile, '');
+            });
+        });
+
+        return this.globals;
     }
 
     /**
@@ -79,7 +79,7 @@ export class Parser {
      * @param id - The unique identifier to use as the key in the global scope.
      * @param ast - The AST object to serialize and save to the global scope.
      */
-    protected saveGlobal(ast: Ast) {
+    private saveGlobal(ast: Ast) {
         if (!ast) return;
 
         const id = ast.getId();
@@ -109,26 +109,6 @@ export class Parser {
         }
     }
 
-    /**
-     * This is the main entry point for the parser.
-     * It iterates over the statements in a source file and converts each of them into an Ast object.
-     * @returns An array of Ast objects representing the parsed source file.
-     */
-    public parse() {
-        // Collect all the declarations in the program
-        this.collectDeclarations();
-
-        // Then process the program, resolving declarations along the way.
-        this.program.getSourceFiles().forEach((sourceFile) => {
-            this.currentSourceFile = sourceFile;
-            sourceFile.forEachChild((node) => {
-                this.visitStatements(node, sourceFile, '');
-            });
-        });
-
-        return this.globals;
-    }
-
     // MARK: ▼ PRE-CACHE ▼
     // Find and store declarations, constructors, and heritage to make parsing more efficient
 
@@ -138,13 +118,11 @@ export class Parser {
      *
      * @todo Move into another file or class
      */
-    protected collectDeclarations(): void {
+    private collectDeclarations(): void {
         // deno-lint-ignore no-this-alias
         const that = this;
 
-        // console.log(`// Globals`);
         this.program.getSourceFiles().forEach((sourceFile) => {
-            // console.log(`// File: ${sourceFile.fileName} */`);
             ts.forEachChild(sourceFile, (node) => visitDeclarations(node, sourceFile));
         });
 
@@ -311,7 +289,7 @@ export class Parser {
      * @param node The TypeScript AST to parse.
      * @param globalPrefix A value such as 'Object.prototype' or 'Object' to add to binding values.
      */
-    protected visitStatements(node: ts.Node, sourceFile: ts.SourceFile, globalPrefix = ''): Ast | undefined {
+    private visitStatements(node: ts.Node, sourceFile: ts.SourceFile, globalPrefix = ''): Ast | undefined {
         switch (node.kind) {
             case ts.SyntaxKind.FunctionDeclaration: {
                 if (ts.isFunctionDeclaration(node)) {
@@ -784,7 +762,7 @@ export class Parser {
      * @param node The module declaration to parse.
      * @returns An array of parsed module declarations.
      */
-    protected parseModuleDeclaration(node: ts.ModuleDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
+    private parseModuleDeclaration(node: ts.ModuleDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const name = node.name.getText(sourceFile);
         const meta = this.getMetaFromModifiers(node.modifiers);
         const ast = new Ast()
@@ -821,7 +799,7 @@ export class Parser {
      * @param node The IndexSignatureDeclaration node to parse.
      * @returns an Ast object representing the parsed IndexSignatureDeclaration.
      */
-    protected parseIndexSignatureDeclaration(
+    private parseIndexSignatureDeclaration(
         node: ts.IndexSignatureDeclaration,
         sourceFile: ts.SourceFile,
         _globalPrefix = '',
@@ -849,7 +827,7 @@ export class Parser {
      * @param node - The TypeScript AST node representing the interface declaration.
      * @returns An Ast object representing the parsed interface.
      */
-    protected parseInterfaceDeclaration(
+    private parseInterfaceDeclaration(
         node: ts.InterfaceDeclaration,
         sourceFile: ts.SourceFile,
         globalPrefix = '',
@@ -925,7 +903,7 @@ export class Parser {
      * @param globalPrefix - The prefix to use for the generated Ast object.
      * @returns An Ast object representing the parsed heritage clause.
      */
-    protected parseHeritage(node: ts.HeritageClause, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
+    private parseHeritage(node: ts.HeritageClause, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
         const ast = new Ast().setId(globalPrefix).setKind(node.kind).setName(globalPrefix);
         const nodeTypes = [...node.types];
 
@@ -965,7 +943,7 @@ export class Parser {
      * @param globalPrefix - The prefix to use for the generated Ast object.
      * @returns An Ast object representing the parsed call signature.
      */
-    protected parseCallSignatureDeclaration(
+    private parseCallSignatureDeclaration(
         node: ts.CallSignatureDeclaration,
         sourceFile: ts.SourceFile,
         globalPrefix: string,
@@ -1010,7 +988,7 @@ export class Parser {
      * @param globalPrefix - The prefix to use for the generated Ast object.
      * @returns An Ast object representing the parsed construct signature.
      */
-    protected parseConstructSignatureDeclaration(
+    private parseConstructSignatureDeclaration(
         node: ts.ConstructSignatureDeclaration,
         sourceFile: ts.SourceFile,
         globalPrefix: string,
@@ -1054,7 +1032,7 @@ export class Parser {
      * @param globalPrefix - The prefix to use for the generated Ast object.
      * @returns An Ast object representing the parsed method signature, or undefined if the method name is not valid.
      */
-    protected parseMethodSignature(
+    private parseMethodSignature(
         node: ts.MethodSignature,
         sourceFile: ts.SourceFile,
         globalPrefix: string,
@@ -1097,7 +1075,7 @@ export class Parser {
      * @param globalPrefix - The name of a global object that this function belongs to (which makes this a global)
      * @returns An Ast object representing the parsed function, or undefined if the function name is not valid.
      */
-    protected parseFunctionDeclaration(
+    private parseFunctionDeclaration(
         node: ts.FunctionDeclaration,
         sourceFile: ts.SourceFile,
         globalPrefix = '',
@@ -1151,7 +1129,7 @@ export class Parser {
      * @param prefix - The prefix to use for the property name.
      * @returns An Ast object representing the parsed property, or undefined if the property name is not valid.
      */
-    protected parsePropertySignature(
+    private parsePropertySignature(
         node: ts.PropertySignature,
         sourceFile: ts.SourceFile,
         globalPrefix: string,
@@ -1183,7 +1161,7 @@ export class Parser {
      * @param node - The TypeScript AST node representing the variable declaration.
      * @returns An Ast object representing the parsed variable.
      */
-    protected parseVariableDeclaration(
+    private parseVariableDeclaration(
         node: ts.VariableDeclaration,
         sourceFile: ts.SourceFile,
         globalPrefix = '',
@@ -1214,7 +1192,7 @@ export class Parser {
      *
      * @param node - The variable statement node to parse.
      */
-    protected parseVariableStatement(node: ts.VariableStatement, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
+    private parseVariableStatement(node: ts.VariableStatement, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const parameters: Ast[] = [];
         const declarationIds: string[] = [];
         node.declarationList.declarations.forEach((declaration) => {
@@ -1242,7 +1220,7 @@ export class Parser {
      * @param node - The TypeScript AST node representing the type alias declaration.
      * @returns An Ast object representing the parsed type alias.
      */
-    protected parseTypeAliasDeclaration(
+    private parseTypeAliasDeclaration(
         node: ts.TypeAliasDeclaration,
         sourceFile: ts.SourceFile,
         globalPrefix = '',
@@ -1273,7 +1251,7 @@ export class Parser {
      * @param modifiers - The array of TypeScript modifier nodes to extract metadata from.
      * @returns An array of metadata values extracted from the provided modifiers.
      */
-    protected getMetaFromModifiers(modifiers: ts.NodeArray<ts.ModifierLike> | undefined): Meta[] {
+    private getMetaFromModifiers(modifiers: ts.NodeArray<ts.ModifierLike> | undefined): Meta[] {
         if (!modifiers) return [];
         const meta = new Set<Meta>();
         for (const modifier of modifiers) {
@@ -1291,7 +1269,7 @@ export class Parser {
      * @param syntaxKind - The name of the calling function (if any).
      * @returns An array of `ParameterBuilder` objects representing the resolved type parameters.
      */
-    protected getTypeParameters(
+    private getTypeParameters(
         typeParameters: ts.NodeArray<ts.TypeParameterDeclaration>,
         sourceFile: ts.SourceFile,
     ): Ast[] {
@@ -1312,7 +1290,7 @@ export class Parser {
      * @param sourceFile - The source file containing the type parameter declaration.
      * @returns A `ParameterBuilder` object representing the resolved type parameter.
      */
-    protected getTypeParameter(
+    private getTypeParameter(
         typeParameter: ts.TypeParameterDeclaration,
         sourceFile: ts.SourceFile,
         globalPrefix = '',
@@ -1369,7 +1347,7 @@ export class Parser {
      * @param callee - The name of the calling function (if any).
      * @returns A `ParameterBuilder` object representing the resolved parameter.
      */
-    protected getParameter(nodeParameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile) {
+    private getParameter(nodeParameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile) {
         const parameter = new Ast()
             .setName(nodeParameter.name.getText(sourceFile))
             .setKind(nodeParameter.kind);
@@ -1399,7 +1377,7 @@ export class Parser {
      * @param node - The interface declaration to get the prefix for.
      * @returns The prefix for the members of the interface.
      */
-    protected getPrefixForInterfaceMembers(
+    private getPrefixForInterfaceMembers(
         node: ts.InterfaceDeclaration,
         sourceFile: ts.SourceFile,
         _globalPrefix = '',
@@ -1424,7 +1402,7 @@ export class Parser {
      *
      * @param interfaceDeclaration - The interface declaration to check
      */
-    protected hasConstructSignatureDeclaration(interfaceDeclaration: ts.InterfaceDeclaration) {
+    private hasConstructSignatureDeclaration(interfaceDeclaration: ts.InterfaceDeclaration) {
         return interfaceDeclaration.members.some((member) => ts.isConstructSignatureDeclaration(member));
     }
 }
