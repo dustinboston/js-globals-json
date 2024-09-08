@@ -1,6 +1,6 @@
 import ts from 'npm:typescript@5.5.3';
 import { libs } from '../lib/mod.ts';
-import { Parser } from '../src/parser.ts';
+import { Generator } from '../src/generator.ts';
 import { SerializedAst } from '../src/types.ts';
 import { AppCache } from '../src/cache.ts';
 
@@ -8,8 +8,8 @@ const libFiles = libs.map((file) => `./lib/${file}`);
 const program = ts.createProgram(libFiles, { noLib: true });
 
 const cache = new AppCache(program);
-const parser = new Parser(program, cache);
-const result = parser.parse();
+const generator = new Generator(program, cache);
+const result = generator.generate();
 
 // For regular serialized:
 const obj: Record<string, SerializedAst[]> = {};

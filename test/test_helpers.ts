@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { Parser } from '../src/parser.ts';
+import { Generator } from '../src/generator.ts';
 import { AppCache } from '../src/cache.ts';
 
 export function createMockCache(sourceCode = ''): AppCache {
@@ -9,10 +9,10 @@ export function createMockCache(sourceCode = ''): AppCache {
     return new AppCache(program);
 }
 
-export function createMockParser(sourceCode = ''): Parser {
+export function createMockGenerator(sourceCode = ''): Generator {
     const compilerHost = createCompilerHost(createMockSourceFile(sourceCode));
     const program = ts.createProgram(['test.ts'], { noLib: true }, compilerHost);
-    return new Parser(program, new AppCache(program));
+    return new Generator(program, new AppCache(program));
 }
 
 export function createMockSourceFile(content = ''): ts.SourceFile {

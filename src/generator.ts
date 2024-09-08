@@ -6,13 +6,13 @@ import { formatId, formatName, isValidMeta } from './utils.ts';
 import { AppCache } from './cache.ts';
 
 /**
- * The `Parser` class is responsible for parsing TypeScript source files and generating an abstract syntax tree (AST) representation of the code.
+ * The `Generator` class is responsible for parsing TypeScript source files and generating an abstract syntax tree (AST) representation of the code.
  * It iterates over the statements in a source file, converts each of them into an `Ast` object, and stores the serialized AST objects in the `globals` array.
- * The class also maintains various caches and data structures to store information about the parsed code, such as declarations, built-in types, and interfaces.
+ * The class also maintains various caches and data structures to store information about the generated code, such as declarations, built-in types, and interfaces.
  */
-export class Parser {
+export class Generator {
     /**
-     * An array to store the serialized AST objects for the parsed global declarations.
+     * An array to store the serialized AST objects for the generated global declarations.
      */
     public globals: Record<string, Ast[]> = {};
 
@@ -22,15 +22,15 @@ export class Parser {
     public program: ts.Program;
 
     /**
-     * The cache used by the parser to store and retrieve information about the parsed code.
+     * The cache used by the generator to store and retrieve information about the generated code.
      */
     public cache: AppCache;
 
     /**
-     * Initializes the parser with the provided file paths. Only the entry point files are necessary as the Typescript
+     * Initializes the generator with the provided file paths. Only the entry point files are necessary as the Typescript
      * Program will automatically load the dependencies.
      *
-     * @param filePaths - An array of file paths to be parsed.
+     * @param filePaths - An array of file paths to be generated.
      */
     constructor(program: ts.Program, cache: AppCache) {
         if (!program || !cache) {
@@ -41,11 +41,11 @@ export class Parser {
     }
 
     /**
-     * This is the main entry point for the parser.
+     * This is the main entry point for the generator.
      * It iterates over the statements in a source file and converts each of them into an Ast object.
-     * @returns An array of Ast objects representing the parsed source file.
+     * @returns An array of Ast objects representing the generated source file.
      */
-    public parse() {
+    public generate() {
         this.cache.initialize();
 
         // Then process the program, resolving declarations along the way.
@@ -100,14 +100,14 @@ export class Parser {
      * Visits top-level declarations and signatures in the TypeScript AST and resolves them to their types.
      *
      * @note A switch/case is not used because the is* type-guard functions would still need to be used.
-     * @param node The TypeScript AST to parse.
+     * @param node The TypeScript AST to generate.
      * @param globalPrefix A value such as 'Object.prototype' or 'Object' to add to binding values.
      */
     public visitStatements(node: ts.Node, sourceFile: ts.SourceFile, globalPrefix = ''): Ast | undefined {
         switch (node.kind) {
             case ts.SyntaxKind.FunctionDeclaration: {
                 if (ts.isFunctionDeclaration(node)) {
-                    return this.parseFunctionDeclaration(node, sourceFile, globalPrefix);
+                    return this.readFunctionDeclaration(node, sourceFile, globalPrefix);
                 }
                 break;
             }
@@ -115,7 +115,7 @@ export class Parser {
             // Can be ignored because type aliases will be omitted from final output
             case ts.SyntaxKind.TypeAliasDeclaration: {
                 if (ts.isTypeAliasDeclaration(node)) {
-                    return this.parseTypeAliasDeclaration(node, sourceFile, globalPrefix);
+                    return this.readTypeAliasDeclaration(node, sourceFile, globalPrefix);
                 }
                 break;
             }
@@ -123,7 +123,7 @@ export class Parser {
             // Variable declarations are only used for reference, handled in visitDeclarations
             case ts.SyntaxKind.VariableDeclaration: {
                 if (ts.isVariableDeclaration(node)) {
-                    return this.parseVariableDeclaration(node, sourceFile);
+                    return this.readVariableDeclaration(node, sourceFile);
                 }
                 break;
             }
@@ -131,7 +131,7 @@ export class Parser {
             // Collect namespace members
             case ts.SyntaxKind.ModuleDeclaration: {
                 if (ts.isModuleDeclaration(node)) {
-                    return this.parseModuleDeclaration(node, sourceFile, globalPrefix);
+                    return this.readModuleDeclaration(node, sourceFile, globalPrefix);
                 }
                 break;
             }
@@ -139,14 +139,14 @@ export class Parser {
             // This is the primary means of collecting definitions
             case ts.SyntaxKind.InterfaceDeclaration: {
                 if (ts.isInterfaceDeclaration(node)) {
-                    return this.parseInterfaceDeclaration(node, sourceFile, globalPrefix);
+                    return this.readInterfaceDeclaration(node, sourceFile, globalPrefix);
                 }
                 break;
             }
 
             case ts.SyntaxKind.CallSignature: {
                 if (ts.isCallSignatureDeclaration(node)) {
-                    return this.parseCallSignatureDeclaration(node, sourceFile, globalPrefix);
+                    return this.readCallSignatureDeclaration(node, sourceFile, globalPrefix);
                 }
                 break;
             }
@@ -154,7 +154,7 @@ export class Parser {
             case ts.SyntaxKind.ConstructSignature: {
                 // Filtering out items when there isn't a globalPrefix
                 if (ts.isConstructSignatureDeclaration(node) && globalPrefix) {
-                    return this.parseConstructSignatureDeclaration(node, sourceFile, globalPrefix);
+                    return this.readConstructSignatureDeclaration(node, sourceFile, globalPrefix);
                 } else {
                     return;
                 }
@@ -162,35 +162,35 @@ export class Parser {
 
             case ts.SyntaxKind.HeritageClause: {
                 if (ts.isHeritageClause(node)) {
-                    return this.parseHeritage(node, sourceFile, globalPrefix);
+                    return this.readHeritage(node, sourceFile, globalPrefix);
                 }
                 break;
             }
 
             case ts.SyntaxKind.IndexSignature: {
                 if (ts.isIndexSignatureDeclaration(node)) {
-                    return this.parseIndexSignatureDeclaration(node, sourceFile, globalPrefix);
+                    return this.readIndexSignatureDeclaration(node, sourceFile, globalPrefix);
                 }
                 break;
             }
 
             case ts.SyntaxKind.MethodSignature: {
                 if (ts.isMethodSignature(node)) {
-                    return this.parseMethodSignature(node, sourceFile, globalPrefix);
+                    return this.readMethodSignature(node, sourceFile, globalPrefix);
                 }
                 break;
             }
 
             case ts.SyntaxKind.PropertySignature: {
                 if (ts.isPropertySignature(node)) {
-                    return this.parsePropertySignature(node, sourceFile, globalPrefix);
+                    return this.readPropertySignature(node, sourceFile, globalPrefix);
                 }
                 break;
             }
 
             case ts.SyntaxKind.VariableStatement: {
                 if (ts.isVariableStatement(node)) {
-                    return this.parseVariableStatement(node, sourceFile, globalPrefix);
+                    return this.readVariableStatement(node, sourceFile, globalPrefix);
                 }
                 break;
             }
@@ -559,7 +559,7 @@ export class Parser {
     }
 
     /**
-     * Parse a module declaration.
+     * Generate a module declaration.
      *
      * @example
      * ```
@@ -569,10 +569,10 @@ export class Parser {
      * ```
      *
      * @todo Not handling the case where node.body is a NamespaceDeclaration
-     * @param node The module declaration to parse.
-     * @returns An array of parsed module declarations.
+     * @param node The module declaration to generate.
+     * @returns An array of generated module declarations.
      */
-    public parseModuleDeclaration(node: ts.ModuleDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
+    public readModuleDeclaration(node: ts.ModuleDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const name = node.name.getText(sourceFile);
         const meta = this.getMetaFromModifiers(node.modifiers);
         const ast = new Ast().setId(formatId(name, globalPrefix)).setName(formatName(name, globalPrefix)).setKind(node.kind).setMeta(meta);
@@ -592,7 +592,7 @@ export class Parser {
     }
 
     /**
-     * Parses an index signature declaration in the TypeScript AST and returns an Ast object representing the index signature.
+     * Generates an index signature declaration in the TypeScript AST and returns an Ast object representing the index signature.
      * An IndexSignatureDeclaration is a set of parameters surrounded by brackets, followed by a type, e.g. `[A: B]: C`
      *
      * @example
@@ -602,10 +602,10 @@ export class Parser {
      * }
      * ```
      *
-     * @param node The IndexSignatureDeclaration node to parse.
-     * @returns an Ast object representing the parsed IndexSignatureDeclaration.
+     * @param node The IndexSignatureDeclaration node to generate.
+     * @returns an Ast object representing the generated IndexSignatureDeclaration.
      */
-    public parseIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration, sourceFile: ts.SourceFile, _globalPrefix = ''): Ast {
+    public readIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration, sourceFile: ts.SourceFile, _globalPrefix = ''): Ast {
         const ast = new Ast().setKind(node.kind).addType(this.visitType(node.type, sourceFile));
         for (const parameter of node.parameters) {
             ast.addParameter(this.visitType(parameter, sourceFile));
@@ -614,7 +614,7 @@ export class Parser {
     }
 
     /**
-     * Parses an interface declaration in the TypeScript AST and returns an Ast object representing the interface.
+     * Generates an interface declaration in the TypeScript AST and returns an Ast object representing the interface.
      *
      * @example
      * ```
@@ -627,9 +627,9 @@ export class Parser {
      * ```
      *
      * @param node - The TypeScript AST node representing the interface declaration.
-     * @returns An Ast object representing the parsed interface.
+     * @returns An Ast object representing the generated interface.
      */
-    public parseInterfaceDeclaration(node: ts.InterfaceDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
+    public readInterfaceDeclaration(node: ts.InterfaceDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const interfaceName = node.name.getText(sourceFile);
         const meta = this.getMetaFromModifiers(node.modifiers);
         const ast = new Ast()
@@ -687,7 +687,7 @@ export class Parser {
     }
 
     /**
-     * Parses a heritage clause in a TypeScript interface or class declaration.
+     * Generates a heritage clause in a TypeScript interface or class declaration.
      * A heritage clause specifies the interfaces or classes that the current interface or class extends or implements.
      *
      * @example
@@ -699,9 +699,9 @@ export class Parser {
      *
      * @param node - The TypeScript AST node representing the heritage clause.
      * @param globalPrefix - The prefix to use for the generated Ast object.
-     * @returns An Ast object representing the parsed heritage clause.
+     * @returns An Ast object representing the generated heritage clause.
      */
-    public parseHeritage(node: ts.HeritageClause, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
+    public readHeritage(node: ts.HeritageClause, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
         const ast = new Ast().setId(globalPrefix).setKind(node.kind).setName(globalPrefix);
         const nodeTypes = [...node.types];
 
@@ -727,7 +727,7 @@ export class Parser {
     }
 
     /**
-     * Parses a call signature declaration in the TypeScript AST and returns an Ast object representing the call signature.
+     * Generates a call signature declaration in the TypeScript AST and returns an Ast object representing the call signature.
      * A call signature declaration is a function signature that can be used as a type.
      *
      * @example
@@ -739,9 +739,9 @@ export class Parser {
      *
      * @param node - The TypeScript AST node representing the call signature declaration.
      * @param globalPrefix - The prefix to use for the generated Ast object.
-     * @returns An Ast object representing the parsed call signature.
+     * @returns An Ast object representing the generated call signature.
      */
-    public parseCallSignatureDeclaration(node: ts.CallSignatureDeclaration, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
+    public readCallSignatureDeclaration(node: ts.CallSignatureDeclaration, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
         const parameters = this.getParameters(node.parameters, sourceFile);
         const typeParameters = this.getTypeParameters(node.typeParameters ?? ts.factory.createNodeArray<ts.TypeParameterDeclaration>(), sourceFile);
 
@@ -760,7 +760,7 @@ export class Parser {
     }
 
     /**
-     * Parses a construct signature declaration in the TypeScript AST and returns an Ast object representing the construct signature.
+     * Generates a construct signature declaration in the TypeScript AST and returns an Ast object representing the construct signature.
      * A construct signature declaration is a special type of function signature declaration that is used to define the constructor of a class.
      *
      * @example The `constructor` method is a construct signature declaration
@@ -777,11 +777,11 @@ export class Parser {
      *
      * @param node - The TypeScript AST node representing the construct signature declaration.
      * @param globalPrefix - The prefix to use for the generated Ast object.
-     * @returns An Ast object representing the parsed construct signature.
+     * @returns An Ast object representing the generated construct signature.
      */
-    public parseConstructSignatureDeclaration(node: ts.ConstructSignatureDeclaration, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
+    public readConstructSignatureDeclaration(node: ts.ConstructSignatureDeclaration, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
         if (!globalPrefix) {
-            throw new TypeError('parseConstructSignatureDeclaration requires a globalPrefix');
+            throw new TypeError('generateConstructSignatureDeclaration requires a globalPrefix');
         }
 
         const bindingName = `${globalPrefix}.new`;
@@ -805,7 +805,7 @@ export class Parser {
     }
 
     /**
-     * Parses a method signature declaration in the TypeScript AST and returns an Ast object representing the method signature.
+     * Generates a method signature declaration in the TypeScript AST and returns an Ast object representing the method signature.
      * A method signature declaration is a function signature that is part of an object type.
      *
      * @example
@@ -817,9 +817,9 @@ export class Parser {
      *
      * @param node - The TypeScript AST node representing the method signature declaration.
      * @param globalPrefix - The prefix to use for the generated Ast object.
-     * @returns An Ast object representing the parsed method signature, or undefined if the method name is not valid.
+     * @returns An Ast object representing the generated method signature, or undefined if the method name is not valid.
      */
-    public parseMethodSignature(node: ts.MethodSignature, sourceFile: ts.SourceFile, globalPrefix: string): Ast | undefined {
+    public readMethodSignature(node: ts.MethodSignature, sourceFile: ts.SourceFile, globalPrefix: string): Ast | undefined {
         const methodName = node.name.getText(sourceFile);
         if (!methodName) return;
 
@@ -845,7 +845,7 @@ export class Parser {
     }
 
     /**
-     * Parses a function declaration in the TypeScript AST and returns an Ast object representing the function.
+     * Generates a function declaration in the TypeScript AST and returns an Ast object representing the function.
      * If the function is in the declarations or if it has a global prefix, it is a global and should be added to the global object.
      *
      * @example
@@ -856,9 +856,9 @@ export class Parser {
      * ```
      * @param node - The TypeScript AST node representing the function declaration.
      * @param globalPrefix - The name of a global object that this function belongs to (which makes this a global)
-     * @returns An Ast object representing the parsed function, or undefined if the function name is not valid.
+     * @returns An Ast object representing the generated function, or undefined if the function name is not valid.
      */
-    public parseFunctionDeclaration(node: ts.FunctionDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast | undefined {
+    public readFunctionDeclaration(node: ts.FunctionDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast | undefined {
         if (!node.name) return;
 
         const functionName = node.name.getText(sourceFile);
@@ -892,7 +892,7 @@ export class Parser {
     }
 
     /**
-     * Parses a property signature from the TypeScript AST and returns an Ast object representing the property.
+     * Generates a property signature from the TypeScript AST and returns an Ast object representing the property.
      * A property signature is a property declaration that is part of an object type.
      *
      * @example
@@ -910,9 +910,9 @@ export class Parser {
      *
      * @param node - The TypeScript AST node representing the property signature.
      * @param prefix - The prefix to use for the property name.
-     * @returns An Ast object representing the parsed property, or undefined if the property name is not valid.
+     * @returns An Ast object representing the generated property, or undefined if the property name is not valid.
      */
-    public parsePropertySignature(node: ts.PropertySignature, sourceFile: ts.SourceFile, globalPrefix: string): Ast | undefined {
+    public readPropertySignature(node: ts.PropertySignature, sourceFile: ts.SourceFile, globalPrefix: string): Ast | undefined {
         if ((node.getFullText(sourceFile)).includes('@deprecated')) return;
 
         const propertyName = node.name.getText(sourceFile);
@@ -930,7 +930,7 @@ export class Parser {
     }
 
     /**
-     * Parses a variable declaration from the TypeScript AST and returns an Ast object representing the variable.
+     * Generates a variable declaration from the TypeScript AST and returns an Ast object representing the variable.
      *
      * @example `NaN: number` is variable declaration
      * ```
@@ -938,9 +938,9 @@ export class Parser {
      * ```
      *
      * @param node - The TypeScript AST node representing the variable declaration.
-     * @returns An Ast object representing the parsed variable.
+     * @returns An Ast object representing the generated variable.
      */
-    public parseVariableDeclaration(node: ts.VariableDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
+    public readVariableDeclaration(node: ts.VariableDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const variableName = node.name.getText(sourceFile);
 
         const ast = new Ast()
@@ -958,20 +958,20 @@ export class Parser {
     }
 
     /**
-     * Parses a variable statement from the TypeScript AST and processes the variable declarations within it.
+     * Generates a variable statement from the TypeScript AST and processes the variable declarations within it.
      *
      * @example
      * ```
      * declare var NaN: number;
      * ```
      *
-     * @param node - The variable statement node to parse.
+     * @param node - The variable statement node to generate.
      */
-    public parseVariableStatement(node: ts.VariableStatement, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
+    public readVariableStatement(node: ts.VariableStatement, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const parameters: Ast[] = [];
         const declarationIds: string[] = [];
         node.declarationList.declarations.forEach((declaration) => {
-            const declarationAst = this.parseVariableDeclaration(declaration, sourceFile, globalPrefix);
+            const declarationAst = this.readVariableDeclaration(declaration, sourceFile, globalPrefix);
             parameters.push(declarationAst);
             declarationIds.push(declarationAst.getId());
         });
@@ -985,7 +985,7 @@ export class Parser {
     }
 
     /**
-     * Parses a TypeScript type alias declaration and returns an Ast object representing it.
+     * Generates a TypeScript type alias declaration and returns an Ast object representing it.
      *
      * @example
      * ```typescript
@@ -993,9 +993,9 @@ export class Parser {
      * ```
      *
      * @param node - The TypeScript AST node representing the type alias declaration.
-     * @returns An Ast object representing the parsed type alias.
+     * @returns An Ast object representing the generated type alias.
      */
-    public parseTypeAliasDeclaration(node: ts.TypeAliasDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
+    public readTypeAliasDeclaration(node: ts.TypeAliasDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const id = node.name.getText(sourceFile);
 
         const ast = new Ast()

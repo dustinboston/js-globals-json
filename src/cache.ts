@@ -28,7 +28,7 @@ export class AppCache {
 
     /**
      * All Nodes by name with source file
-     * named statementsCache in parser
+     * named statementsCache in generator
      * @todo rename "containers"
      */
     public statementsCache = new Map<string, [ts.SourceFile['fileName'], ts.Node][]>();
