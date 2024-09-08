@@ -1,9 +1,0 @@
-Parser cache vs App cache: 
-
-    [ ] Implement visitor pattern for generator
-    [ ] Write tests for generator
-    [x] Rename parser to generator
-    [x] Add Uhandled<WhateverType> checks to cached variable names
-    [x] Cached statements
-    [x] Cached variable types
-    [x] Cached constructor names
