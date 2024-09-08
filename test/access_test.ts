@@ -1,5 +1,5 @@
-import { assert } from './deps.ts';
-import globalsJson from '../js-globals.json' with { type: 'json' };
+import { assert } from '@std/assert';
+import globalsJson from '../globals.json' with { type: 'json' };
 
 Deno.test('Static method "Array.from" exists', () => {
     assert(Object.hasOwn(globalsJson, 'Array.from'));

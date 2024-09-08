@@ -1,7 +1,9 @@
-import ts from 'npm:typescript@5.5.3';
+import ts from 'typescript';
+
 import { Ast } from './ast.ts';
-import { formatName, isValidMeta, Meta } from './types.ts';
-import { formatId } from './types.ts';
+import { Meta } from './types.ts';
+import { formatId, formatName, isValidMeta } from './utils.ts';
+import { AppCache } from './cache.ts';
 
 /**
  * The `Parser` class is responsible for parsing TypeScript source files and generating an abstract syntax tree (AST) representation of the code.
@@ -10,34 +12,19 @@ import { formatId } from './types.ts';
  */
 export class Parser {
     /**
-     * Map of declaration names to types
-     */
-    private variableDeclarationsByName = new Map<string, string>();
-
-    /**
-     * Map of declaration types to their declaration names
-     */
-    private variableDeclarationsByType = new Map<string, string>();
-
-    /**
-     * List of constructors for quick reference
-     */
-    private constructorCache = new Set<string>();
-
-    /**
-     * Cache of all statement nodes by name.
-     */
-    private statementsCache = new Map<string, [ts.SourceFile['fileName'], ts.Node][]>();
-
-    /**
      * An array to store the serialized AST objects for the parsed global declarations.
      */
-    private globals: Record<string, Ast[]> = {};
+    public globals: Record<string, Ast[]> = {};
 
     /**
      * The Program contains information about the program, including the source files, compiler options, and diagnostics.
      */
-    private program: ts.Program;
+    public program: ts.Program;
+
+    /**
+     * The cache used by the parser to store and retrieve information about the parsed code.
+     */
+    public cache: AppCache;
 
     /**
      * Initializes the parser with the provided file paths. Only the entry point files are necessary as the Typescript
@@ -45,11 +32,12 @@ export class Parser {
      *
      * @param filePaths - An array of file paths to be parsed.
      */
-    constructor(program: ts.Program) {
-        if (!program) {
-            throw new TypeError('A program is required');
+    constructor(program: ts.Program, cache: AppCache) {
+        if (!program || !cache) {
+            throw new TypeError('A program and cache are required');
         }
         this.program = program;
+        this.cache = cache;
     }
 
     /**
@@ -58,8 +46,7 @@ export class Parser {
      * @returns An array of Ast objects representing the parsed source file.
      */
     public parse() {
-        // Collect all the declarations in the program
-        this.collectDeclarations();
+        this.cache.initialize();
 
         // Then process the program, resolving declarations along the way.
         this.program.getSourceFiles().forEach((sourceFile) => {
@@ -79,7 +66,7 @@ export class Parser {
      * @param id - The unique identifier to use as the key in the global scope.
      * @param ast - The AST object to serialize and save to the global scope.
      */
-    private saveGlobal(ast: Ast) {
+    public saveGlobal(ast: Ast) {
         if (!ast) return;
 
         const id = ast.getId();
@@ -109,179 +96,6 @@ export class Parser {
         }
     }
 
-    // MARK: ▼ PRE-CACHE ▼
-    // Find and store declarations, constructors, and heritage to make parsing more efficient
-
-    /**
-     * Collects all the declarations (variables, functions, type aliases, and modules) in the program and stores them in a map.
-     * This method is called before parsing the source files to gather all the declarations that will be used later.
-     *
-     * @todo Move into another file or class
-     */
-    private collectDeclarations(): void {
-        // deno-lint-ignore no-this-alias
-        const that = this;
-
-        this.program.getSourceFiles().forEach((sourceFile) => {
-            ts.forEachChild(sourceFile, (node) => visitDeclarations(node, sourceFile));
-        });
-
-        /**
-         * Visits the TypeScript AST and extracts declarations for variables, functions, and type aliases.
-         *
-         * - For each declaration, it logs the name and type to the console.
-         * - For module declarations, it logs the name and the resolved type of the module body.
-         * - The extracted declarations are also stored in a Map for later use.
-         *
-         * @todo Get parameters for function declarations
-         * @todo For module declarations parse the body
-         *
-         * @param node - The current node being visited in the TypeScript AST.
-         */
-        function visitDeclarations(node: ts.Node, sourceFile: ts.SourceFile, globalPrefix = ''): void {
-            if (ts.isInterfaceDeclaration(node)) {
-                visitInterfaceDeclaration(node, sourceFile, globalPrefix);
-            }
-
-            if (ts.isVariableDeclaration(node)) {
-                return visitVariableDeclaration(node, sourceFile, globalPrefix);
-            }
-
-            if (ts.isFunctionDeclaration(node)) {
-                return visitFunctionDeclaration(node, sourceFile, globalPrefix);
-            }
-
-            if (ts.isModuleDeclaration(node) && (node.name && node.body)) {
-                return visitModuleDeclaration(node, sourceFile, globalPrefix);
-            }
-
-            node.forEachChild((child: ts.Node) => visitDeclarations(child, sourceFile, globalPrefix));
-        }
-
-        /**
-         * Visits a TypeScript interface declaration node and processes its contents.
-         *
-         * This method is responsible for:
-         * - Extracting the name of the interface declaration and storing it in the `constructorCache`.
-         * - Determining if the interface has a constructor signature declaration and adding it to the `constructorCache` if so.
-         *
-         * @param node - The TypeScript interface declaration node to visit.
-         * @param sourceFile - The source file containing the interface declaration.
-         * @param globalPrefix - The global prefix to use when formatting the interface name.
-         */
-        function visitInterfaceDeclaration(
-            node: ts.InterfaceDeclaration,
-            sourceFile: ts.SourceFile,
-            globalPrefix = '',
-        ) {
-            const name = formatName(node.name.getText(sourceFile), globalPrefix);
-
-            const statements = that.statementsCache.get(name) ?? [];
-            statements.push([sourceFile.fileName, node]);
-            that.statementsCache.set(name, statements);
-
-            if (that.hasConstructSignatureDeclaration(node)) {
-                that.constructorCache.add(name);
-            }
-        }
-
-        /**
-         * Visits a TypeScript module declaration node and processes its contents.
-         *
-         * This method is responsible for:
-         * - Extracting the name of the module declaration and storing it in the `variableDeclarationsByName` map.
-         * - If the module declaration has a body, recursively visiting the child nodes of the body to process any nested declarations.
-         *
-         * @param node - The TypeScript module declaration node to visit.
-         * @param sourceFile - The source file containing the module declaration.
-         * @param globalPrefix - The global prefix to use when formatting the module name.
-         */
-        function visitModuleDeclaration(
-            node: ts.ModuleDeclaration,
-            sourceFile: ts.SourceFile,
-            globalPrefix: string,
-        ): void {
-            if (!node.body) return;
-
-            const name = formatName(node.name.getText(sourceFile), globalPrefix);
-            that.variableDeclarationsByName.set(name, name);
-
-            const statements = that.statementsCache.get(name) ?? [];
-            statements.push([sourceFile.fileName, node]);
-            that.statementsCache.set(name, statements);
-
-            if (ts.isModuleBlock(node.body)) {
-                node.forEachChild((child: ts.Node) => visitDeclarations(child, sourceFile, name));
-            }
-
-            return;
-        }
-
-        /**
-         * Visits a TypeScript function declaration node and processes its contents.
-         *
-         * This method is responsible for:
-         * - Extracting the name of the function declaration and storing it in the `variableDeclarationsByName` map.
-         * - Determining the type of the function declaration, either from the `type` property or by using a fallback value.
-         *
-         * @param node - The TypeScript function declaration node to visit.
-         * @param sourceFile - The source file containing the function declaration.
-         * @param globalPrefix - The global prefix to use when formatting the function name.
-         */
-        function visitFunctionDeclaration(
-            node: ts.FunctionDeclaration,
-            sourceFile: ts.SourceFile,
-            globalPrefix: string,
-        ): void {
-            if (!node.name) return;
-
-            const name = formatName(node.name.getText(sourceFile), globalPrefix);
-
-            let type = '';
-            if (node.type && ts.isToken(node.type)) {
-                type = formatName(node.type.getText(sourceFile), globalPrefix);
-            } else if (node.type) {
-                type = `Uhandled<${ts.SyntaxKind[node.type.kind]}>`;
-            }
-
-            that.variableDeclarationsByName.set(name, type);
-        }
-
-        /**
-         * Visits a TypeScript variable declaration node and processes its contents.
-         *
-         * This method is responsible for:
-         * - Extracting the name of the variable declaration and storing it in the `variableDeclarationsByName` map.
-         * - Determining the type of the variable declaration, either from the `type` property or by using a fallback value.
-         * - If the variable declaration has a type reference, storing the type name in the `variableDeclarationsByType` map for reverse lookup.
-         *
-         * @param node - The TypeScript variable declaration node to visit.
-         * @param sourceFile - The source file containing the variable declaration.
-         * @param globalPrefix - The global prefix to use when formatting the variable name.
-         */
-        function visitVariableDeclaration(
-            node: ts.VariableDeclaration,
-            sourceFile: ts.SourceFile,
-            globalPrefix: string,
-        ): void {
-            if (!node.name || !node.type) return;
-
-            const name = formatName(node.name.getText(sourceFile), globalPrefix);
-
-            let type = `Uhandled<${ts.SyntaxKind[node.type.kind]}>`;
-            if (ts.isTypeReferenceNode(node.type) && ts.isVariableDeclaration(node)) {
-                type = formatName(node.type.typeName.getText(sourceFile), globalPrefix);
-                that.variableDeclarationsByType.set(type, name); // Reverse lookup for constructors
-            } else if (ts.isToken(node.type)) {
-                type = formatName(node.type.getText(sourceFile), globalPrefix);
-            }
-
-            that.variableDeclarationsByName.set(name, type);
-        }
-    }
-
-    // MARK: ▲ PRE-CACHE ▲
-
     /**
      * Visits top-level declarations and signatures in the TypeScript AST and resolves them to their types.
      *
@@ -289,7 +103,7 @@ export class Parser {
      * @param node The TypeScript AST to parse.
      * @param globalPrefix A value such as 'Object.prototype' or 'Object' to add to binding values.
      */
-    private visitStatements(node: ts.Node, sourceFile: ts.SourceFile, globalPrefix = ''): Ast | undefined {
+    public visitStatements(node: ts.Node, sourceFile: ts.SourceFile, globalPrefix = ''): Ast | undefined {
         switch (node.kind) {
             case ts.SyntaxKind.FunctionDeclaration: {
                 if (ts.isFunctionDeclaration(node)) {
@@ -672,13 +486,9 @@ export class Parser {
                 break;
             }
 
-            // TODO: Audit this - `parseConstructSignature` requires a globalPrefix. If there isn't one, just return an empty AST.
             case ts.SyntaxKind.ConstructSignature: {
                 // Example: `new (...args: string[]): Function;`
                 parameter.setKind(typeNode.kind);
-
-                // if (!ts.isConstructSignatureDeclaration(typeNode)) break;
-                // return this.parseConstructSignatureDeclaration(typeNode, '');
                 break;
             }
 
@@ -762,14 +572,10 @@ export class Parser {
      * @param node The module declaration to parse.
      * @returns An array of parsed module declarations.
      */
-    private parseModuleDeclaration(node: ts.ModuleDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
+    public parseModuleDeclaration(node: ts.ModuleDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const name = node.name.getText(sourceFile);
         const meta = this.getMetaFromModifiers(node.modifiers);
-        const ast = new Ast()
-            .setId(formatId(name, globalPrefix))
-            .setName(formatName(name, globalPrefix))
-            .setKind(node.kind)
-            .setMeta(meta);
+        const ast = new Ast().setId(formatId(name, globalPrefix)).setName(formatName(name, globalPrefix)).setKind(node.kind).setMeta(meta);
 
         if (node.body && ts.isModuleBlock(node.body)) {
             const statementAsts: Ast[] = [];
@@ -799,11 +605,7 @@ export class Parser {
      * @param node The IndexSignatureDeclaration node to parse.
      * @returns an Ast object representing the parsed IndexSignatureDeclaration.
      */
-    private parseIndexSignatureDeclaration(
-        node: ts.IndexSignatureDeclaration,
-        sourceFile: ts.SourceFile,
-        _globalPrefix = '',
-    ): Ast {
+    public parseIndexSignatureDeclaration(node: ts.IndexSignatureDeclaration, sourceFile: ts.SourceFile, _globalPrefix = ''): Ast {
         const ast = new Ast().setKind(node.kind).addType(this.visitType(node.type, sourceFile));
         for (const parameter of node.parameters) {
             ast.addParameter(this.visitType(parameter, sourceFile));
@@ -827,11 +629,7 @@ export class Parser {
      * @param node - The TypeScript AST node representing the interface declaration.
      * @returns An Ast object representing the parsed interface.
      */
-    private parseInterfaceDeclaration(
-        node: ts.InterfaceDeclaration,
-        sourceFile: ts.SourceFile,
-        globalPrefix = '',
-    ): Ast {
+    public parseInterfaceDeclaration(node: ts.InterfaceDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const interfaceName = node.name.getText(sourceFile);
         const meta = this.getMetaFromModifiers(node.modifiers);
         const ast = new Ast()
@@ -871,7 +669,7 @@ export class Parser {
         }
 
         if (hasObjectHeritage === false) {
-            const cachedObject = this.statementsCache.get('Object');
+            const cachedObject = this.cache.statementsCache.get('Object');
             if (cachedObject) {
                 for (const [fileName, statementNode] of cachedObject) {
                     const statementSourceFile = this.program.getSourceFile(fileName);
@@ -903,13 +701,13 @@ export class Parser {
      * @param globalPrefix - The prefix to use for the generated Ast object.
      * @returns An Ast object representing the parsed heritage clause.
      */
-    private parseHeritage(node: ts.HeritageClause, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
+    public parseHeritage(node: ts.HeritageClause, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
         const ast = new Ast().setId(globalPrefix).setKind(node.kind).setName(globalPrefix);
         const nodeTypes = [...node.types];
 
         for (const extendsType of nodeTypes) {
             const extendsName = extendsType.expression.getText(sourceFile);
-            const extendedNodes = this.statementsCache.get(extendsName) ?? [];
+            const extendedNodes = this.cache.statementsCache.get(extendsName) ?? [];
 
             for (const [fileName, extendedNode] of extendedNodes) {
                 const statementSourceFile = this.program.getSourceFile(fileName);
@@ -943,16 +741,9 @@ export class Parser {
      * @param globalPrefix - The prefix to use for the generated Ast object.
      * @returns An Ast object representing the parsed call signature.
      */
-    private parseCallSignatureDeclaration(
-        node: ts.CallSignatureDeclaration,
-        sourceFile: ts.SourceFile,
-        globalPrefix: string,
-    ): Ast {
+    public parseCallSignatureDeclaration(node: ts.CallSignatureDeclaration, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
         const parameters = this.getParameters(node.parameters, sourceFile);
-        const typeParameters = this.getTypeParameters(
-            node.typeParameters ?? ts.factory.createNodeArray<ts.TypeParameterDeclaration>(),
-            sourceFile,
-        );
+        const typeParameters = this.getTypeParameters(node.typeParameters ?? ts.factory.createNodeArray<ts.TypeParameterDeclaration>(), sourceFile);
 
         const ast = new Ast()
             .setId(globalPrefix)
@@ -988,11 +779,7 @@ export class Parser {
      * @param globalPrefix - The prefix to use for the generated Ast object.
      * @returns An Ast object representing the parsed construct signature.
      */
-    private parseConstructSignatureDeclaration(
-        node: ts.ConstructSignatureDeclaration,
-        sourceFile: ts.SourceFile,
-        globalPrefix: string,
-    ): Ast {
+    public parseConstructSignatureDeclaration(node: ts.ConstructSignatureDeclaration, sourceFile: ts.SourceFile, globalPrefix: string): Ast {
         if (!globalPrefix) {
             throw new TypeError('parseConstructSignatureDeclaration requires a globalPrefix');
         }
@@ -1032,11 +819,7 @@ export class Parser {
      * @param globalPrefix - The prefix to use for the generated Ast object.
      * @returns An Ast object representing the parsed method signature, or undefined if the method name is not valid.
      */
-    private parseMethodSignature(
-        node: ts.MethodSignature,
-        sourceFile: ts.SourceFile,
-        globalPrefix: string,
-    ): Ast | undefined {
+    public parseMethodSignature(node: ts.MethodSignature, sourceFile: ts.SourceFile, globalPrefix: string): Ast | undefined {
         const methodName = node.name.getText(sourceFile);
         if (!methodName) return;
 
@@ -1075,11 +858,7 @@ export class Parser {
      * @param globalPrefix - The name of a global object that this function belongs to (which makes this a global)
      * @returns An Ast object representing the parsed function, or undefined if the function name is not valid.
      */
-    private parseFunctionDeclaration(
-        node: ts.FunctionDeclaration,
-        sourceFile: ts.SourceFile,
-        globalPrefix = '',
-    ): Ast | undefined {
+    public parseFunctionDeclaration(node: ts.FunctionDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast | undefined {
         if (!node.name) return;
 
         const functionName = node.name.getText(sourceFile);
@@ -1087,7 +866,11 @@ export class Parser {
             .setId(formatId(functionName, globalPrefix))
             .setName(formatName(functionName, globalPrefix));
 
-        if (ast.getName() && this.variableDeclarationsByName.has(ast.getName()!) || globalPrefix !== '') {
+        const name = ast.getName();
+        const hasName = name && this.cache.variableNameToTypeMap.has(name);
+        const hasPrefix = globalPrefix !== '';
+
+        if (hasName || hasPrefix) {
             const parameters = this.getParameters(node.parameters, sourceFile);
             const typeParameters = this.getTypeParameters(
                 node.typeParameters ?? ts.factory.createNodeArray<ts.TypeParameterDeclaration>(),
@@ -1129,11 +912,7 @@ export class Parser {
      * @param prefix - The prefix to use for the property name.
      * @returns An Ast object representing the parsed property, or undefined if the property name is not valid.
      */
-    private parsePropertySignature(
-        node: ts.PropertySignature,
-        sourceFile: ts.SourceFile,
-        globalPrefix: string,
-    ): Ast | undefined {
+    public parsePropertySignature(node: ts.PropertySignature, sourceFile: ts.SourceFile, globalPrefix: string): Ast | undefined {
         if ((node.getFullText(sourceFile)).includes('@deprecated')) return;
 
         const propertyName = node.name.getText(sourceFile);
@@ -1161,11 +940,7 @@ export class Parser {
      * @param node - The TypeScript AST node representing the variable declaration.
      * @returns An Ast object representing the parsed variable.
      */
-    private parseVariableDeclaration(
-        node: ts.VariableDeclaration,
-        sourceFile: ts.SourceFile,
-        globalPrefix = '',
-    ): Ast {
+    public parseVariableDeclaration(node: ts.VariableDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const variableName = node.name.getText(sourceFile);
 
         const ast = new Ast()
@@ -1192,7 +967,7 @@ export class Parser {
      *
      * @param node - The variable statement node to parse.
      */
-    private parseVariableStatement(node: ts.VariableStatement, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
+    public parseVariableStatement(node: ts.VariableStatement, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const parameters: Ast[] = [];
         const declarationIds: string[] = [];
         node.declarationList.declarations.forEach((declaration) => {
@@ -1220,11 +995,7 @@ export class Parser {
      * @param node - The TypeScript AST node representing the type alias declaration.
      * @returns An Ast object representing the parsed type alias.
      */
-    private parseTypeAliasDeclaration(
-        node: ts.TypeAliasDeclaration,
-        sourceFile: ts.SourceFile,
-        globalPrefix = '',
-    ): Ast {
+    public parseTypeAliasDeclaration(node: ts.TypeAliasDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const id = node.name.getText(sourceFile);
 
         const ast = new Ast()
@@ -1251,7 +1022,7 @@ export class Parser {
      * @param modifiers - The array of TypeScript modifier nodes to extract metadata from.
      * @returns An array of metadata values extracted from the provided modifiers.
      */
-    private getMetaFromModifiers(modifiers: ts.NodeArray<ts.ModifierLike> | undefined): Meta[] {
+    public getMetaFromModifiers(modifiers: ts.NodeArray<ts.ModifierLike> | undefined): Meta[] {
         if (!modifiers) return [];
         const meta = new Set<Meta>();
         for (const modifier of modifiers) {
@@ -1269,10 +1040,7 @@ export class Parser {
      * @param syntaxKind - The name of the calling function (if any).
      * @returns An array of `ParameterBuilder` objects representing the resolved type parameters.
      */
-    private getTypeParameters(
-        typeParameters: ts.NodeArray<ts.TypeParameterDeclaration>,
-        sourceFile: ts.SourceFile,
-    ): Ast[] {
+    public getTypeParameters(typeParameters: ts.NodeArray<ts.TypeParameterDeclaration>, sourceFile: ts.SourceFile): Ast[] {
         const parameters: Ast[] = [];
         if (!typeParameters) return parameters;
 
@@ -1290,12 +1058,7 @@ export class Parser {
      * @param sourceFile - The source file containing the type parameter declaration.
      * @returns A `ParameterBuilder` object representing the resolved type parameter.
      */
-    private getTypeParameter(
-        typeParameter: ts.TypeParameterDeclaration,
-        sourceFile: ts.SourceFile,
-        globalPrefix = '',
-    ): Ast {
-        // const sourceFile = sourceFile;
+    public getTypeParameter(typeParameter: ts.TypeParameterDeclaration, sourceFile: ts.SourceFile, globalPrefix = ''): Ast {
         const name = typeParameter.name.getText(sourceFile);
 
         const parameter = new Ast()
@@ -1336,7 +1099,6 @@ export class Parser {
      * @returns A `ParameterBuilder` object representing the resolved type, or `undefined` if `nodeType` is `undefined`.
      */
     public getType(typeNode: ts.TypeNode, sourceFile: ts.SourceFile): Ast | undefined {
-        // if (!typeNode) return;
         return this.visitType(typeNode, sourceFile);
     }
 
@@ -1347,7 +1109,7 @@ export class Parser {
      * @param callee - The name of the calling function (if any).
      * @returns A `ParameterBuilder` object representing the resolved parameter.
      */
-    private getParameter(nodeParameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile) {
+    public getParameter(nodeParameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile) {
         const parameter = new Ast()
             .setName(nodeParameter.name.getText(sourceFile))
             .setKind(nodeParameter.kind);
@@ -1375,21 +1137,19 @@ export class Parser {
      * Otherwise, the prefix is `{interfaceName}.prototype`.
      *
      * @param node - The interface declaration to get the prefix for.
+     * @param sourceFile - The source file containing the interface declaration.
+     * @param _globalPrefix - An optional global prefix (not used in this implementation).
      * @returns The prefix for the members of the interface.
      */
-    private getPrefixForInterfaceMembers(
-        node: ts.InterfaceDeclaration,
-        sourceFile: ts.SourceFile,
-        _globalPrefix = '',
-    ): string {
+    public getPrefixForInterfaceMembers(node: ts.InterfaceDeclaration, sourceFile: ts.SourceFile, _globalPrefix = ''): string {
         const interfaceName = node.name.getText(sourceFile);
-        const hasConstructSignatureDeclaration = this.constructorCache.has(interfaceName);
-        const isInterfaceNameADeclaredVariable = this.variableDeclarationsByName.has(interfaceName);
-        const interfaceTypeForDeclaredVariable = this.variableDeclarationsByName.get(interfaceName);
+        const hasConstructSignatureDeclaration = this.cache.constructors.has(interfaceName);
+        const isInterfaceNameADeclaredVariable = this.cache.variableNameToTypeMap.has(interfaceName);
+        const interfaceTypeForDeclaredVariable = this.cache.variableNameToTypeMap.get(interfaceName);
 
         // If this is a constructor interface, get the declared interface
         if (hasConstructSignatureDeclaration) {
-            return this.variableDeclarationsByType.get(interfaceName) ?? '';
+            return this.cache.variableTypeToNameMap.get(interfaceName) ?? '';
         } else if (isInterfaceNameADeclaredVariable && interfaceTypeForDeclaredVariable === interfaceName) {
             return interfaceName;
         } else {
@@ -1402,7 +1162,7 @@ export class Parser {
      *
      * @param interfaceDeclaration - The interface declaration to check
      */
-    private hasConstructSignatureDeclaration(interfaceDeclaration: ts.InterfaceDeclaration) {
+    public hasConstructSignatureDeclaration(interfaceDeclaration: ts.InterfaceDeclaration) {
         return interfaceDeclaration.members.some((member) => ts.isConstructSignatureDeclaration(member));
     }
 }

@@ -1,5 +1,6 @@
 import ts from 'npm:typescript@5.5.3';
-import { isValidMeta, Meta, SerializedAst } from './types.ts';
+import type { Meta, SerializedAst } from './types.ts';
+import { isValidMeta } from './utils.ts';
 
 /**
  * A builder class for constructing a serialized ast.
@@ -61,14 +62,14 @@ export class Ast {
 		}
 
 		if (this.kind !== undefined) {
-			sparse.kind = this.kind ?? 0;
+			sparse.kind = ts.SyntaxKind[this.kind ?? 0];
 		}
 
 		if (this.meta.size > 0) {
-			const metaNames: number[] = [];
+			const metaNames: string[] = [];
 			for (const metaKind of this.meta) {
 				if (isValidMeta(metaKind)) {
-					metaNames.push(metaKind);
+					metaNames.push(ts.SyntaxKind[metaKind]);
 				}
 			}
 			sparse.meta = metaNames;

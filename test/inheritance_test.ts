@@ -1,5 +1,5 @@
-import { assert } from './deps.ts';
-import globalsJson from '../js-globals.json' with { type: 'json' };
+import { assert } from '@std/assert';
+import globalsJson from '../globals.json' with { type: 'json' };
 
 Deno.test('AggregateError inherits "cause" from Error', () => {
     assert(Object.hasOwn(globalsJson, 'AggregateError.prototype.toString'));

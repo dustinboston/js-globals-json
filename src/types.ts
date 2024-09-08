@@ -12,13 +12,13 @@ export type SerializedAst = Partial<{
     /**
      * The kind of the object. This is used to determine the type of the object. This is a simplied version of the TypeScript API's `SyntaxKinds`
      */
-    kind: number;
+    kind: string;
 
     /**
      * Meta information about the object, as boolean flags (if present it's true, absent is false) This includes
      * metadata about the object such as whether it is a declaration, extends another object, or is read-only. This is a list of the available types:
      */
-    meta: number[];
+    meta: string[];
 
     /**
      * The name of the objects and properties such as `String`, `ArrayConstructor`, and `encodeURI`.
@@ -51,7 +51,7 @@ export type SerializedAst = Partial<{
  * These values are used to indicate properties such as whether a class is abstract,
  * a property is an accessor, or a variable is declared as const, private, etc.
  */
-const metaValues = [
+export const metaValues = [
     ts.SyntaxKind.AbstractKeyword, // indicates that a class is marked `abstract`
     ts.SyntaxKind.AccessorKeyword, // indicates that a property is an accessor, e.g. `A[B]`
     ts.SyntaxKind.AssertsKeyword, // indicates that the Ast is a type assertion, e.g. `asserts is Foo`
@@ -78,65 +78,12 @@ const metaValues = [
  */
 export type Meta = typeof metaValues[number];
 
-/**
- * A set of valid meta values, which are members of the `metaValues` array.
- * These values represent boolean meta values and are stored in a set for O(1) lookup.
- */
-export const validMetaValues = new Set(metaValues);
+export type DeclarationWithName = ts.InterfaceDeclaration | ts.VariableDeclaration | (ts.FunctionDeclaration & { name: ts.Identifier }) | ts.ModuleDeclaration;
 
-/**
- * Checks if the provided `kind` value is a valid meta value.
- *
- * @param kind - The value to check.
- * @returns `true` if the `kind` is a valid meta value, `false` otherwise.
- */
-export function isValidMeta(kind: number): kind is Meta {
-    return validMetaValues.has(kind);
-}
+export type DeclarationWithType = (ts.VariableDeclaration | ts.FunctionDeclaration) & {
+    type: ts.TypeReferenceType | ts.Token<ts.SyntaxKind>;
+};
 
-/**
- * Formats a unique identifier for a global object or property.
- *
- * If the `id` is enclosed in square brackets (`[` and `]`), it is treated as a symbol and the `globalPrefix` is prepended to it.
- * Otherwise, if `globalPrefix` is provided, it is prepended to the `id` with a dot (`.`) separator.
- * If `globalPrefix` is not provided, the `id` is returned as-is.
- *
- * @param id The unique identifier to format.
- * @param globalPrefix An optional prefix to prepend to the `id`.
- * @returns The formatted identifier.
- */
-export function formatId(id: string, globalPrefix = '') {
-    if (id.startsWith('[') && id.endsWith(']')) { // This is a symbol
-        return `${globalPrefix}${id}`;
-    } else if (globalPrefix) {
-        return `${globalPrefix}.${id}`;
-    } else {
-        return id;
-    }
-}
+export type DeclarationWithConstructor = ts.InterfaceDeclaration & { members: ts.NodeArray<ts.ConstructSignatureDeclaration> };
 
-/**
- * Formats an AST name
- *
- * If the `name` is enclosed in square brackets (`[` and `]`), it is treated as a symbol and the `globalPrefix` is prepended to it.
- * Otherwise, if `globalPrefix` is provided, it is prepended to the `name` with a dot (`.`) separator.
- * If `globalPrefix` is not provided, the `name` is returned as-is.
- *
- * @param name The unique identifier to format.
- * @param globalPrefix An optional prefix to prepend to the `name`.
- * @returns The formatted identifier.
- */
-export function formatName(name: string, globalPrefix = '') {
-    let prefix = globalPrefix;
-    if (name === 'prototype' && globalPrefix.endsWith('.prototype')) {
-        prefix = globalPrefix.replace(/\.prototype/g, '');
-    }
-
-    if (name.startsWith('[') && name.endsWith(']')) { // This is a symbol
-        return `${prefix}${name}`;
-    } else if (prefix) {
-        return `${prefix}.${name}`;
-    } else {
-        return name;
-    }
-}
+export type ContainerDeclaration = ts.InterfaceDeclaration | ts.ModuleDeclaration;

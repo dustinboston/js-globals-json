@@ -1,5 +1,5 @@
-import { assert } from './deps.ts';
-import json from '../js-globals.json' with { type: 'json' };
+import { assert } from '@std/assert';
+import json from '../globals.json' with { type: 'json' };
 
 Deno.test('The json is a list of key/value pairs', () => {
     assert(json !== null && typeof json === 'object');

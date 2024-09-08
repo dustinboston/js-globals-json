@@ -1,5 +1,5 @@
-import { assert, assertEquals } from './deps.ts';
-import globalsJson from '../js-globals.json' with { type: 'json' };
+import { assert, assertEquals } from '@std/assert';
+import globalsJson from '../globals.json' with { type: 'json' };
 import { SerializedAst } from '../src/types.ts';
 
 Deno.test('new Array()', () => {

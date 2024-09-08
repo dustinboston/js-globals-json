@@ -1,36 +1,41 @@
 {
-	"compilerOptions": {
-		"allowJs": false,
-		"checkJs": false,
-		"strict": true,
-		"lib": ["esnext", "dom", "dom.iterable", "dom.asynciterable", "deno.ns"]
-	},
-	"nodeModulesDir": false,
-	"tasks": {
-		"json": "deno run -A ./scripts/json.ts > globals.json",
-		"test": "deno test --parallel"
-	},
-	"lint": {
-		"exclude": [
-			"old",
-			"lib"
-		],
-		"rules": {
-			"tags": ["recommended"],
-			"include": [],
-			"exclude": []
-		}
-	},
-	"fmt": {
-		"useTabs": true,
-		"lineWidth": 120,
-		"indentWidth": 4,
-		"semiColons": true,
-		"singleQuote": true,
-		"proseWrap": "always",
-		"exclude": [
-			"old",
-			"lib"
-		]
-	}
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "lib": ["esnext", "dom", "dom.iterable", "dom.asynciterable", "deno.ns"]
+  },
+  "nodeModulesDir": false,
+  "tasks": {
+    "json": "deno run -A ./scripts/json.ts > globals.json",
+    "test": "deno test --parallel"
+  },
+  "lint": {
+    "exclude": [
+      "old",
+      "lib"
+    ],
+    "rules": {
+      "tags": ["recommended"],
+      "include": [],
+      "exclude": []
+    }
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 160,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "always",
+    "exclude": [
+      "old",
+      "lib"
+    ]
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@^1.0.4",
+    "@std/testing": "jsr:@std/testing@^1.0.2",
+    "typescript": "npm:typescript@^5.5.3"
+  }
 }

@@ -2,10 +2,13 @@ import ts from 'npm:typescript@5.5.3';
 import { libs } from '../lib/mod.ts';
 import { Parser } from '../src/parser.ts';
 import { SerializedAst } from '../src/types.ts';
+import { AppCache } from '../src/cache.ts';
 
 const libFiles = libs.map((file) => `./lib/${file}`);
 const program = ts.createProgram(libFiles, { noLib: true });
-const parser = new Parser(program);
+
+const cache = new AppCache(program);
+const parser = new Parser(program, cache);
 const result = parser.parse();
 
 // For regular serialized:
