@@ -1,0 +1,58 @@
+{
+  "XSLTProcessor": {
+    "XSLTProcessor()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "clearParameters()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "getParameter()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "importStylesheet()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "removeParameter()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "reset()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "setParameter()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "transformToDocument()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "transformToFragment()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "RTCDataChannelEvent": {
+    "RTCDataChannelEvent()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "channel": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

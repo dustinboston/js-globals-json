@@ -1,0 +1,70 @@
+{
+  "TreeWalker": {
+    "currentNode": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "filter": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "root": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "whatToShow": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "firstChild()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "lastChild()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "nextNode()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "nextSibling()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "parentNode()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "previousNode()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "previousSibling()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

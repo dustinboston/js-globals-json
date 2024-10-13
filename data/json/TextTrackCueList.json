@@ -1,0 +1,16 @@
+{
+  "TextTrackCueList": {
+    "length": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "getCueById()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

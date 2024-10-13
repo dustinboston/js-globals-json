@@ -1,0 +1,16 @@
+{
+  "ImageBitmapRenderingContext": {
+    "canvas": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "transferFromImageBitmap()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

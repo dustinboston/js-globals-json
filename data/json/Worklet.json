@@ -1,0 +1,10 @@
+{
+  "Worklet": {
+    "addModule()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

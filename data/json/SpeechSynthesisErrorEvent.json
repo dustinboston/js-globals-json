@@ -1,0 +1,28 @@
+{
+  "SpeechSynthesisErrorEvent": {
+    "SpeechSynthesisErrorEvent()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "error": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "SpeechSynthesisEvent": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

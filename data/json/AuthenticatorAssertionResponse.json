@@ -1,0 +1,28 @@
+{
+  "AuthenticatorAssertionResponse": {
+    "authenticatorData": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "signature": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "userHandle": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "AuthenticatorResponse": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

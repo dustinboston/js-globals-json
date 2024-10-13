@@ -1,0 +1,22 @@
+{
+  "TransformStream": {
+    "TransformStream()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "readable": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "writable": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "SpeechRecognitionAlternative": {
+    "confidence": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "transcript": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

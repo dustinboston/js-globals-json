@@ -1,0 +1,106 @@
+{
+  "FontFaceSet": {
+    "ready": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "size": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "status": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "add()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "check()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "clear()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "delete()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "entries()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "forEach()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "has()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "keys()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "load()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "values()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "loading": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "loadingdone": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "loadingerror": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

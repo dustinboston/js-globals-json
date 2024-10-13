@@ -1,0 +1,28 @@
+{
+  "MediaQueryList": {
+    "matches": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "media": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "change": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "OrientationSensor": {
+    "quaternion": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "populateMatrix()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "Sensor": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

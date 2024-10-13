@@ -1,0 +1,28 @@
+{
+  "MediaEncryptedEvent": {
+    "MediaEncryptedEvent()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "initData": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "initDataType": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

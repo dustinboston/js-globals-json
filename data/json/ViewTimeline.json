@@ -1,0 +1,10 @@
+{
+  "ViewTimeline": {
+    "AnimationTimeline": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

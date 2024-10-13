@@ -1,0 +1,16 @@
+{
+  "CSSStyleValue": {
+    "parse()": {
+      "type": "StaticMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "parseAll()": {
+      "type": "StaticMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

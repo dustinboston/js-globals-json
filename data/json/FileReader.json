@@ -1,0 +1,88 @@
+{
+  "FileReader": {
+    "FileReader()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "error": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "readyState": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "result": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "abort()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "readAsArrayBuffer()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "readAsDataURL()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "readAsText()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "abort": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "load": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "loadend": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "loadstart": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "progress": {
+      "type": "Event",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

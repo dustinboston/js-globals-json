@@ -1,0 +1,10 @@
+{
+  "CSSPseudoElement": {
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

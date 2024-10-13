@@ -1,0 +1,16 @@
+{
+  "PerformanceMeasure": {
+    "detail": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "PerformanceEntry": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "FileSystemDirectoryReader": {
+    "readEntries()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "RTCPeerConnectionIceErrorEvent": {
+    "address": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

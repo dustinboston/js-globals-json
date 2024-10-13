@@ -1,0 +1,10 @@
+{
+  "InterventionReportBody": {
+    "ReportBody": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

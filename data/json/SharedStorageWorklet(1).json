@@ -1,0 +1,10 @@
+{
+  "SharedStorageWorklet": {
+    "Worklet": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "FileSystemFileEntry": {
+    "file()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "FileSystemEntry": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "CloseWatcher": {
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

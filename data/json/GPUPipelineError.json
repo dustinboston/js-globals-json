@@ -1,0 +1,10 @@
+{
+  "GPUPipelineError": {
+    "DOMException": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

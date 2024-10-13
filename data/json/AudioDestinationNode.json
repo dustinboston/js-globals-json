@@ -1,0 +1,22 @@
+{
+  "AudioDestinationNode": {
+    "maxChannelCount": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "AudioNode": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "InputDeviceInfo": {
+    "getCapabilities()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "MediaDeviceInfo": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

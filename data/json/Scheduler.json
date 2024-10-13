@@ -1,0 +1,10 @@
+{
+  "Scheduler": {
+    "postTask()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

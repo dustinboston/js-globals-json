@@ -1,0 +1,10 @@
+{
+  "DocumentPictureInPicture": {
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

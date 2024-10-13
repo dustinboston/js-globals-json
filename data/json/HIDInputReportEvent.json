@@ -1,0 +1,10 @@
+{
+  "HIDInputReportEvent": {
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

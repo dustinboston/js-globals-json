@@ -1,0 +1,10 @@
+{
+  "SVGRect": {
+    "x": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

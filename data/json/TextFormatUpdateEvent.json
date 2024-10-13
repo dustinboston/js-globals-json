@@ -1,0 +1,10 @@
+{
+  "TextFormatUpdateEvent": {
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

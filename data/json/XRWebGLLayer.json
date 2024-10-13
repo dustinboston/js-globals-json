@@ -1,0 +1,10 @@
+{
+  "XRWebGLLayer": {
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "TextUpdateEvent": {
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

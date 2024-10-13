@@ -1,0 +1,34 @@
+{
+  "ClipboardItem": {
+    "ClipboardItem()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "presentationStyle": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "types": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "supports()": {
+      "type": "StaticMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "getType()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

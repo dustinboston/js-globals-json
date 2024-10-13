@@ -1,0 +1,10 @@
+{
+  "SnapEvent": {
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "XRLightProbe": {
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

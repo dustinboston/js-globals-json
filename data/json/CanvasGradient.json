@@ -1,0 +1,10 @@
+{
+  "CanvasGradient": {
+    "addColorStop()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

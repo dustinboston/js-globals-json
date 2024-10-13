@@ -1,0 +1,10 @@
+{
+  "XPathExpression": {
+    "evaluate()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

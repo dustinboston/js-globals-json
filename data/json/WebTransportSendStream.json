@@ -1,0 +1,10 @@
+{
+  "WebTransportSendStream": {
+    "WritableStream": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "AnimationTimeline": {
+    "currentTime": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

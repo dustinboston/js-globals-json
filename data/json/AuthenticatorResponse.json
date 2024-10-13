@@ -1,0 +1,10 @@
+{
+  "AuthenticatorResponse": {
+    "clientDataJSON": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

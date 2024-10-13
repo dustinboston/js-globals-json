@@ -1,0 +1,10 @@
+{
+  "PresentationConnectionList": {
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

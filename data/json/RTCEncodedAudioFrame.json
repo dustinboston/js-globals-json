@@ -1,0 +1,16 @@
+{
+  "RTCEncodedAudioFrame": {
+    "data": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "getMetadata()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

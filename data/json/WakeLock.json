@@ -1,0 +1,10 @@
+{
+  "WakeLock": {
+    "request()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

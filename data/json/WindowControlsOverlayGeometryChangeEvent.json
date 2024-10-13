@@ -1,0 +1,10 @@
+{
+  "WindowControlsOverlayGeometryChangeEvent": {
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ScreenDetailed": {
+    "Screen": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

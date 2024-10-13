@@ -1,0 +1,10 @@
+{
+  "HIDConnectionEvent": {
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

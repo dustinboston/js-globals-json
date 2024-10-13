@@ -1,0 +1,10 @@
+{
+  "CSSNumericArray": {
+    "length": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

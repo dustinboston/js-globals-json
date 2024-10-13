@@ -1,0 +1,16 @@
+{
+  "PushSubscriptionOptions": {
+    "applicationServerKey": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "userVisibleOnly": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

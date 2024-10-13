@@ -1,0 +1,10 @@
+{
+  "Permissions": {
+    "query()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

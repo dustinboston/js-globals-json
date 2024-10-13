@@ -1,0 +1,16 @@
+{
+  "XMLSerializer": {
+    "XMLSerializer()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "serializeToString()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

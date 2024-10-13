@@ -1,0 +1,10 @@
+{
+  "AudioWorklet": {
+    "Worklet": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ScreenDetails": {
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

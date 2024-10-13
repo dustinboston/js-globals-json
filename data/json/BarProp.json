@@ -1,0 +1,10 @@
+{
+  "BarProp": {
+    "visible": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

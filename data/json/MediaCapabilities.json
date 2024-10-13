@@ -1,0 +1,16 @@
+{
+  "MediaCapabilities": {
+    "decodingInfo()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "encodingInfo()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

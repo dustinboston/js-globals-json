@@ -1,0 +1,10 @@
+{
+  "PageRevealEvent": {
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

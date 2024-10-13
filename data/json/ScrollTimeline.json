@@ -1,0 +1,10 @@
+{
+  "ScrollTimeline": {
+    "AnimationTimeline": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "DOMMatrix": {
+    "DOMMatrix()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "DOMMatrixReadOnly": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

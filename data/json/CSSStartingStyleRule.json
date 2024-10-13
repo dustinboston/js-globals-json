@@ -1,0 +1,16 @@
+{
+  "CSSStartingStyleRule": {
+    "CSSGroupingRule": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "CSSRule": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

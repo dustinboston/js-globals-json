@@ -1,0 +1,10 @@
+{
+  "PaintWorkletGlobalScope": {
+    "WorkletGlobalScope": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

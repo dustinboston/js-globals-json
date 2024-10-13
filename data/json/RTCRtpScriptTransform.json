@@ -1,0 +1,10 @@
+{
+  "RTCRtpScriptTransform": {
+    "RTCRtpScriptTransform()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

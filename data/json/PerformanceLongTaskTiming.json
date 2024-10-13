@@ -1,0 +1,10 @@
+{
+  "PerformanceLongTaskTiming": {
+    "PerformanceEntry": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

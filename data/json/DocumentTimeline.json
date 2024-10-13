@@ -1,0 +1,16 @@
+{
+  "DocumentTimeline": {
+    "DocumentTimeline()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "AnimationTimeline": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

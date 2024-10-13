@@ -1,0 +1,10 @@
+{
+  "PeriodicWave": {
+    "PeriodicWave()": {
+      "type": "Constructor",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

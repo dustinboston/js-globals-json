@@ -1,0 +1,10 @@
+{
+  "CSSPositionTryRule": {
+    "CSSRule": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

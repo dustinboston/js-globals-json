@@ -1,0 +1,10 @@
+{
+  "CSSPositionTryDescriptors": {
+    "CSSStyleDeclaration": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

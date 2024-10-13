@@ -1,0 +1,16 @@
+{
+  "CSSFontFeatureValuesRule": {
+    "fontFamily": {
+      "type": "InstanceProperty",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    },
+    "CSSRule": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

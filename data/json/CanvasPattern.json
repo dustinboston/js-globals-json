@@ -1,0 +1,10 @@
+{
+  "CanvasPattern": {
+    "setTransform()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ReportBody": {
+    "toJSON()": {
+      "type": "InstanceMethod",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

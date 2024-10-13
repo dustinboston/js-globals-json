@@ -1,0 +1,10 @@
+{
+  "PresentationConnectionAvailableEvent": {
+    "Event": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}

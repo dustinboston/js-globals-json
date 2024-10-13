@@ -1,0 +1,10 @@
+{
+  "CaptureController": {
+    "EventTarget": {
+      "type": "Inheritance",
+      "params": [],
+      "returns": "",
+      "inherits": []
+    }
+  }
+}
