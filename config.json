@@ -1,0 +1,82 @@
+[
+  {
+    "deno.enable": true,
+    "editor.formatOnSave": true,
+    "[typescript]": {
+      "editor.defaultFormatter": "denoland.vscode-deno"
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "denoland.vscode-deno"
+    },
+    "[json]": {
+      "editor.defaultFormatter": "denoland.vscode-deno"
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "denoland.vscode-deno"
+    },
+    "[javascriptreact]": {
+      "editor.defaultFormatter": "denoland.vscode-deno"
+    },
+    "deno.codeLens.test": true,
+    "deno.config": "deno.jsonc"
+  },
+
+  {
+    "breadcrumbs.enabled": false,
+    "breadcrumbs.filePath": "off",
+    "diffEditor.hideUnchangedRegions.enabled": true,
+    "diffEditor.ignoreTrimWhitespace": true,
+    "editor.foldingHighlight": false,
+    "editor.guides.indentation": false,
+    "editor.hover.delay": 500,
+    "editor.inlineSuggest.suppressSuggestions": true,
+    "editor.largeFileOptimizations": true,
+    "editor.lineHeight": 1.7,
+    "editor.renderControlCharacters": false,
+    "editor.renderWhitespace": "none",
+    "editor.stickyScroll.enabled": false,
+    "extensions.ignoreRecommendations": true,
+    "git.autofetch": true,
+    "workbench.editor.decorations.badges": false,
+    "workbench.editor.empty.hint": "hidden",
+    "workbench.editor.showIcons": false,
+    "workbench.startupEditor": "none",
+    "workbench.tree.indent": 12,
+    "workbench.tree.renderIndentGuides": "none",
+    "git.openRepositoryInParentFolders": "never",
+    "editor.minimap.renderCharacters": false
+  },
+  {
+    "exclude": [
+      "data",
+      "old",
+      "lib"
+    ],
+    "compilerOptions": {
+      "checkJs": false,
+      "strict": true,
+      "lib": [
+        "esnext",
+        "dom",
+        "dom.iterable",
+        "dom.asynciterable",
+        "deno.ns"
+      ]
+    },
+    "lint": {
+      "rules": {
+        "tags": ["recommended"],
+        "include": [],
+        "exclude": []
+      }
+    },
+    "fmt": {
+      "useTabs": false,
+      "lineWidth": 120,
+      "indentWidth": 2,
+      "semiColons": true,
+      "singleQuote": true,
+      "proseWrap": "always"
+    }
+  }
+]

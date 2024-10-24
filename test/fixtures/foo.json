@@ -1,0 +1,428 @@
+{
+  "Foo.new": [
+    {
+      "id": "Foo.new",
+      "kind": "ConstructSignature",
+      "meta": [],
+      "name": "Foo.new",
+      "params": [
+        {
+          "id": "a",
+          "kind": "Parameter",
+          "meta": [],
+          "name": "a",
+          "params": [],
+          "text": null,
+          "returns": [
+            {
+              "id": "_5000",
+              "kind": "StringKeyword",
+              "meta": [],
+              "name": "_5000",
+              "params": [],
+              "text": "string",
+              "returns": [],
+              "generics": []
+            }
+          ],
+          "generics": []
+        }
+      ],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5001",
+          "kind": "TypeReference",
+          "meta": [],
+          "name": "_5001",
+          "params": [],
+          "text": "Foo",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ],
+  "Foo": [
+    {
+      "id": "Foo",
+      "kind": "CallSignature",
+      "meta": [],
+      "name": "Foo",
+      "params": [
+        {
+          "id": "a",
+          "kind": "Parameter",
+          "meta": [],
+          "name": "a",
+          "params": [],
+          "text": null,
+          "returns": [
+            {
+              "id": "_5002",
+              "kind": "StringKeyword",
+              "meta": [],
+              "name": "_5002",
+              "params": [],
+              "text": "string",
+              "returns": [],
+              "generics": []
+            }
+          ],
+          "generics": []
+        }
+      ],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5003",
+          "kind": "TypeReference",
+          "meta": [],
+          "name": "_5003",
+          "params": [],
+          "text": "Foo",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ],
+  "Foo.staticPropA": [
+    {
+      "id": "Foo.staticPropA",
+      "kind": "PropertySignature",
+      "meta": [],
+      "name": "Foo.staticPropA",
+      "params": [],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5004",
+          "kind": "StringKeyword",
+          "meta": [],
+          "name": "_5004",
+          "params": [],
+          "text": "string",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ],
+  "Foo.staticFuncA": [
+    {
+      "id": "Foo.staticFuncA",
+      "kind": "MethodSignature",
+      "meta": [],
+      "name": "Foo.staticFuncA",
+      "params": [
+        {
+          "id": "b",
+          "kind": "Parameter",
+          "meta": [],
+          "name": "b",
+          "params": [],
+          "text": null,
+          "returns": [
+            {
+              "id": "_5005",
+              "kind": "NumberKeyword",
+              "meta": [],
+              "name": "_5005",
+              "params": [],
+              "text": "number",
+              "returns": [],
+              "generics": []
+            }
+          ],
+          "generics": []
+        }
+      ],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5006",
+          "kind": "NumberKeyword",
+          "meta": [],
+          "name": "_5006",
+          "params": [],
+          "text": "number",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ],
+  "Foo.staticPropB": [
+    {
+      "id": "Foo.staticPropB",
+      "kind": "PropertySignature",
+      "meta": [],
+      "name": "Foo.staticPropB",
+      "params": [],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5007",
+          "kind": "StringKeyword",
+          "meta": [],
+          "name": "_5007",
+          "params": [],
+          "text": "string",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ],
+  "Foo.staticFuncB": [
+    {
+      "id": "Foo.staticFuncB",
+      "kind": "MethodSignature",
+      "meta": [],
+      "name": "Foo.staticFuncB",
+      "params": [
+        {
+          "id": "b",
+          "kind": "Parameter",
+          "meta": [],
+          "name": "b",
+          "params": [],
+          "text": null,
+          "returns": [
+            {
+              "id": "_5008",
+              "kind": "NumberKeyword",
+              "meta": [],
+              "name": "_5008",
+              "params": [],
+              "text": "number",
+              "returns": [],
+              "generics": []
+            }
+          ],
+          "generics": []
+        }
+      ],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5009",
+          "kind": "NumberKeyword",
+          "meta": [],
+          "name": "_5009",
+          "params": [],
+          "text": "number",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ],
+  "Foo.prototype.protoPropA": [
+    {
+      "id": "Foo.prototype.protoPropA",
+      "kind": "PropertySignature",
+      "meta": [],
+      "name": "Foo.prototype.protoPropA",
+      "params": [],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5010",
+          "kind": "StringKeyword",
+          "meta": [],
+          "name": "_5010",
+          "params": [],
+          "text": "string",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ],
+  "Foo.prototype.protoFuncA": [
+    {
+      "id": "Foo.prototype.protoFuncA",
+      "kind": "MethodSignature",
+      "meta": [],
+      "name": "Foo.prototype.protoFuncA",
+      "params": [
+        {
+          "id": "a",
+          "kind": "Parameter",
+          "meta": [],
+          "name": "a",
+          "params": [],
+          "text": null,
+          "returns": [
+            {
+              "id": "_5011",
+              "kind": "NumberKeyword",
+              "meta": [],
+              "name": "_5011",
+              "params": [],
+              "text": "number",
+              "returns": [],
+              "generics": []
+            }
+          ],
+          "generics": []
+        }
+      ],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5012",
+          "kind": "NumberKeyword",
+          "meta": [],
+          "name": "_5012",
+          "params": [],
+          "text": "number",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    },
+    {
+      "id": "Foo.prototype.protoFuncA",
+      "kind": "MethodSignature",
+      "meta": [],
+      "name": "Foo.prototype.protoFuncA",
+      "params": [
+        {
+          "id": "a",
+          "kind": "Parameter",
+          "meta": [],
+          "name": "a",
+          "params": [],
+          "text": null,
+          "returns": [
+            {
+              "id": "_5013",
+              "kind": "NumberKeyword",
+              "meta": [],
+              "name": "_5013",
+              "params": [],
+              "text": "number",
+              "returns": [],
+              "generics": []
+            }
+          ],
+          "generics": []
+        },
+        {
+          "id": "b",
+          "kind": "Parameter",
+          "meta": ["optional"],
+          "name": "b",
+          "params": [],
+          "text": null,
+          "returns": [
+            {
+              "id": "_5014",
+              "kind": "NumberKeyword",
+              "meta": [],
+              "name": "_5014",
+              "params": [],
+              "text": "number",
+              "returns": [],
+              "generics": []
+            }
+          ],
+          "generics": []
+        }
+      ],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5015",
+          "kind": "NumberKeyword",
+          "meta": [],
+          "name": "_5015",
+          "params": [],
+          "text": "number",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ],
+  "Foo.prototype.protoPropB": [
+    {
+      "id": "Foo.prototype.protoPropB",
+      "kind": "PropertySignature",
+      "meta": [],
+      "name": "Foo.prototype.protoPropB",
+      "params": [],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5016",
+          "kind": "StringKeyword",
+          "meta": [],
+          "name": "_5016",
+          "params": [],
+          "text": "string",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ],
+  "Foo.prototype.protoFuncB": [
+    {
+      "id": "Foo.prototype.protoFuncB",
+      "kind": "MethodSignature",
+      "meta": [],
+      "name": "Foo.prototype.protoFuncB",
+      "params": [
+        {
+          "id": "b",
+          "kind": "Parameter",
+          "meta": [],
+          "name": "b",
+          "params": [],
+          "text": null,
+          "returns": [
+            {
+              "id": "_5017",
+              "kind": "NumberKeyword",
+              "meta": [],
+              "name": "_5017",
+              "params": [],
+              "text": "number",
+              "returns": [],
+              "generics": []
+            }
+          ],
+          "generics": []
+        }
+      ],
+      "text": null,
+      "returns": [
+        {
+          "id": "_5018",
+          "kind": "NumberKeyword",
+          "meta": [],
+          "name": "_5018",
+          "params": [],
+          "text": "number",
+          "returns": [],
+          "generics": []
+        }
+      ],
+      "generics": []
+    }
+  ]
+}

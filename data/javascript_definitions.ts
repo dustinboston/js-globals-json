@@ -12,6 +12,8 @@ import {
   arrBuff,
   bigInt,
   bool,
+  type BuiltinDefn,
+  type Builtins,
   ctor,
   fn,
   iter,
@@ -19,6 +21,7 @@ import {
   num,
   obj,
   or,
+  type ParamVisitor,
   promise,
   regex,
   set,
@@ -27,11 +30,8 @@ import {
   tuple,
   typedArr,
   undef,
-  type BuiltinDefn,
-  type Builtins,
-  type ParamVisitor
-} from './params.ts';
-import type { BaseObjects } from './types.ts';
+} from "./params.ts";
+import type { BaseObjects } from "./types.ts";
 
 // TODO: Update the js interop file to use new definitions.
 // TODO: Update the html definitions file to use the same approach.
@@ -47,97 +47,97 @@ import type { BaseObjects } from './types.ts';
 function inheritFunction(name: string): Builtins {
   const functionBuiltin: Builtins = {
     [`${name}.apply`]: {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [
-        ['thisArg', any()],
-        ['argArray?', arr()],
+        ["thisArg", any()],
+        ["argArray?", arr()],
       ],
       returns: any(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.bind`]: {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [
-        ['thisArg', any()],
-        ['...argArray', arr()],
+        ["thisArg", any()],
+        ["...argArray", arr()],
       ],
       returns: any(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.call`]: {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [
-        ['thisArg', any()],
-        ['...argArray', arr()],
+        ["thisArg", any()],
+        ["...argArray", arr()],
       ],
       returns: any(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}[Symbol.hasInstance]`]: {
-      type: 'StaticMethod',
-      params: [['value', any()]],
+      type: "StaticMethod",
+      params: [["value", any()]],
       returns: bool(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.toString`]: {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [],
       returns: str(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.length`]: {
-      type: 'StaticProperty',
+      type: "StaticProperty",
       params: [],
       returns: num(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.name`]: {
-      type: 'StaticProperty',
+      type: "StaticProperty",
       params: [],
       returns: str(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.prototype`]: {
-      type: 'StaticProperty',
+      type: "StaticProperty",
       params: [],
       returns: any(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.toString`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: str(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.toLocaleString`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: str(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.valueOf`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: obj(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.length`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: num(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.name`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: str(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
     [`${name}.constructor`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: fn(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     },
   };
 
@@ -151,17 +151,17 @@ function inheritFunction(name: string): Builtins {
  * This includes constructors, static methods, instance methods, and instance properties.
  */
 const functionBuiltin: Builtins = {
-  ...inheritFunction('Function'),
+  ...inheritFunction("Function"),
 
   [`Function`]: {
-    type: 'Constructor',
-    params: [['...args', arr(str())]],
+    type: "Constructor",
+    params: [["...args", arr(str())]],
     returns: ctor(),
     inherits: [],
   },
   [`Function.new`]: {
-    type: 'Constructor',
-    params: [['...args', arr(str())]],
+    type: "Constructor",
+    params: [["...args", arr(str())]],
     returns: ctor(),
     inherits: [],
   },
@@ -174,61 +174,61 @@ const functionBuiltin: Builtins = {
  * This includes constructors, static methods, instance methods, and instance properties.
  */
 const arrayBuiltin: Builtins = {
-  ...inheritFunction('Array'),
+  ...inheritFunction("Array"),
 
   [`Array`]: [
     {
-      type: 'Constructor',
+      type: "Constructor",
       params: [],
       returns: arr(),
       inherits: [],
     },
     {
-      type: 'Constructor',
-      params: [['arrayLength', num()]],
+      type: "Constructor",
+      params: [["arrayLength", num()]],
       returns: arr(),
       inherits: [],
     },
     {
-      type: 'Constructor',
-      params: [['...items', arr()]],
+      type: "Constructor",
+      params: [["...items", arr()]],
       returns: arr(),
       inherits: [],
     },
   ],
   [`Array.new`]: [
     {
-      type: 'Constructor',
+      type: "Constructor",
       params: [],
       returns: arr(),
       inherits: [],
     },
     {
-      type: 'Constructor',
-      params: [['arrayLength', num()]],
+      type: "Constructor",
+      params: [["arrayLength", num()]],
       returns: arr(),
       inherits: [],
     },
     {
-      type: 'Constructor',
-      params: [['...items', arr()]],
+      type: "Constructor",
+      params: [["...items", arr()]],
       returns: arr(),
       inherits: [],
     },
   ],
   [`Array.from`]: [
     {
-      type: 'StaticMethod',
-      params: [['arrayLike', arr()]],
+      type: "StaticMethod",
+      params: [["arrayLike", arr()]],
       returns: arr(),
       inherits: [],
     },
     {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [
-        ['arrayLike', arr()],
-        ['mapfn', fn()], // (v: T, k: number) => U
-        ['thisArg', any()],
+        ["arrayLike", arr()],
+        ["mapfn", fn()], // (v: T, k: number) => U
+        ["thisArg", any()],
       ],
       returns: arr(),
       inherits: [],
@@ -236,31 +236,31 @@ const arrayBuiltin: Builtins = {
   ],
   [`Array.fromAsync`]: [
     {
-      type: 'StaticMethod',
-      params: [['iterableOrArrayLike', arr()]],
+      type: "StaticMethod",
+      params: [["iterableOrArrayLike", arr()]],
       returns: promise(arr()),
       inherits: [],
     },
     {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [
-        ['iterableOrArrayLike', arr()],
-        ['mapFn', fn()], // Awaited<((v: T, k: number) => U)>
-        ['thisArg?', any()],
+        ["iterableOrArrayLike", arr()],
+        ["mapFn", fn()], // Awaited<((v: T, k: number) => U)>
+        ["thisArg?", any()],
       ],
       returns: promise(arr()), // Promise<Awaited<U>[]> | Promise<T[]>;
       inherits: [],
     },
   ],
   [`Array.isArray`]: {
-    type: 'StaticMethod',
-    params: [['arg', any()]],
+    type: "StaticMethod",
+    params: [["arg", any()]],
     returns: bool(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
   [`Array.of`]: {
-    type: 'StaticMethod',
-    params: [['...items', arr()]],
+    type: "StaticMethod",
+    params: [["...items", arr()]],
     returns: arr(),
     inherits: [],
   },
@@ -275,29 +275,29 @@ const arrayBuiltin: Builtins = {
   //   inheritedFrom: [BaseObjects.None],
   // },
   [`Array.prototype.at`]: {
-    type: 'InstanceMethod',
-    params: [['index', num()]],
+    type: "InstanceMethod",
+    params: [["index", num()]],
     returns: or(any(), undef()),
     inherits: [],
   },
   [`Array.prototype.concat`]: {
-    type: 'InstanceMethod',
-    params: [['...items', arr()]],
+    type: "InstanceMethod",
+    params: [["...items", arr()]],
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.copyWithin`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['target', num()],
-      ['start', num()],
-      ['end?', num()],
+      ["target", num()],
+      ["start", num()],
+      ["end?", num()],
     ],
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.entries`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [],
     returns: arr(
       tuple(num(), any()),
@@ -305,173 +305,173 @@ const arrayBuiltin: Builtins = {
     inherits: [],
   },
   [`Array.prototype.every`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-      ['thisArg?', any()],
+      ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+      ["thisArg?", any()],
     ],
     returns: bool(),
     inherits: [],
   },
   [`Array.prototype.fill`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['value', any()],
-      ['start?', num()],
-      ['end?', num()],
+      ["value", any()],
+      ["start?", num()],
+      ["end?", num()],
     ],
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.filter`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-      ['thisArg?', any()],
+      ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+      ["thisArg?", any()],
     ],
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.find`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-      ['thisArg?', any()],
+      ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+      ["thisArg?", any()],
     ],
     returns: or(any(), undef()),
     inherits: [],
   },
   [`Array.prototype.findIndex`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-      ['thisArg?', any()],
+      ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+      ["thisArg?", any()],
     ],
     returns: num(),
     inherits: [],
   },
   [`Array.prototype.findLast`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-      ['thisArg?', any()],
+      ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+      ["thisArg?", any()],
     ],
     returns: or(any(), undef()),
     inherits: [],
   },
   [`Array.prototype.findLastIndex`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-      ['thisArg?', any()],
+      ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+      ["thisArg?", any()],
     ],
     returns: num(),
     inherits: [],
   },
   [`Array.prototype.flat`]: {
-    type: 'InstanceMethod',
-    params: [['depth?', num()]], // TODO: Add initializer, e.g. = 1
+    type: "InstanceMethod",
+    params: [["depth?", num()]], // TODO: Add initializer, e.g. = 1
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.flatMap`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['callback', fn()], // (T, number, T[]) => U
-      ['thisArg?', arr()],
+      ["callback", fn()], // (T, number, T[]) => U
+      ["thisArg?", arr()],
     ],
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.forEach`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['callbackfn', fn()], // (value: T, index: number, array: T[]) => void
-      ['thisArg?', any()],
+      ["callbackfn", fn()], // (value: T, index: number, array: T[]) => void
+      ["thisArg?", any()],
     ],
     returns: undef(), // void
     inherits: [],
   },
   [`Array.prototype.includes`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['searchElement', any()],
-      ['fromIndex?', num()],
+      ["searchElement", any()],
+      ["fromIndex?", num()],
     ],
     returns: bool(),
     inherits: [],
   },
   [`Array.prototype.indexOf`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['searchElement', any()],
-      ['fromIndex?', num()],
+      ["searchElement", any()],
+      ["fromIndex?", num()],
     ],
     returns: num(),
     inherits: [],
   },
   [`Array.prototype.join`]: {
-    type: 'InstanceMethod',
-    params: [['separator?', str()]],
+    type: "InstanceMethod",
+    params: [["separator?", str()]],
     returns: str(),
     inherits: [],
   },
   [`Array.prototype.keys`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [],
     returns: arr(num()), // IterableIterator<number>
     inherits: [],
   },
   [`Array.prototype.lastIndexOf`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['searchElement', any()],
-      ['fromIndex?', num()],
+      ["searchElement", any()],
+      ["fromIndex?", num()],
     ],
     returns: num(),
     inherits: [],
   },
   [`Array.prototype.map`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['callbackfn', fn()], // (T, number, T[]) => U
-      ['thisArg?', any()],
+      ["callbackfn", fn()], // (T, number, T[]) => U
+      ["thisArg?", any()],
     ],
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.pop`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [],
     returns: or(any(), undef()),
     inherits: [],
   },
   [`Array.prototype.push`]: {
-    type: 'InstanceMethod',
-    params: [['...items', arr()]],
+    type: "InstanceMethod",
+    params: [["...items", arr()]],
     returns: num(),
     inherits: [],
   },
   [`Array.prototype.reduce`]: [
     {
       // reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: readonly T[]) => T, initialValue: T): T;
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
         // ['context', arr()],
         [
-          'callbackfn',
+          "callbackfn",
           fn(), // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
         ],
-        ['initialValue', any()],
+        ["initialValue", any()],
       ],
       returns: any(),
       inherits: [],
     },
     {
       // reduce(callbackfn: (previousValue: T, currentValue: T, currentIndex: number, array: readonly T[]) => T): T;
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [[
-        'callbackfn',
+        "callbackfn",
         fn(), // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
       ]],
       returns: any(),
@@ -480,10 +480,10 @@ const arrayBuiltin: Builtins = {
   ],
   [`Array.prototype.reduceRight`]: [
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
         [
-          'callbackfn',
+          "callbackfn",
           fn(), // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
         ],
       ],
@@ -491,139 +491,139 @@ const arrayBuiltin: Builtins = {
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
         [
-          'callbackfn',
+          "callbackfn",
           fn(), // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
         ],
-        ['initialValue', any()],
+        ["initialValue", any()],
       ],
       returns: any(),
       inherits: [],
     },
   ],
   [`Array.prototype.reverse`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [],
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.shift`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [],
     returns: or(any(), undef()),
     inherits: [],
   },
   [`Array.prototype.slice`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['start?', num()],
-      ['end?', num()],
+      ["start?", num()],
+      ["end?", num()],
     ],
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.some`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-      ['thisArg?', any()],
+      ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+      ["thisArg?", any()],
     ],
     returns: bool(),
     inherits: [],
   },
   [`Array.prototype.sort`]: {
-    type: 'InstanceMethod',
-    params: [['compareFn?', fn()]], // (a: T, b: T) => number,
+    type: "InstanceMethod",
+    params: [["compareFn?", fn()]], // (a: T, b: T) => number,
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.splice`]: [
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['start', num()],
-        ['deleteCount?', num()],
+        ["start", num()],
+        ["deleteCount?", num()],
       ],
       returns: arr(),
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['start', num()],
-        ['deleteCount', num()],
-        ['...items', arr()],
+        ["start", num()],
+        ["deleteCount", num()],
+        ["...items", arr()],
       ],
       returns: arr(),
       inherits: [],
     },
   ],
   [`Array.prototype[Symbol.iterator]`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [],
     returns: iter(), // IterableIterator<T>
     inherits: [],
   },
   [`Array.prototype.toReversed`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [],
     returns: arr(),
     inherits: [],
   },
   [`Array.prototype.toSorted`]: [
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: arr(),
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
-      params: [['compareFunction?', fn()]], // (a: T, b: T) => number,
+      type: "InstanceMethod",
+      params: [["compareFunction?", fn()]], // (a: T, b: T) => number,
       returns: arr(),
       inherits: [],
     },
   ],
   [`Array.prototype.toSpliced`]: [
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['start', num()],
-        ['deleteCount', num()],
-        ['...items', arr()],
+        ["start", num()],
+        ["deleteCount", num()],
+        ["...items", arr()],
       ],
       returns: arr(),
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['start', num()],
-        ['deleteCount?', num()],
+        ["start", num()],
+        ["deleteCount?", num()],
       ],
       returns: arr(),
       inherits: [],
     },
   ],
   [`Array.prototype.unshift`]: {
-    type: 'InstanceMethod',
-    params: [['...items', arr()]],
+    type: "InstanceMethod",
+    params: [["...items", arr()]],
     returns: num(),
     inherits: [],
   },
   [`Array.prototype.values`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [],
     returns: iter(), // IterableIterator<T>
     inherits: [],
   },
   [`Array.prototype.with`]: {
-    type: 'InstanceMethod',
+    type: "InstanceMethod",
     params: [
-      ['index', num()],
-      ['value', any()],
+      ["index", num()],
+      ["value", any()],
     ],
     returns: arr(),
     inherits: [],
@@ -639,86 +639,89 @@ const arrayBuiltin: Builtins = {
  * @param arrayType - The parameter type for the typed array, such as `PTInt16Array`.
  * @returns A `BuiltinCollection` object that contains the properties and methods for the specified typed array class.
  */
-function inheritTypedArray(typedArrayName: string, arrayType: BaseObjects): Builtins {
+function inheritTypedArray(
+  typedArrayName: string,
+  arrayType: BaseObjects,
+): Builtins {
   const builtIn: Builtins = {
     ...inheritFunction(typedArrayName),
     [`${typedArrayName}.new`]: [
       {
-        type: 'Constructor',
+        type: "Constructor",
         params: [],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'Constructor',
-        params: [['length', num()]],
+        type: "Constructor",
+        params: [["length", num()]],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'Constructor',
+        type: "Constructor",
         params: [[
-          'array',
+          "array",
           or(
             arr(num()),
             arrBuff(),
           ),
         ]],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'Constructor',
+        type: "Constructor",
         params: [
-          ['buffer', arrBuff()],
-          ['byteOffset?', num()],
-          ['length?', num()],
+          ["buffer", arrBuff()],
+          ["byteOffset?", num()],
+          ["length?", num()],
         ],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'Constructor',
+        type: "Constructor",
         params: [
-          ['elements', iter(num())],
+          ["elements", iter(num())],
         ],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
     ],
     [`${typedArrayName}.from`]: [
       {
-        type: 'StaticMethod',
-        params: [['arrayLike', arr(num())]],
+        type: "StaticMethod",
+        params: [["arrayLike", arr(num())]],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'StaticMethod',
+        type: "StaticMethod",
         params: [
-          ['arrayLike', iter(num())],
-          ['mapfn?', fn()], // (v: T, k: number) => number
-          ['baz?', any()],
+          ["arrayLike", iter(num())],
+          ["mapfn?", fn()], // (v: T, k: number) => number
+          ["baz?", any()],
         ],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'StaticMethod',
+        type: "StaticMethod",
         params: [
-          ['arrayLike', arr()],
-          ['mapfn', fn()], // (v: T, k: number) => number
-          ['thisArg?', any()],
+          ["arrayLike", arr()],
+          ["mapfn", fn()], // (v: T, k: number) => number
+          ["thisArg?", any()],
         ],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
     ],
     [`${typedArrayName}.BYTES_PER_ELEMENT`]: {
-      type: 'StaticProperty',
+      type: "StaticProperty",
       params: [],
       returns: num(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     // Disable Symbol.species to prevent arbitrary code execution.
     // > Warning: The existence of [Symbol.species] allows execution of arbitrary code and may create security vulnerabilities. It also makes certain
@@ -731,391 +734,393 @@ function inheritTypedArray(typedArrayName: string, arrayType: BaseObjects): Buil
     //   inheritedFrom: [BaseObjects.TypedArray],
     // },
     [`${typedArrayName}.prototype.at`]: {
-      type: 'InstanceMethod',
-      params: [['index', num()]],
+      type: "InstanceMethod",
+      params: [["index", num()]],
       returns: or(num(), undef()),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.copyWithin`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['target', num()],
-        ['start', num()],
-        ['end?', num()],
+        ["target", num()],
+        ["start", num()],
+        ["end?", num()],
       ],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.entries`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: iter(
         tuple(num(), num()),
       ),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.every`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-        ['thisArg?', any()],
+        ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+        ["thisArg?", any()],
       ],
       returns: bool(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.fill`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['value', any()],
-        ['start?', num()],
-        ['end?', num()],
+        ["value", any()],
+        ["start?", num()],
+        ["end?", num()],
       ],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.filter`]: [
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-          ['thisArg?', any()],
+          ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+          ["thisArg?", any()],
         ],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-          ['thisArg?', any()],
+          ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+          ["thisArg?", any()],
         ],
         returns: ctor(arrayType),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
     ],
     [`${typedArrayName}.prototype.find`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-        ['thisArg?', any()],
+        ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+        ["thisArg?", any()],
       ],
       returns: or(any(), undef()),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.findIndex`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-        ['thisArg?', any()],
+        ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+        ["thisArg?", any()],
       ],
       returns: num(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.findLast`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-        ['thisArg?', any()],
+        ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+        ["thisArg?", any()],
       ],
       returns: or(any(), undef()),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.findLastIndex`]: [
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-          ['thisArg?', any()],
+          ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+          ["thisArg?", any()],
         ],
         returns: num(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-          ['thisArg?', any()],
+          ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+          ["thisArg?", any()],
         ],
         returns: num(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
     ],
     [`${typedArrayName}.prototype.forEach`]: [
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['callbackfn', fn()], // (value: T, index: number, array: T[]) => void
-          ['thisArg?', any()],
+          ["callbackfn", fn()], // (value: T, index: number, array: T[]) => void
+          ["thisArg?", any()],
         ],
         returns: undef(), // void
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['callbackfn', fn()], // (value: T, index: number, array: T[]) => void
-          ['thisArg?', any()],
+          ["callbackfn", fn()], // (value: T, index: number, array: T[]) => void
+          ["thisArg?", any()],
         ],
         returns: undef(), // void
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
     ],
     [`${typedArrayName}.prototype.includes`]: [
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['searchElement', any()],
-          ['fromIndex?', num()],
+          ["searchElement", any()],
+          ["fromIndex?", num()],
         ],
         returns: bool(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['searchElement', num()],
-          ['fromIndex?', num()],
+          ["searchElement", num()],
+          ["fromIndex?", num()],
         ],
         returns: bool(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
     ],
     [`${typedArrayName}.prototype.indexOf`]: [
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['searchElement', any()],
-          ['fromIndex?', num()],
+          ["searchElement", any()],
+          ["fromIndex?", num()],
         ],
         returns: num(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['searchElement', num()],
-          ['fromIndex?', num()],
+          ["searchElement", num()],
+          ["fromIndex?", num()],
         ],
         returns: num(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
     ],
     [`${typedArrayName}.prototype.join`]: {
-      type: 'InstanceMethod',
-      params: [['separator?', str()]],
+      type: "InstanceMethod",
+      params: [["separator?", str()]],
       returns: str(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.keys`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: arr(num()), // IterableIterator<number>
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.lastIndexOf`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['searchElement', num()],
-        ['fromIndex?', num()],
+        ["searchElement", num()],
+        ["fromIndex?", num()],
       ],
       returns: num(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.map`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['callbackfn', fn()], // (T, number, T[]) => U
-        ['thisArg?', any()],
+        ["callbackfn", fn()], // (T, number, T[]) => U
+        ["thisArg?", any()],
       ],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.reduce`]: [
       {
-        type: 'InstanceMethod',
-        params: [['callbackfn', fn()]], // (previousValue: U, currentValue: number, currentIndex: number, array: Int16Array) => U
+        type: "InstanceMethod",
+        params: [["callbackfn", fn()]], // (previousValue: U, currentValue: number, currentIndex: number, array: Int16Array) => U
         returns: num(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['callbackfn', fn()], // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
-          ['initialValue', any()],
+          ["callbackfn", fn()], // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
+          ["initialValue", any()],
         ],
         returns: any(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
     ],
     [`${typedArrayName}.prototype.reduceRight`]: [
       {
-        type: 'InstanceMethod',
-        params: [['callbackfn', fn()]], // (previousValue: U, currentValue: number, currentIndex: number, array: Int16Array) => U
+        type: "InstanceMethod",
+        params: [["callbackfn", fn()]], // (previousValue: U, currentValue: number, currentIndex: number, array: Int16Array) => U
         returns: num(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['callbackfn', fn()], // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
-          ['initialValue', num()],
+          ["callbackfn", fn()], // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
+          ["initialValue", num()],
         ],
         returns: num(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
       {
-        type: 'InstanceMethod',
+        type: "InstanceMethod",
         params: [
-          ['callbackfn', fn()], // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
-          ['initialValue', any()],
+          ["callbackfn", fn()], // '(previousValue: T, currentValue: T, currentIndex: number, array: T[]) => T'
+          ["initialValue", any()],
         ],
         returns: any(),
-        inherits: ['TypedArray'],
+        inherits: ["TypedArray"],
       },
     ],
     [`${typedArrayName}.prototype.reverse`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.set`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['array', arr(num())],
-        ['offset?', num()],
+        ["array", arr(num())],
+        ["offset?", num()],
       ],
       returns: undef(), // void
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.slice`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['start?', num()],
-        ['end?', num()],
+        ["start?", num()],
+        ["end?", num()],
       ],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.some`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['predicate', fn()], // (value: T, index: number, array: T[]) => unknown
-        ['thisArg?', any()],
+        ["predicate", fn()], // (value: T, index: number, array: T[]) => unknown
+        ["thisArg?", any()],
       ],
       returns: bool(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.sort`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['compareFn?', fn()], // (a: T, b: T) => number
+        ["compareFn?", fn()], // (a: T, b: T) => number
       ],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.subarray`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['begin?', num()],
-        ['end?', num()],
+        ["begin?", num()],
+        ["end?", num()],
       ],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype[Symbol.iterator]`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: arr(num()), // IterableIterator<number>
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.toLocaleString`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: str(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.toReversed`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.toSorted`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['compareFn?', fn()], // (value: T, index: number, array: T[]) => void
+        ["compareFn?", fn()], // (value: T, index: number, array: T[]) => void
       ],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.valueOf`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.values`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: arr(num()), // IterableIterator<number>
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.with`]: {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['index', num()],
-        ['value', num()],
+        ["index", num()],
+        ["value", num()],
       ],
       returns: ctor(arrayType),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.buffer`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: arrBuff(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.byteLength`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: num(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.byteOffset`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: num(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
     [`${typedArrayName}.prototype.length`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: num(),
-      inherits: ['TypedArray'],
+      inherits: ["TypedArray"],
     },
   };
 
   // TODO: Find out why the Deno linter doesn't allow more than one argument to bind and call for most Typed Arrays.
   // Override the inherited Function methods bind and call to resolve the issue. (BigInt64Array, BigUint64Array is an exception)
-  if (typedArrayName !== 'BigInt64Array' && typedArrayName !== 'BigUint64Array') {
+  if (
+    typedArrayName !== "BigInt64Array" && typedArrayName !== "BigUint64Array"
+  ) {
     builtIn[`${typedArrayName}.bind`] = {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [
-        ['thisArg', any()],
+        ["thisArg", any()],
         // ['...argArray', arr()]
       ],
       returns: any(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     };
     builtIn[`${typedArrayName}.call`] = {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [
-        ['thisArg', any()],
+        ["thisArg", any()],
         // ['...argArray', arr()]
       ],
       returns: any(),
-      inherits: ['Function'],
+      inherits: ["Function"],
     };
   }
   return builtIn;
@@ -1124,83 +1129,83 @@ function inheritTypedArray(typedArrayName: string, arrayType: BaseObjects): Buil
 // MARK INT8 ARRAY
 
 const int8ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('Int8Array', 'Int8Array'),
+  ...inheritTypedArray("Int8Array", "Int8Array"),
 };
 
 // MARK: ✅ BIG INT 64 ARRAY
 
 const bigint64ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('BigInt64Array', 'BigInt64Array'),
+  ...inheritTypedArray("BigInt64Array", "BigInt64Array"),
 };
 
 // MARK: ✅ BIG UINT 64 ARRAY
 
 const bigUint64ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('BigUint64Array', 'BigUint64Array'),
+  ...inheritTypedArray("BigUint64Array", "BigUint64Array"),
 };
 
 // MARK: ✅ FLOAT 32 ARRAY
 
 const float32ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('Float32Array', 'Float32Array'),
+  ...inheritTypedArray("Float32Array", "Float32Array"),
 };
 
 // MARK: ✅ FLOAT 64 ARRAY
 
 const float64ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('Float64Array', 'Float64Array'),
+  ...inheritTypedArray("Float64Array", "Float64Array"),
 };
 
 // MARK: ✅ INT 16 ARRAY
 
 const int16ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('Int16Array', 'Int16Array'),
+  ...inheritTypedArray("Int16Array", "Int16Array"),
 };
 
 // MARK: ✅ INT 32 ARRAY
 
 const int32ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('Int32Array', 'Int32Array'),
+  ...inheritTypedArray("Int32Array", "Int32Array"),
 };
 
 // MARK: ✅ UINT 8 ARRAY
 
 const uint8ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('Uint8Array', 'Uint8Array'),
+  ...inheritTypedArray("Uint8Array", "Uint8Array"),
 };
 
 // MARK: ✅ UINT 16 ARRAY
 
 const uint16ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('Uint16Array', 'Uint16Array'),
+  ...inheritTypedArray("Uint16Array", "Uint16Array"),
 };
 
 // MARK: ✅ UINT 32 ARRAY
 
 const uint32ArrayBuiltin: Builtins = {
-  ...inheritTypedArray('Uint32Array', 'Uint32Array'),
+  ...inheritTypedArray("Uint32Array", "Uint32Array"),
 };
 
 // MARK: ✅ UINT 8 CLAMPED ARRAY
 
 const uint8ClampedArrayBuiltin: Builtins = {
-  ...inheritTypedArray('Uint8ClampedArray', 'Uint8ClampedArray'),
+  ...inheritTypedArray("Uint8ClampedArray", "Uint8ClampedArray"),
 };
 
 // MARK: ✅ ARRAY BUFFER
 const arrayBufferBuiltin: Builtins = {
-  ...inheritFunction('ArrayBuffer'),
-  ['ArrayBuffer.new']: {
-    type: 'Constructor',
-    params: [['byteLength', num()]],
+  ...inheritFunction("ArrayBuffer"),
+  ["ArrayBuffer.new"]: {
+    type: "Constructor",
+    params: [["byteLength", num()]],
     returns: arrBuff(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['ArrayBuffer.isView']: {
-    type: 'StaticMethod',
-    params: [['arg', any()]],
+  ["ArrayBuffer.isView"]: {
+    type: "StaticMethod",
+    params: [["arg", any()]],
     returns: bool(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
   // TODO: Enable when ArrayBuffer.prototype.resize is available in Deno.
   // ['ArrayBuffer.prototype.resize']: {
@@ -1209,11 +1214,11 @@ const arrayBufferBuiltin: Builtins = {
   //   returnValue: bool(),
   //   inheritedFrom: [BuiltinObject.Function],
   // },
-  ['ArrayBuffer.prototype.slice']: {
-    type: 'InstanceMethod',
-    params: [['begin', num()], ['end?', num()]],
+  ["ArrayBuffer.prototype.slice"]: {
+    type: "InstanceMethod",
+    params: [["begin", num()], ["end?", num()]],
     returns: arrBuff(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
   // TODO: Enable when ArrayBuffer.prototype.transfer is available in Deno.
   // ['ArrayBuffer.prototype.transfer']: {
@@ -1229,11 +1234,11 @@ const arrayBufferBuiltin: Builtins = {
   //   returnValue: arrBuff(),
   //   inheritedFrom: [BuiltinObject.Function],
   // },
-  ['ArrayBuffer.prototype.byteLength']: {
-    type: 'InstanceProperty',
+  ["ArrayBuffer.prototype.byteLength"]: {
+    type: "InstanceProperty",
     params: [],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
   // TODO: Enable when ArrayBuffer.prototype.transfer is available in Deno.
   // ['ArrayBuffer.detached']: {
@@ -1261,139 +1266,139 @@ const arrayBufferBuiltin: Builtins = {
 // MARK: ✅ ATOMICS
 
 const atomicsBuiltin: Builtins = {
-  ['Atomics.add']: {
-    type: 'StaticMethod',
+  ["Atomics.add"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['value', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["value", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.and']: {
-    type: 'StaticMethod',
+  ["Atomics.and"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['value', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["value", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.compareExchange']: {
-    type: 'StaticMethod',
+  ["Atomics.compareExchange"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['expectedValue', num()],
-      ['replacementValue', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["expectedValue", num()],
+      ["replacementValue", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.exchange']: {
-    type: 'StaticMethod',
+  ["Atomics.exchange"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['value', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["value", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.isLockFree']: {
-    type: 'StaticMethod',
+  ["Atomics.isLockFree"]: {
+    type: "StaticMethod",
     params: [
-      ['size', num()],
+      ["size", num()],
     ],
     returns: bool(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.load']: {
-    type: 'StaticMethod',
+  ["Atomics.load"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.notify']: {
-    type: 'StaticMethod',
+  ["Atomics.notify"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['count?', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["count?", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.or']: {
-    type: 'StaticMethod',
+  ["Atomics.or"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['value', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["value", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.store']: {
-    type: 'StaticMethod',
+  ["Atomics.store"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['value', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["value", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.sub']: {
-    type: 'StaticMethod',
+  ["Atomics.sub"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['value', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["value", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.wait']: {
-    type: 'StaticMethod',
+  ["Atomics.wait"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['value', num()],
-      ['timeout?', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["value", num()],
+      ["timeout?", num()],
     ],
     returns: str(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.waitAsync']: {
-    type: 'StaticMethod',
+  ["Atomics.waitAsync"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['value', num()],
-      ['timeout?', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["value", num()],
+      ["timeout?", num()],
     ],
     returns: or(
       obj(),
       bool(),
       str(),
     ),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Atomics.xor']: {
-    type: 'StaticMethod',
+  ["Atomics.xor"]: {
+    type: "StaticMethod",
     params: [
-      ['typedArray', typedArr()],
-      ['index', num()],
-      ['value', num()],
+      ["typedArray", typedArr()],
+      ["index", num()],
+      ["value", num()],
     ],
     returns: num(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
   // ['Atomics[Symbol.toStringTag]']: {
   //   type: DefinitionType.StaticMethod,
@@ -1406,12 +1411,12 @@ const atomicsBuiltin: Builtins = {
 // MARK: ✅ BIGINT
 
 const bigintBuiltin: Builtins = {
-  ...inheritFunction('BigInt'),
-  ['BigInt']: {
-    type: 'Constructor',
+  ...inheritFunction("BigInt"),
+  ["BigInt"]: {
+    type: "Constructor",
     params: [
       [
-        'value',
+        "value",
         or(
           bigInt(),
           bool(),
@@ -1420,257 +1425,257 @@ const bigintBuiltin: Builtins = {
       ],
     ],
     returns: bigInt(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['BigInt.asIntN']: {
-    type: 'StaticMethod',
+  ["BigInt.asIntN"]: {
+    type: "StaticMethod",
     params: [
-      ['bits', num()],
-      ['int', bigInt()],
+      ["bits", num()],
+      ["int", bigInt()],
     ],
     returns: bigInt(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['BigInt.asUintN']: {
-    type: 'StaticMethod',
+  ["BigInt.asUintN"]: {
+    type: "StaticMethod",
     params: [
-      ['bits', num()],
-      ['int', bigInt()],
+      ["bits", num()],
+      ["int", bigInt()],
     ],
     returns: bigInt(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
 };
 
 // MARK: ✅ BOOLEAN
 
 const booleanBuiltin: Builtins = {
-  ...inheritFunction('Boolean'),
-  ['Boolean']: {
-    type: 'Constructor',
-    params: [['value?', any()]],
+  ...inheritFunction("Boolean"),
+  ["Boolean"]: {
+    type: "Constructor",
+    params: [["value?", any()]],
     returns: bool(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
-  ['Boolean.new']: {
-    type: 'Constructor',
-    params: [['value?', any()]],
+  ["Boolean.new"]: {
+    type: "Constructor",
+    params: [["value?", any()]],
     returns: bool(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
 };
 
 // MARK: ✅ DATA VIEW
 
 const dataViewBuiltin: Builtins = {
-  ...inheritFunction('DataView'),
+  ...inheritFunction("DataView"),
 
   [`DataView.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
-      ['buffer', arrBuff()], // TODO: add `& { BYTES_PER_ELEMENT?: never }`
-      ['byteOffset?', num()],
-      ['byteLength?', num()],
+      ["buffer", arrBuff()], // TODO: add `& { BYTES_PER_ELEMENT?: never }`
+      ["byteOffset?", num()],
+      ["byteLength?", num()],
     ],
-    returns: ctor('DataView'),
+    returns: ctor("DataView"),
     inherits: [],
   },
-  ['DataView.prototype.getBigInt64']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.getBigInt64"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['littleEndian?', bool()],
-    ],
-    returns: bigInt(),
-    inherits: [],
-  },
-  ['DataView.prototype.getBigUint64']: {
-    type: 'InstanceMethod',
-    params: [
-      ['byteOffset', num()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["littleEndian?", bool()],
     ],
     returns: bigInt(),
     inherits: [],
   },
-  ['DataView.prototype.getFloat32']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.getBigUint64"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["littleEndian?", bool()],
+    ],
+    returns: bigInt(),
+    inherits: [],
+  },
+  ["DataView.prototype.getFloat32"]: {
+    type: "InstanceMethod",
+    params: [
+      ["byteOffset", num()],
+      ["littleEndian?", bool()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['DataView.prototype.getFloat64']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.getFloat64"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["littleEndian?", bool()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['DataView.prototype.getInt16']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.getInt16"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["littleEndian?", bool()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['DataView.prototype.getInt32']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.getInt32"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["littleEndian?", bool()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['DataView.prototype.getInt8']: {
-    type: 'InstanceMethod',
-    params: [['byteOffset', num()]],
+  ["DataView.prototype.getInt8"]: {
+    type: "InstanceMethod",
+    params: [["byteOffset", num()]],
     returns: num(),
     inherits: [],
   },
-  ['DataView.prototype.getUint16']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.getUint16"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['littleEndian?', bool()],
-    ],
-    returns: num(),
-    inherits: [],
-  },
-  ['DataView.prototype.getUint32']: {
-    type: 'InstanceMethod',
-    params: [
-      ['byteOffset', num()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["littleEndian?", bool()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['DataView.prototype.getUint8']: {
-    type: 'InstanceMethod',
-    params: [['byteOffset', num()]],
+  ["DataView.prototype.getUint32"]: {
+    type: "InstanceMethod",
+    params: [
+      ["byteOffset", num()],
+      ["littleEndian?", bool()],
+    ],
     returns: num(),
     inherits: [],
   },
-  ['DataView.prototype.setBigInt64']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.getUint8"]: {
+    type: "InstanceMethod",
+    params: [["byteOffset", num()]],
+    returns: num(),
+    inherits: [],
+  },
+  ["DataView.prototype.setBigInt64"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', bigInt()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["value", bigInt()],
+      ["littleEndian?", bool()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.setBigUint64']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.setBigUint64"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', bigInt()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["value", bigInt()],
+      ["littleEndian?", bool()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.setFloat32']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.setFloat32"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', bigInt()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["value", bigInt()],
+      ["littleEndian?", bool()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.setFloat64']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.setFloat64"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', bigInt()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["value", bigInt()],
+      ["littleEndian?", bool()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.setInt16']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.setInt16"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', bigInt()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["value", bigInt()],
+      ["littleEndian?", bool()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.setInt32']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.setInt32"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', bigInt()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["value", bigInt()],
+      ["littleEndian?", bool()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.setInt8']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.setInt8"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', bigInt()],
+      ["byteOffset", num()],
+      ["value", bigInt()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.setUint16']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.setUint16"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', bigInt()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["value", bigInt()],
+      ["littleEndian?", bool()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.setUint32']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.setUint32"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', bigInt()],
-      ['littleEndian?', bool()],
+      ["byteOffset", num()],
+      ["value", bigInt()],
+      ["littleEndian?", bool()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.setUint8']: {
-    type: 'InstanceMethod',
+  ["DataView.prototype.setUint8"]: {
+    type: "InstanceMethod",
     params: [
-      ['byteOffset', num()],
-      ['value', num()],
+      ["byteOffset", num()],
+      ["value", num()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['DataView.prototype.buffer']: {
-    type: 'InstanceProperty',
+  ["DataView.prototype.buffer"]: {
+    type: "InstanceProperty",
     params: [],
     returns: arrBuff(),
     inherits: [],
   },
-  ['DataView.prototype.byteLength']: {
-    type: 'InstanceProperty',
+  ["DataView.prototype.byteLength"]: {
+    type: "InstanceProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['DataView.prototype.byteOffset']: {
-    type: 'InstanceProperty',
+  ["DataView.prototype.byteOffset"]: {
+    type: "InstanceProperty",
     params: [],
     returns: num(),
     inherits: [],
@@ -1680,340 +1685,340 @@ const dataViewBuiltin: Builtins = {
 // MARK: ✅ DATE
 
 const dateBuiltin: Builtins = {
-  ...inheritFunction('Date'),
+  ...inheritFunction("Date"),
 
   [`Date`]: [
     {
-      type: 'Constructor',
+      type: "Constructor",
       params: [],
-      returns: ctor('Date'),
+      returns: ctor("Date"),
       inherits: [],
     },
   ],
   [`Date.new`]: [
     {
-      type: 'Constructor',
+      type: "Constructor",
       params: [],
-      returns: ctor('Date'),
+      returns: ctor("Date"),
       inherits: [],
     },
     {
-      type: 'Constructor',
-      params: [['value', or(num(), str())]],
-      returns: ctor('Date'),
+      type: "Constructor",
+      params: [["value", or(num(), str())]],
+      returns: ctor("Date"),
       inherits: [],
     },
     {
-      type: 'Constructor',
+      type: "Constructor",
       params: [
-        ['year', num()],
-        ['monthIndex', num()],
-        ['date?', num()],
-        ['hours?', num()],
-        ['minutes?', num()],
-        ['seconds?', num()],
-        ['ms?', num()],
+        ["year", num()],
+        ["monthIndex", num()],
+        ["date?", num()],
+        ["hours?", num()],
+        ["minutes?", num()],
+        ["seconds?", num()],
+        ["ms?", num()],
       ],
-      returns: ctor('Date'),
+      returns: ctor("Date"),
       inherits: [],
     },
   ],
-  ['Date.now']: {
-    type: 'StaticMethod',
+  ["Date.now"]: {
+    type: "StaticMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.parse']: {
-    type: 'StaticMethod',
-    params: [['dateString', str()]],
+  ["Date.parse"]: {
+    type: "StaticMethod",
+    params: [["dateString", str()]],
     returns: num(),
     inherits: [],
   },
-  ['Date.UTC']: {
-    type: 'StaticMethod',
+  ["Date.UTC"]: {
+    type: "StaticMethod",
     params: [
-      ['year', num()],
-      ['month', num()],
-      ['date?', num()],
-      ['hours?', num()],
-      ['minutes?', num()],
-      ['seconds?', num()],
-      ['ms?', num()],
+      ["year", num()],
+      ["month", num()],
+      ["date?", num()],
+      ["hours?", num()],
+      ["minutes?", num()],
+      ["seconds?", num()],
+      ["ms?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getDate']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getDate"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getDay']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getDay"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getFullYear']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getFullYear"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getHours']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getHours"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getMilliseconds']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getMilliseconds"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getMinutes']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getMinutes"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getMonth']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getMonth"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getSeconds']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getSeconds"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getTime']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getTime"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getTimezoneOffset']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getTimezoneOffset"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getUTCDate']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getUTCDate"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getUTCDay']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getUTCDay"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getUTCFullYear']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getUTCFullYear"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getUTCHours']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getUTCHours"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getUTCMilliseconds']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getUTCMilliseconds"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getUTCMinutes']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getUTCMinutes"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getUTCMonth']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getUTCMonth"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.getUTCSeconds']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.getUTCSeconds"]: {
+    type: "InstanceMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setDate']: {
-    type: 'InstanceMethod',
-    params: [['date', num()]],
+  ["Date.prototype.setDate"]: {
+    type: "InstanceMethod",
+    params: [["date", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setFullYear']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setFullYear"]: {
+    type: "InstanceMethod",
     params: [
-      ['year', num()],
-      ['month?', num()],
-      ['date?', num()],
+      ["year", num()],
+      ["month?", num()],
+      ["date?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setHours']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setHours"]: {
+    type: "InstanceMethod",
     params: [
-      ['hours', num()],
-      ['min?', num()],
-      ['sec?', num()],
-      ['ms?', num()],
+      ["hours", num()],
+      ["min?", num()],
+      ["sec?", num()],
+      ["ms?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setMilliseconds']: {
-    type: 'InstanceMethod',
-    params: [['ms', num()]],
+  ["Date.prototype.setMilliseconds"]: {
+    type: "InstanceMethod",
+    params: [["ms", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setMinutes']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setMinutes"]: {
+    type: "InstanceMethod",
     params: [
-      ['min', num()],
-      ['sec?', num()],
-      ['ms?', num()],
+      ["min", num()],
+      ["sec?", num()],
+      ["ms?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setMonth']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setMonth"]: {
+    type: "InstanceMethod",
     params: [
-      ['month', num()],
-      ['date?', num()],
+      ["month", num()],
+      ["date?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setSeconds']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setSeconds"]: {
+    type: "InstanceMethod",
     params: [
-      ['sec', num()],
-      ['ms?', num()],
+      ["sec", num()],
+      ["ms?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setTime']: {
-    type: 'InstanceMethod',
-    params: [['time', num()]],
+  ["Date.prototype.setTime"]: {
+    type: "InstanceMethod",
+    params: [["time", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setUTCDate']: {
-    type: 'InstanceMethod',
-    params: [['date', num()]],
+  ["Date.prototype.setUTCDate"]: {
+    type: "InstanceMethod",
+    params: [["date", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setUTCFullYear']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setUTCFullYear"]: {
+    type: "InstanceMethod",
     params: [
-      ['year', num()],
-      ['month?', num()],
-      ['date?', num()],
+      ["year", num()],
+      ["month?", num()],
+      ["date?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setUTCHours']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setUTCHours"]: {
+    type: "InstanceMethod",
     params: [
-      ['hours', num()],
-      ['min?', num()],
-      ['sec?', num()],
-      ['ms?', num()],
+      ["hours", num()],
+      ["min?", num()],
+      ["sec?", num()],
+      ["ms?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setUTCMilliseconds']: {
-    type: 'InstanceMethod',
-    params: [['ms', num()]],
+  ["Date.prototype.setUTCMilliseconds"]: {
+    type: "InstanceMethod",
+    params: [["ms", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setUTCMinutes']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setUTCMinutes"]: {
+    type: "InstanceMethod",
     params: [
-      ['min', num()],
-      ['sec?', num()],
-      ['ms?', num()],
+      ["min", num()],
+      ["sec?", num()],
+      ["ms?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setUTCMonth']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setUTCMonth"]: {
+    type: "InstanceMethod",
     params: [
-      ['month', num()],
-      ['date?', num()],
+      ["month", num()],
+      ["date?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.setUTCSeconds']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.setUTCSeconds"]: {
+    type: "InstanceMethod",
     params: [
-      ['sec', num()],
-      ['ms?', num()],
+      ["sec", num()],
+      ["ms?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Date.prototype.toDateString']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.toDateString"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Date.prototype.toISOString']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.toISOString"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Date.prototype.toJSON']: {
-    type: 'InstanceMethod',
-    params: [['key?', any()]],
+  ["Date.prototype.toJSON"]: {
+    type: "InstanceMethod",
+    params: [["key?", any()]],
     returns: str(),
     inherits: [],
   },
-  ['Date.prototype.toLocaleDateString']: [
+  ["Date.prototype.toLocaleDateString"]: [
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [],
       returns: str(),
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
         [
-          'locales?',
+          "locales?",
           or(str(), arr(str())),
         ],
         [
-          'options?',
+          "options?",
           obj(
             str(),
             or(
@@ -2028,15 +2033,15 @@ const dateBuiltin: Builtins = {
       inherits: [],
     },
   ],
-  ['Date.prototype.toLocaleString']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.toLocaleString"]: {
+    type: "InstanceMethod",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2050,15 +2055,15 @@ const dateBuiltin: Builtins = {
     returns: str(),
     inherits: [],
   },
-  ['Date.prototype.toLocaleTimeString']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.toLocaleTimeString"]: {
+    type: "InstanceMethod",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2072,42 +2077,42 @@ const dateBuiltin: Builtins = {
     returns: str(),
     inherits: [],
   },
-  ['Date.prototype.toTimeString']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.toTimeString"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Date.prototype.toUTCString']: {
-    type: 'InstanceMethod',
+  ["Date.prototype.toUTCString"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Date.prototype[Symbol.toPrimitive]']: {
-    type: 'InstanceMethod',
-    params: [['hint', str()]],
+  ["Date.prototype[Symbol.toPrimitive]"]: {
+    type: "InstanceMethod",
+    params: [["hint", str()]],
     returns: or(num(), str()),
     inherits: [],
   },
   // Override Function
   [`Date.bind`]: {
-    type: 'StaticMethod',
+    type: "StaticMethod",
     params: [
-      ['thisArg', any()],
+      ["thisArg", any()],
       // ['...argArray', arr()]
     ],
     returns: any(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
   [`Date.call`]: {
-    type: 'StaticMethod',
+    type: "StaticMethod",
     params: [
-      ['thisArg', any()],
+      ["thisArg", any()],
       // ['...argArray', arr()]
     ],
     returns: any(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
 };
 
@@ -2118,40 +2123,40 @@ function inheritError(name: string, arrayType: BaseObjects): Builtins {
     ...inheritFunction(name),
 
     [`${name}`]: {
-      type: 'Constructor',
-      params: [['message?', str()]],
+      type: "Constructor",
+      params: [["message?", str()]],
       returns: ctor(arrayType),
-      inherits: ['Error'],
+      inherits: ["Error"],
     },
     [`${name}.new`]: {
-      type: 'Constructor',
-      params: [['message?', str()]],
+      type: "Constructor",
+      params: [["message?", str()]],
       returns: ctor(arrayType),
-      inherits: ['Error'],
+      inherits: ["Error"],
     },
     [`${name}.prototype.message`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: str(),
-      inherits: ['Error'],
+      inherits: ["Error"],
     },
     [`${name}.prototype.name`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: str(),
-      inherits: ['Error'],
+      inherits: ["Error"],
     },
     [`${name}.prototype.cause`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: any(),
-      inherits: ['Error'],
+      inherits: ["Error"],
     },
     [`${name}.prototype.stack`]: {
-      type: 'InstanceProperty',
+      type: "InstanceProperty",
       params: [],
       returns: str(),
-      inherits: ['Error'],
+      inherits: ["Error"],
     },
   };
   return builtIn;
@@ -2160,16 +2165,16 @@ function inheritError(name: string, arrayType: BaseObjects): Builtins {
 // MARK: ✅ ERROR
 
 const errorBuiltin: Builtins = {
-  ...inheritError('Error', 'Error'),
+  ...inheritError("Error", "Error"),
 };
 
 // MARK: ✅ AGGREGATE ERROR
 
 const aggregateErrorBuiltin: Builtins = {
-  ...inheritError('AggregateError', 'AggregateError'),
+  ...inheritError("AggregateError", "AggregateError"),
 
   [`AggregateError.prototype.errors`]: {
-    type: 'InstanceProperty',
+    type: "InstanceProperty",
     params: [],
     returns: arr(),
     inherits: [],
@@ -2179,64 +2184,64 @@ const aggregateErrorBuiltin: Builtins = {
 // MARK: ✅ EVAL ERROR
 
 const evalErrorBuiltin: Builtins = {
-  ...inheritError('EvalError', 'EvalError'),
+  ...inheritError("EvalError", "EvalError"),
 };
 
 // MARK: ✅ RANGE ERROR
 
 const rangeErrorBuiltin: Builtins = {
-  ...inheritError('RangeError', 'RangeError'),
+  ...inheritError("RangeError", "RangeError"),
 };
 
 // MARK: ✅ REFERENCE ERROR
 
 const referenceErrorBuiltin: Builtins = {
-  ...inheritError('ReferenceError', 'ReferenceError'),
+  ...inheritError("ReferenceError", "ReferenceError"),
 };
 
 // MARK: ✅ SYNTAX ERROR
 
 const syntaxErrorBuiltin: Builtins = {
-  ...inheritError('SyntaxError', 'SyntaxError'),
+  ...inheritError("SyntaxError", "SyntaxError"),
 };
 
 // MARK: ✅ TYPE ERROR
 
 const typeErrorBuiltin: Builtins = {
-  ...inheritError('TypeError', 'TypeError'),
+  ...inheritError("TypeError", "TypeError"),
 };
 
 // MARK: ✅ URI ERROR
 
 const uriErrorBuiltin: Builtins = {
-  ...inheritError('URIError', 'URIError'),
+  ...inheritError("URIError", "URIError"),
 };
 
 // MARK: ✅ FINALIZATION REG.
 
 const finalizationRegistryBuiltin: Builtins = {
-  ...inheritFunction('FinalizationRegistry'),
+  ...inheritFunction("FinalizationRegistry"),
 
-  ['FinalizationRegistry.new']: {
-    type: 'Constructor',
-    params: [['cleanupCallback', fn()]], // (heldValue: any) => void,
+  ["FinalizationRegistry.new"]: {
+    type: "Constructor",
+    params: [["cleanupCallback", fn()]], // (heldValue: any) => void,
     returns: any(),
     inherits: [],
   },
-  ['FinalizationRegistry.prototype.register']: {
-    type: 'InstanceMethod',
+  ["FinalizationRegistry.prototype.register"]: {
+    type: "InstanceMethod",
     params: [
-      ['target', or(sym(), obj())],
-      ['heldValue', any()],
-      ['unregisterToken?', or(sym(), obj())],
+      ["target", or(sym(), obj())],
+      ["heldValue", any()],
+      ["unregisterToken?", or(sym(), obj())],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['FinalizationRegistry.prototype.unregister']: {
-    type: 'InstanceMethod',
+  ["FinalizationRegistry.prototype.unregister"]: {
+    type: "InstanceMethod",
     params: [[
-      'unregisterToken',
+      "unregisterToken",
       or(sym(), obj()),
     ]],
     returns: bool(),
@@ -2247,18 +2252,18 @@ const finalizationRegistryBuiltin: Builtins = {
 // MARK: ✅ INTL
 
 const intlBuiltin: Builtins = {
-  ['Intl.getCanonicalLocales']: {
-    type: 'InstanceMethod',
+  ["Intl.getCanonicalLocales"]: {
+    type: "InstanceMethod",
     params: [[
-      'locale?',
+      "locale?",
       or(str(), arr(str())),
     ]],
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.supportedValuesOf']: {
-    type: 'InstanceMethod',
-    params: [['key', str()]],
+  ["Intl.supportedValuesOf"]: {
+    type: "InstanceMethod",
+    params: [["key", str()]],
     returns: arr(str()),
     inherits: [],
   },
@@ -2267,31 +2272,31 @@ const intlBuiltin: Builtins = {
 // MARK: ✅ INTL COLLATOR
 
 const intlCollatorBuiltin: Builtins = {
-  ...inheritFunction('Intl.Collator'),
+  ...inheritFunction("Intl.Collator"),
 
   [`Intl.Collator`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [],
-    returns: ctor('Intl.Collator'),
+    returns: ctor("Intl.Collator"),
     inherits: [],
   },
   [`Intl.Collator.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [],
-    returns: ctor('Intl.Collator'),
+    returns: ctor("Intl.Collator"),
     inherits: [],
   },
-  ['Intl.Collator.prototype.compare']: {
-    type: 'InstanceMethod',
+  ["Intl.Collator.prototype.compare"]: {
+    type: "InstanceMethod",
     params: [
-      ['x', str()],
-      ['y', str()],
+      ["x", str()],
+      ["y", str()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Intl.Collator.prototype.resolvedOptions']: {
-    type: 'InstanceMethod',
+  ["Intl.Collator.prototype.resolvedOptions"]: {
+    type: "InstanceMethod",
     params: [],
     returns: obj(
       str(),
@@ -2299,25 +2304,25 @@ const intlCollatorBuiltin: Builtins = {
     ), // ResolvedCollatorOptions
     inherits: [],
   },
-  ['Intl.Collator.supportedLocalesOf']: [
+  ["Intl.Collator.supportedLocalesOf"]: [
     {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [[
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ]],
       returns: arr(str()),
       inherits: [],
     },
     {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [
         [
-          'locales?',
+          "locales?",
           or(str(), arr(str())),
         ],
         [
-          'options',
+          "options",
           obj(
             str(),
             or(
@@ -2337,17 +2342,17 @@ const intlCollatorBuiltin: Builtins = {
 // MARK: ✅ INTL DATETIME FORMAT
 
 const intlDateTimeFormatBuiltin: Builtins = {
-  ...inheritFunction('Intl.DateTimeFormat'),
+  ...inheritFunction("Intl.DateTimeFormat"),
 
   [`Intl.DateTimeFormat`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2358,18 +2363,18 @@ const intlDateTimeFormatBuiltin: Builtins = {
         ),
       ],
     ],
-    returns: ctor('Intl.DateTimeFormat'),
+    returns: ctor("Intl.DateTimeFormat"),
     inherits: [],
   },
   [`Intl.DateTimeFormat.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2380,27 +2385,27 @@ const intlDateTimeFormatBuiltin: Builtins = {
         ),
       ],
     ],
-    returns: ctor('Intl.DateTimeFormat'),
+    returns: ctor("Intl.DateTimeFormat"),
     inherits: [],
   },
-  ['Intl.DateTimeFormat.supportedLocalesOf']: {
-    type: 'StaticMethod',
+  ["Intl.DateTimeFormat.supportedLocalesOf"]: {
+    type: "StaticMethod",
     params: [
       [
-        'locales',
+        "locales",
         or(
           str(),
-          ctor('Intl.Locale'),
+          ctor("Intl.Locale"),
           arr(
             or(
               str(),
-              ctor('Intl.Locale'),
+              ctor("Intl.Locale"),
             ),
           ),
         ),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2414,58 +2419,58 @@ const intlDateTimeFormatBuiltin: Builtins = {
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.DateTimeFormat.prototype.format']: {
-    type: 'InstanceMethod',
+  ["Intl.DateTimeFormat.prototype.format"]: {
+    type: "InstanceMethod",
     params: [[
-      'date?',
+      "date?",
       or(
-        ctor('Date'),
+        ctor("Date"),
         num(),
       ),
     ]],
     returns: str(),
     inherits: [],
   },
-  ['Intl.DateTimeFormat.prototype.formatRange']: {
-    type: 'InstanceMethod',
+  ["Intl.DateTimeFormat.prototype.formatRange"]: {
+    type: "InstanceMethod",
     params: [
       [
-        'startDate',
+        "startDate",
         or(
-          ctor('Date'),
+          ctor("Date"),
           num(),
-          ctor('BigInt'),
+          ctor("BigInt"),
         ),
       ],
       [
-        'endDate',
+        "endDate",
         or(
-          ctor('Date'),
+          ctor("Date"),
           num(),
-          ctor('BigInt'),
+          ctor("BigInt"),
         ),
       ],
     ],
     returns: str(),
     inherits: [],
   },
-  ['Intl.DateTimeFormat.prototype.formatRangeToParts']: {
-    type: 'InstanceMethod',
+  ["Intl.DateTimeFormat.prototype.formatRangeToParts"]: {
+    type: "InstanceMethod",
     params: [
       [
-        'startDate',
+        "startDate",
         or(
-          ctor('Date'),
+          ctor("Date"),
           num(),
-          ctor('BigInt'),
+          ctor("BigInt"),
         ),
       ],
       [
-        'endDate',
+        "endDate",
         or(
-          ctor('Date'),
+          ctor("Date"),
           num(),
-          ctor('BigInt'),
+          ctor("BigInt"),
         ),
       ],
     ],
@@ -2475,12 +2480,12 @@ const intlDateTimeFormatBuiltin: Builtins = {
     ), // DateTimeRangeFormatPart
     inherits: [],
   },
-  ['Intl.DateTimeFormat.prototype.formatToParts']: {
-    type: 'InstanceMethod',
+  ["Intl.DateTimeFormat.prototype.formatToParts"]: {
+    type: "InstanceMethod",
     params: [[
-      'date?',
+      "date?",
       or(
-        ctor('Date'),
+        ctor("Date"),
         num(),
       ),
     ]],
@@ -2490,8 +2495,8 @@ const intlDateTimeFormatBuiltin: Builtins = {
     ), // interface DateTimeFormatPart
     inherits: [],
   },
-  ['Intl.DateTimeFormat.prototype.resolvedOptions']: {
-    type: 'InstanceMethod',
+  ["Intl.DateTimeFormat.prototype.resolvedOptions"]: {
+    type: "InstanceMethod",
     params: [],
     returns: obj(
       str(),
@@ -2504,116 +2509,116 @@ const intlDateTimeFormatBuiltin: Builtins = {
 // MARK: ✅ INTL DISPLAY NAMES
 
 const intlDisplayNamesBuiltin: Builtins = {
-  ...inheritFunction('Intl.DisplayNames'),
+  ...inheritFunction("Intl.DisplayNames"),
 
   [`Intl.DisplayNames.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales',
+        "locales",
         or(
           str(),
-          ctor('Intl.Locale'),
+          ctor("Intl.Locale"),
           arr(
             or(
               str(),
-              ctor('Intl.Locale'),
+              ctor("Intl.Locale"),
             ),
           ),
         ),
       ],
-      ['options?', obj(str(), str())], // DisplayNamesOptions
+      ["options?", obj(str(), str())], // DisplayNamesOptions
     ],
-    returns: ctor('Intl.DisplayNames'),
+    returns: ctor("Intl.DisplayNames"),
     inherits: [],
   },
-  ['Intl.DisplayNames.supportedLocalesOf']: {
-    type: 'StaticMethod',
+  ["Intl.DisplayNames.supportedLocalesOf"]: {
+    type: "StaticMethod",
     params: [
       [
-        'locales',
+        "locales",
         or(
           str(),
-          ctor('Intl.Locale'),
+          ctor("Intl.Locale"),
           arr(
             or(
               str(),
-              ctor('Intl.Locale'),
+              ctor("Intl.Locale"),
             ),
           ),
         ),
       ],
-      ['options?', obj(str(), str())],
+      ["options?", obj(str(), str())],
     ],
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.DisplayNames.prototype.of']: {
-    type: 'InstanceMethod',
-    params: [['code', str()]],
+  ["Intl.DisplayNames.prototype.of"]: {
+    type: "InstanceMethod",
+    params: [["code", str()]],
     returns: or(str(), undef()),
     inherits: [],
   },
-  ['Intl.DisplayNames.prototype.resolvedOptions']: {
-    type: 'InstanceMethod',
+  ["Intl.DisplayNames.prototype.resolvedOptions"]: {
+    type: "InstanceMethod",
     params: [],
     returns: obj(str(), str()), // ResolvedDisplayNamesOptions
     inherits: [],
   },
   // Intl.DisplayNames.call takes 3 arguments
   [`Intl.DisplayNames.call`]: {
-    type: 'StaticMethod',
+    type: "StaticMethod",
     params: [
-      ['thisArg', any()],
-      ['fnArg1', any()],
-      ['fnArg2', any()],
+      ["thisArg", any()],
+      ["fnArg1", any()],
+      ["fnArg2", any()],
     ],
     returns: any(),
-    inherits: ['Function'],
+    inherits: ["Function"],
   },
 };
 
 // MARK: ✅ INTL LIST FORMAT
 
 const intlListFormatBuiltin: Builtins = {
-  ...inheritFunction('Intl.ListFormat'),
+  ...inheritFunction("Intl.ListFormat"),
 
   [`Intl.ListFormat.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales',
+        "locales",
         or(
           str(),
-          ctor('Intl.Locale'),
+          ctor("Intl.Locale"),
           arr(
             or(
               str(),
-              ctor('Intl.Locale'),
+              ctor("Intl.Locale"),
             ),
           ),
         ),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(str(), undef()),
         ),
       ], // ListFormatOptions
     ],
-    returns: ctor('Intl.ListFormat'),
+    returns: ctor("Intl.ListFormat"),
     inherits: [],
   },
-  ['Intl.ListFormat.supportedLocalesOf']: {
-    type: 'StaticMethod',
+  ["Intl.ListFormat.supportedLocalesOf"]: {
+    type: "StaticMethod",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(str(), undef()),
@@ -2623,20 +2628,20 @@ const intlListFormatBuiltin: Builtins = {
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.ListFormat.prototype.format']: {
-    type: 'InstanceMethod',
-    params: [['list', arr(str())]],
+  ["Intl.ListFormat.prototype.format"]: {
+    type: "InstanceMethod",
+    params: [["list", arr(str())]],
     returns: str(),
     inherits: [],
   },
-  ['Intl.ListFormat.prototype.formatToParts']: {
-    type: 'InstanceMethod',
-    params: [['list', arr(str())]],
+  ["Intl.ListFormat.prototype.formatToParts"]: {
+    type: "InstanceMethod",
+    params: [["list", arr(str())]],
     returns: obj(str(), str()), // ListFormatPart
     inherits: [],
   },
-  ['Intl.ListFormat.prototype.resolvedOptions']: {
-    type: 'InstanceMethod',
+  ["Intl.ListFormat.prototype.resolvedOptions"]: {
+    type: "InstanceMethod",
     params: [],
     returns: obj(str(), str()), // ResolvedListFormatOptions
     inherits: [],
@@ -2646,122 +2651,122 @@ const intlListFormatBuiltin: Builtins = {
 // MARK: ✅ INTL LOCALE
 
 const intlLocaleBuiltin: Builtins = {
-  ...inheritFunction('Intl.Locale'),
+  ...inheritFunction("Intl.Locale"),
 
   // new (tag: UnicodeBCP47LocaleIdentifier | Locale, options?: LocaleOptions): Locale;
   [`Intl.Locale.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
-      ['tag', obj(str(), str())],
+      ["tag", obj(str(), str())],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(str(), bool()),
         ),
       ], // LocaleOptions
     ],
-    returns: ctor('Intl.Locale'),
+    returns: ctor("Intl.Locale"),
     inherits: [],
   },
-  ['Intl.Locale.prototype.getCalendars']: {
-    type: 'InstanceMethod',
+  ["Intl.Locale.prototype.getCalendars"]: {
+    type: "InstanceMethod",
     params: [],
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.Locale.prototype.getCollations']: {
-    type: 'InstanceMethod',
+  ["Intl.Locale.prototype.getCollations"]: {
+    type: "InstanceMethod",
     params: [],
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.Locale.prototype.getHourCycles']: {
-    type: 'InstanceMethod',
+  ["Intl.Locale.prototype.getHourCycles"]: {
+    type: "InstanceMethod",
     params: [],
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.Locale.prototype.getNumberingSystems']: {
-    type: 'InstanceMethod',
+  ["Intl.Locale.prototype.getNumberingSystems"]: {
+    type: "InstanceMethod",
     params: [],
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.Locale.prototype.getTimeZones']: {
-    type: 'InstanceMethod',
+  ["Intl.Locale.prototype.getTimeZones"]: {
+    type: "InstanceMethod",
     params: [],
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.Locale.prototype.maximize']: {
-    type: 'InstanceMethod',
+  ["Intl.Locale.prototype.maximize"]: {
+    type: "InstanceMethod",
     params: [],
-    returns: ctor('Intl.Locale'),
+    returns: ctor("Intl.Locale"),
     inherits: [],
   },
-  ['Intl.Locale.prototype.minimize']: {
-    type: 'InstanceMethod',
+  ["Intl.Locale.prototype.minimize"]: {
+    type: "InstanceMethod",
     params: [],
-    returns: ctor('Intl.Locale'),
+    returns: ctor("Intl.Locale"),
     inherits: [],
   },
-  ['Intl.Locale.prototype.baseName']: {
-    type: 'InstanceProperty',
-    params: [],
-    returns: str(),
-    inherits: [],
-  },
-  ['Intl.Locale.prototype.calendar']: {
-    type: 'InstanceProperty',
+  ["Intl.Locale.prototype.baseName"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Intl.Locale.prototype.caseFirst']: {
-    type: 'InstanceProperty',
+  ["Intl.Locale.prototype.calendar"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Intl.Locale.prototype.collation']: {
-    type: 'InstanceProperty',
+  ["Intl.Locale.prototype.caseFirst"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Intl.Locale.prototype.hourCycle']: {
-    type: 'InstanceProperty',
+  ["Intl.Locale.prototype.collation"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Intl.Locale.prototype.language']: {
-    type: 'InstanceProperty',
+  ["Intl.Locale.prototype.hourCycle"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Intl.Locale.prototype.numberingSystem']: {
-    type: 'InstanceProperty',
+  ["Intl.Locale.prototype.language"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Intl.Locale.prototype.numeric']: {
-    type: 'InstanceProperty',
+  ["Intl.Locale.prototype.numberingSystem"]: {
+    type: "InstanceProperty",
+    params: [],
+    returns: str(),
+    inherits: [],
+  },
+  ["Intl.Locale.prototype.numeric"]: {
+    type: "InstanceProperty",
     params: [],
     returns: bool(),
     inherits: [],
   },
-  ['Intl.Locale.prototype.region']: {
-    type: 'InstanceProperty',
+  ["Intl.Locale.prototype.region"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Intl.Locale.prototype.script']: {
-    type: 'InstanceProperty',
+  ["Intl.Locale.prototype.script"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
@@ -2771,17 +2776,17 @@ const intlLocaleBuiltin: Builtins = {
 // MARK: ✅ INTL NUMBER FORMAT
 
 const intlNumberFormatBuiltin: Builtins = {
-  ...inheritFunction('Intl.NumberFormat'),
+  ...inheritFunction("Intl.NumberFormat"),
 
   [`Intl.NumberFormat`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2793,18 +2798,18 @@ const intlNumberFormatBuiltin: Builtins = {
         ),
       ], // NumberFormatOptions
     ],
-    returns: ctor('Intl.NumberFormat'),
+    returns: ctor("Intl.NumberFormat"),
     inherits: [],
   },
   [`Intl.NumberFormat.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2816,18 +2821,18 @@ const intlNumberFormatBuiltin: Builtins = {
         ),
       ],
     ],
-    returns: ctor('Intl.NumberFormat'),
+    returns: ctor("Intl.NumberFormat"),
     inherits: [],
   },
-  ['Intl.NumberFormat.supportedLocalesOf']: {
-    type: 'StaticMethod',
+  ["Intl.NumberFormat.supportedLocalesOf"]: {
+    type: "StaticMethod",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2842,26 +2847,26 @@ const intlNumberFormatBuiltin: Builtins = {
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.NumberFormat.prototype.format']: {
-    type: 'InstanceMethod',
-    params: [['number', num()]],
+  ["Intl.NumberFormat.prototype.format"]: {
+    type: "InstanceMethod",
+    params: [["number", num()]],
     returns: str(),
     inherits: [],
   },
-  ['Intl.NumberFormat.prototype.formatRange']: {
-    type: 'InstanceMethod',
+  ["Intl.NumberFormat.prototype.formatRange"]: {
+    type: "InstanceMethod",
     params: [
-      ['startRange', num()],
-      ['endRange', num()],
+      ["startRange", num()],
+      ["endRange", num()],
     ],
     returns: str(),
     inherits: [],
   },
-  ['Intl.NumberFormat.prototype.formatRangeToParts']: {
-    type: 'InstanceMethod',
+  ["Intl.NumberFormat.prototype.formatRangeToParts"]: {
+    type: "InstanceMethod",
     params: [
-      ['startRange', num()],
-      ['endRange', num()],
+      ["startRange", num()],
+      ["endRange", num()],
     ],
     returns: obj(
       str(),
@@ -2869,16 +2874,16 @@ const intlNumberFormatBuiltin: Builtins = {
     ),
     inherits: [],
   },
-  ['Intl.NumberFormat.prototype.formatToParts']: {
-    type: 'InstanceMethod',
-    params: [['number', num()]],
+  ["Intl.NumberFormat.prototype.formatToParts"]: {
+    type: "InstanceMethod",
+    params: [["number", num()]],
     returns: arr(
       obj(str(), str()),
     ), // NumberFormatPart[]
     inherits: [],
   },
-  ['Intl.NumberFormat.prototype.resolvedOptions']: {
-    type: 'InstanceMethod',
+  ["Intl.NumberFormat.prototype.resolvedOptions"]: {
+    type: "InstanceMethod",
     params: [],
     returns: obj(
       str(),
@@ -2891,17 +2896,17 @@ const intlNumberFormatBuiltin: Builtins = {
 // MARK: ✅ INTL PLURAL RULES
 
 const intlPluralRulesBuiltin: Builtins = {
-  ...inheritFunction('Intl.PluralRules'),
+  ...inheritFunction("Intl.PluralRules"),
 
   [`Intl.PluralRules`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2912,18 +2917,18 @@ const intlPluralRulesBuiltin: Builtins = {
         ),
       ],
     ],
-    returns: ctor('Intl.PluralRules'),
+    returns: ctor("Intl.PluralRules"),
     inherits: [],
   },
   [`Intl.PluralRules.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2934,18 +2939,18 @@ const intlPluralRulesBuiltin: Builtins = {
         ),
       ],
     ],
-    returns: ctor('Intl.PluralRules'),
+    returns: ctor("Intl.PluralRules"),
     inherits: [],
   },
-  ['Intl.PluralRules.supportedLocalesOf']: {
-    type: 'StaticMethod',
+  ["Intl.PluralRules.supportedLocalesOf"]: {
+    type: "StaticMethod",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(
@@ -2959,23 +2964,23 @@ const intlPluralRulesBuiltin: Builtins = {
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.PluralRules.prototype.resolvedOptions']: {
-    type: 'InstanceMethod',
+  ["Intl.PluralRules.prototype.resolvedOptions"]: {
+    type: "InstanceMethod",
     params: [],
     returns: obj(str(), str()),
     inherits: [],
   },
-  ['Intl.PluralRules.prototype.select']: {
-    type: 'InstanceMethod',
-    params: [['number', num()]],
+  ["Intl.PluralRules.prototype.select"]: {
+    type: "InstanceMethod",
+    params: [["number", num()]],
     returns: str(),
     inherits: [],
   },
-  ['Intl.PluralRules.prototype.selectRange']: {
-    type: 'InstanceMethod',
+  ["Intl.PluralRules.prototype.selectRange"]: {
+    type: "InstanceMethod",
     params: [
-      ['startRange', num()],
-      ['endRange', num()],
+      ["startRange", num()],
+      ["endRange", num()],
     ],
     returns: str(),
     inherits: [],
@@ -2985,61 +2990,61 @@ const intlPluralRulesBuiltin: Builtins = {
 // MARK: ✅ INTL RELATIVE TIME FORMAT
 
 const intlRelativeTimeFormatBuiltin: Builtins = {
-  ...inheritFunction('Intl.RelativeTimeFormat'),
+  ...inheritFunction("Intl.RelativeTimeFormat"),
 
   [`Intl.RelativeTimeFormat.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
-      ['options?', obj(str(), str())],
+      ["options?", obj(str(), str())],
     ],
-    returns: ctor('Intl.RelativeTimeFormat'),
+    returns: ctor("Intl.RelativeTimeFormat"),
     inherits: [],
   },
-  ['Intl.RelativeTimeFormat.supportedLocalesOf']: {
-    type: 'StaticMethod',
+  ["Intl.RelativeTimeFormat.supportedLocalesOf"]: {
+    type: "StaticMethod",
     params: [
       [
-        'locales',
+        "locales",
         or(
           str(),
-          ctor('Intl.Locale'),
+          ctor("Intl.Locale"),
           arr(
             or(
               str(),
-              ctor('Intl.Locale'),
+              ctor("Intl.Locale"),
             ),
           ),
         ),
       ],
-      ['options?', obj(str(), str())],
+      ["options?", obj(str(), str())],
     ],
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.RelativeTimeFormat.prototype.format']: {
-    type: 'InstanceMethod',
+  ["Intl.RelativeTimeFormat.prototype.format"]: {
+    type: "InstanceMethod",
     params: [
-      ['value', num()],
-      ['unit', str()],
+      ["value", num()],
+      ["unit", str()],
     ],
     returns: str(),
     inherits: [],
   },
-  ['Intl.RelativeTimeFormat.prototype.formatToParts']: {
-    type: 'InstanceMethod',
+  ["Intl.RelativeTimeFormat.prototype.formatToParts"]: {
+    type: "InstanceMethod",
     params: [
-      ['value', num()],
-      ['unit', str()],
+      ["value", num()],
+      ["unit", str()],
     ],
     returns: obj(str(), str()),
     inherits: [],
   },
-  ['Intl.RelativeTimeFormat.prototype.resolvedOptions']: {
-    type: 'InstanceMethod',
+  ["Intl.RelativeTimeFormat.prototype.resolvedOptions"]: {
+    type: "InstanceMethod",
     params: [],
     returns: obj(str(), str()),
     inherits: [],
@@ -3049,44 +3054,44 @@ const intlRelativeTimeFormatBuiltin: Builtins = {
 // MARK: ✅ INTL SEGMENTER
 
 const intlSegmenterBuiltin: Builtins = {
-  ...inheritFunction('Intl.Segmenter'),
+  ...inheritFunction("Intl.Segmenter"),
 
   [`Intl.Segmenter.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
       [
-        'locales?',
+        "locales?",
         or(str(), arr(str())),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(str(), undef()),
         ),
       ],
     ],
-    returns: ctor('Intl.Segmenter'),
+    returns: ctor("Intl.Segmenter"),
     inherits: [],
   },
-  ['Intl.Segmenter.supportedLocalesOf']: {
-    type: 'StaticMethod',
+  ["Intl.Segmenter.supportedLocalesOf"]: {
+    type: "StaticMethod",
     params: [
       [
-        'locales',
+        "locales",
         or(
           str(),
-          ctor('Intl.Locale'),
+          ctor("Intl.Locale"),
           arr(
             or(
               str(),
-              ctor('Intl.Locale'),
+              ctor("Intl.Locale"),
             ),
           ),
         ),
       ],
       [
-        'options?',
+        "options?",
         obj(
           str(),
           or(str(), undef()),
@@ -3096,15 +3101,15 @@ const intlSegmenterBuiltin: Builtins = {
     returns: arr(str()),
     inherits: [],
   },
-  ['Intl.Segmenter.prototype.resolvedOptions']: {
-    type: 'InstanceMethod',
+  ["Intl.Segmenter.prototype.resolvedOptions"]: {
+    type: "InstanceMethod",
     params: [],
     returns: obj(str(), str()),
     inherits: [],
   },
-  ['Intl.Segmenter.prototype.segment']: {
-    type: 'InstanceMethod',
-    params: [['input', str()]],
+  ["Intl.Segmenter.prototype.segment"]: {
+    type: "InstanceMethod",
+    params: [["input", str()]],
     returns: arr(
       obj(str(), any()),
     ),
@@ -3115,21 +3120,21 @@ const intlSegmenterBuiltin: Builtins = {
 // MARK: ✅ JSON
 
 const jsonBuiltin: Builtins = {
-  ['JSON.parse']: {
-    type: 'StaticMethod',
+  ["JSON.parse"]: {
+    type: "StaticMethod",
     params: [
-      ['text', str()],
-      ['reviver?', fn()], // (key: string, value: any) => any
+      ["text", str()],
+      ["reviver?", fn()], // (key: string, value: any) => any
     ],
     returns: any(),
     inherits: [],
   },
-  ['JSON.stringify']: {
-    type: 'StaticMethod',
+  ["JSON.stringify"]: {
+    type: "StaticMethod",
     params: [
-      ['value', any()],
-      ['replacer?', fn()], // (key: string, value: any) => any
-      ['space?', or(str(), num())],
+      ["value", any()],
+      ["replacer?", fn()], // (key: string, value: any) => any
+      ["space?", or(str(), num())],
     ],
     returns: str(),
     inherits: [],
@@ -3139,20 +3144,20 @@ const jsonBuiltin: Builtins = {
 // MARK: ✅ MAP
 
 const mapBuiltin: Builtins = {
-  ...inheritFunction('Map'),
+  ...inheritFunction("Map"),
 
   [`Map.new`]: [
     {
-      type: 'Constructor',
+      type: "Constructor",
       params: [],
       returns: new ParamTypeTs.MapParam(any(), any()),
       inherits: [],
     },
     {
-      type: 'Constructor',
+      type: "Constructor",
       params: [
         [
-          'entries?',
+          "entries?",
           or(
             arr(
               tuple(str(), str()),
@@ -3161,76 +3166,76 @@ const mapBuiltin: Builtins = {
           ),
         ],
       ],
-      returns: ctor('Map'),
+      returns: ctor("Map"),
       inherits: [],
     },
   ],
-  ['Map.prototype.delete']: {
-    type: 'InstanceMethod',
-    params: [['key', any()]],
+  ["Map.prototype.delete"]: {
+    type: "InstanceMethod",
+    params: [["key", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Map.prototype.entries']: {
-    type: 'InstanceMethod',
+  ["Map.prototype.entries"]: {
+    type: "InstanceMethod",
     params: [],
     returns: iter(
       tuple(any(), any()),
     ),
     inherits: [],
   },
-  ['Map.prototype.forEach']: {
-    type: 'InstanceMethod',
+  ["Map.prototype.forEach"]: {
+    type: "InstanceMethod",
     params: [
-      ['callback', fn()], // (value: V, key: K, map: ReadonlyMap<K, V>) => void
-      ['thisArg?', any()],
+      ["callback", fn()], // (value: V, key: K, map: ReadonlyMap<K, V>) => void
+      ["thisArg?", any()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['Map.prototype.get']: {
-    type: 'InstanceMethod',
-    params: [['key', any()]],
+  ["Map.prototype.get"]: {
+    type: "InstanceMethod",
+    params: [["key", any()]],
     returns: any(),
     inherits: [],
   },
-  ['Map.prototype.has']: {
-    type: 'InstanceMethod',
-    params: [['key', any()]],
+  ["Map.prototype.has"]: {
+    type: "InstanceMethod",
+    params: [["key", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Map.prototype.keys']: {
-    type: 'InstanceMethod',
+  ["Map.prototype.keys"]: {
+    type: "InstanceMethod",
     params: [],
     returns: iter(any()),
     inherits: [],
   },
-  ['Map.prototype.set']: {
-    type: 'InstanceMethod',
+  ["Map.prototype.set"]: {
+    type: "InstanceMethod",
     params: [
-      ['key', any()],
-      ['value', any()],
+      ["key", any()],
+      ["value", any()],
     ],
-    returns: ctor('Map'),
+    returns: ctor("Map"),
     inherits: [],
   },
-  ['Map.prototype.values']: {
-    type: 'InstanceMethod',
+  ["Map.prototype.values"]: {
+    type: "InstanceMethod",
     params: [],
     returns: iter(any()),
     inherits: [],
   },
-  ['Map.prototype[Symbol.iterator]']: {
-    type: 'InstanceMethod',
+  ["Map.prototype[Symbol.iterator]"]: {
+    type: "InstanceMethod",
     params: [],
     returns: iter(
       tuple(any(), any()),
     ),
     inherits: [],
   },
-  ['Map.prototype.size']: {
-    type: 'InstanceProperty',
+  ["Map.prototype.size"]: {
+    type: "InstanceProperty",
     params: [],
     returns: num(),
     inherits: [],
@@ -3240,270 +3245,270 @@ const mapBuiltin: Builtins = {
 // MARK: ✅ MATH
 
 const mathBuiltin: Builtins = {
-  ['Math.abs']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.abs"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.acos']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.acos"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.acosh']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.acosh"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.asin']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.asin"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.asinh']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.asinh"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.atan']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.atan"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.atan2']: {
-    type: 'StaticMethod',
+  ["Math.atan2"]: {
+    type: "StaticMethod",
     params: [
-      ['y', num()],
-      ['x', num()],
+      ["y", num()],
+      ["x", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Math.atanh']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.atanh"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.cbrt']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.cbrt"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.ceil']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.ceil"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.clz32']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.clz32"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.cos']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.cos"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.cosh']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.cosh"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.exp']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.exp"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.expm1']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.expm1"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.floor']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.floor"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.fround']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.fround"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.hypot']: {
-    type: 'StaticMethod',
-    params: [['...values', arr(num())]],
+  ["Math.hypot"]: {
+    type: "StaticMethod",
+    params: [["...values", arr(num())]],
     returns: num(),
     inherits: [],
   },
-  ['Math.imul']: {
-    type: 'StaticMethod',
+  ["Math.imul"]: {
+    type: "StaticMethod",
     params: [
-      ['a', num()],
-      ['b', num()],
+      ["a", num()],
+      ["b", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Math.log']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.log"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.log10']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.log10"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.log1p']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.log1p"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.log2']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.log2"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.max']: {
-    type: 'StaticMethod',
-    params: [['...values', arr(num())]],
+  ["Math.max"]: {
+    type: "StaticMethod",
+    params: [["...values", arr(num())]],
     returns: num(),
     inherits: [],
   },
-  ['Math.min']: {
-    type: 'StaticMethod',
-    params: [['...values', arr(num())]],
+  ["Math.min"]: {
+    type: "StaticMethod",
+    params: [["...values", arr(num())]],
     returns: num(),
     inherits: [],
   },
-  ['Math.pow']: {
-    type: 'StaticMethod',
+  ["Math.pow"]: {
+    type: "StaticMethod",
     params: [
-      ['base', num()],
-      ['exponent', num()],
+      ["base", num()],
+      ["exponent", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['Math.random']: {
-    type: 'StaticMethod',
+  ["Math.random"]: {
+    type: "StaticMethod",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Math.round']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.round"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.sign']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.sign"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.sin']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.sin"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.sinh']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.sinh"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.sqrt']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.sqrt"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.tan']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.tan"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.tanh']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.tanh"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
-  ['Math.trunc']: {
-    type: 'StaticMethod',
-    params: [['x', num()]],
+  ["Math.trunc"]: {
+    type: "StaticMethod",
+    params: [["x", num()]],
     returns: num(),
     inherits: [],
   },
   // Map Static Properties
-  ['Math.E']: {
-    type: 'StaticProperty',
+  ["Math.E"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Math.LN10']: {
-    type: 'StaticProperty',
+  ["Math.LN10"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Math.LN2']: {
-    type: 'StaticProperty',
+  ["Math.LN2"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Math.LOG10E']: {
-    type: 'StaticProperty',
+  ["Math.LOG10E"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Math.LOG2E']: {
-    type: 'StaticProperty',
+  ["Math.LOG2E"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Math.PI']: {
-    type: 'StaticProperty',
+  ["Math.PI"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Math.SQRT1_2']: {
-    type: 'StaticProperty',
+  ["Math.SQRT1_2"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Math.SQRT2']: {
-    type: 'StaticProperty',
+  ["Math.SQRT2"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
@@ -3513,125 +3518,125 @@ const mathBuiltin: Builtins = {
 // MARK: ✅ NUMBER
 
 const numberBuiltin: Builtins = {
-  ...inheritFunction('Number'),
+  ...inheritFunction("Number"),
 
   [`Number`]: {
-    type: 'Constructor',
-    params: [['value', any()]],
+    type: "Constructor",
+    params: [["value", any()]],
     returns: num(),
     inherits: [],
   },
   [`Number.new`]: {
-    type: 'Constructor',
-    params: [['value', any()]],
+    type: "Constructor",
+    params: [["value", any()]],
     returns: num(),
     inherits: [],
   },
 
-  ['Number.isFinite']: {
-    type: 'StaticMethod',
-    params: [['value', any()]],
+  ["Number.isFinite"]: {
+    type: "StaticMethod",
+    params: [["value", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Number.isInteger']: {
-    type: 'StaticMethod',
-    params: [['value', any()]],
+  ["Number.isInteger"]: {
+    type: "StaticMethod",
+    params: [["value", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Number.isNaN']: {
-    type: 'StaticMethod',
-    params: [['value', any()]],
+  ["Number.isNaN"]: {
+    type: "StaticMethod",
+    params: [["value", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Number.isSafeInteger']: {
-    type: 'StaticMethod',
-    params: [['value', any()]],
+  ["Number.isSafeInteger"]: {
+    type: "StaticMethod",
+    params: [["value", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Number.parseFloat']: {
-    type: 'StaticMethod',
-    params: [['string', str()]],
+  ["Number.parseFloat"]: {
+    type: "StaticMethod",
+    params: [["string", str()]],
     returns: num(),
     inherits: [],
   },
-  ['Number.parseInt']: {
-    type: 'StaticMethod',
+  ["Number.parseInt"]: {
+    type: "StaticMethod",
     params: [
-      ['string', str()],
-      ['radix?', num()],
+      ["string", str()],
+      ["radix?", num()],
     ],
     returns: num(),
     inherits: [],
   },
   // Number Static properties
-  ['Number.EPSILON']: {
-    type: 'StaticProperty',
+  ["Number.EPSILON"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Number.MAX_SAFE_INTEGER']: {
-    type: 'StaticProperty',
+  ["Number.MAX_SAFE_INTEGER"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Number.MAX_VALUE']: {
-    type: 'StaticProperty',
+  ["Number.MAX_VALUE"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Number.MIN_SAFE_INTEGER']: {
-    type: 'StaticProperty',
+  ["Number.MIN_SAFE_INTEGER"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Number.MIN_VALUE']: {
-    type: 'StaticProperty',
+  ["Number.MIN_VALUE"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Number.NaN']: {
-    type: 'StaticProperty',
+  ["Number.NaN"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Number.NEGATIVE_INFINITY']: {
-    type: 'StaticProperty',
+  ["Number.NEGATIVE_INFINITY"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['Number.POSITIVE_INFINITY']: {
-    type: 'StaticProperty',
+  ["Number.POSITIVE_INFINITY"]: {
+    type: "StaticProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
   // Number Instance methods
-  ['Number.prototype.toExponential']: {
-    type: 'InstanceMethod',
-    params: [['fractionDigits?', num()]],
+  ["Number.prototype.toExponential"]: {
+    type: "InstanceMethod",
+    params: [["fractionDigits?", num()]],
     returns: str(),
     inherits: [],
   },
-  ['Number.prototype.toFixed']: {
-    type: 'InstanceMethod',
-    params: [['digits?', num()]],
+  ["Number.prototype.toFixed"]: {
+    type: "InstanceMethod",
+    params: [["digits?", num()]],
     returns: str(),
     inherits: [],
   },
-  ['Number.prototype.toPrecision']: {
-    type: 'InstanceMethod',
-    params: [['precision?', num()]],
+  ["Number.prototype.toPrecision"]: {
+    type: "InstanceMethod",
+    params: [["precision?", num()]],
     returns: str(),
     inherits: [],
   },
@@ -3641,32 +3646,32 @@ const numberBuiltin: Builtins = {
 
 const objectBuiltin: Builtins = {
   [`Object`]: {
-    type: 'Constructor',
-    params: [['value', any()]],
+    type: "Constructor",
+    params: [["value", any()]],
     returns: obj(),
     inherits: [],
   },
   [`Object.new`]: {
-    type: 'Constructor',
-    params: [['value', any()]],
+    type: "Constructor",
+    params: [["value", any()]],
     returns: obj(),
     inherits: [],
   },
-  ['Object.assign']: {
-    type: 'StaticMethod',
+  ["Object.assign"]: {
+    type: "StaticMethod",
     params: [
-      ['target', obj()],
-      ['...sources', arr(obj())],
+      ["target", obj()],
+      ["...sources", arr(obj())],
     ],
     returns: obj(),
     inherits: [],
   },
-  ['Object.create']: {
-    type: 'StaticMethod',
+  ["Object.create"]: {
+    type: "StaticMethod",
     params: [
-      ['o', or(obj(), nil())],
+      ["o", or(obj(), nil())],
       [
-        'properties',
+        "properties",
         obj(
           or(
             str(),
@@ -3680,12 +3685,12 @@ const objectBuiltin: Builtins = {
     returns: obj(),
     inherits: [],
   },
-  ['Object.defineProperties']: {
-    type: 'StaticMethod',
+  ["Object.defineProperties"]: {
+    type: "StaticMethod",
     params: [
-      ['o', any()],
+      ["o", any()],
       [
-        'properties',
+        "properties",
         obj(
           or(
             str(),
@@ -3699,23 +3704,23 @@ const objectBuiltin: Builtins = {
     returns: any(),
     inherits: [],
   },
-  ['Object.defineProperty']: {
-    type: 'StaticMethod',
+  ["Object.defineProperty"]: {
+    type: "StaticMethod",
     params: [
-      ['o', obj()],
+      ["o", obj()],
       [
-        'property',
+        "property",
         or(str(), num(), num()),
       ],
-      ['descriptor', obj()],
+      ["descriptor", obj()],
     ],
     returns: obj(),
     inherits: [],
   },
-  ['Object.entries']: {
-    type: 'StaticMethod',
+  ["Object.entries"]: {
+    type: "StaticMethod",
     params: [[
-      'o',
+      "o",
       or(
         obj(str(), any()),
         arr(),
@@ -3726,17 +3731,17 @@ const objectBuiltin: Builtins = {
     ),
     inherits: [],
   },
-  ['Object.freeze']: {
-    type: 'StaticMethod',
-    params: [['o', obj()]],
+  ["Object.freeze"]: {
+    type: "StaticMethod",
+    params: [["o", obj()]],
     returns: obj(),
     inherits: [],
   },
-  ['Object.fromEntries']: [
+  ["Object.fromEntries"]: [
     {
-      type: 'StaticMethod',
+      type: "StaticMethod",
       params: [[
-        'iterable',
+        "iterable",
         iter(
           tuple(
             or(
@@ -3750,53 +3755,53 @@ const objectBuiltin: Builtins = {
       inherits: [],
     },
     {
-      type: 'StaticMethod',
-      params: [['iterable', iter(arr(any()))]],
+      type: "StaticMethod",
+      params: [["iterable", iter(arr(any()))]],
       returns: obj(str(), any()),
       inherits: [],
     },
   ],
-  ['Object.getOwnPropertyDescriptor']: {
-    type: 'StaticMethod',
+  ["Object.getOwnPropertyDescriptor"]: {
+    type: "StaticMethod",
     params: [
-      ['o', obj()],
+      ["o", obj()],
       [
-        'p',
+        "p",
         or(str(), num(), num()),
       ],
     ],
     returns: obj(str(), any()),
     inherits: [],
   },
-  ['Object.getOwnPropertyDescriptors']: {
-    type: 'StaticMethod',
-    params: [['obj', obj()]],
+  ["Object.getOwnPropertyDescriptors"]: {
+    type: "StaticMethod",
+    params: [["obj", obj()]],
     returns: obj(),
     inherits: [],
   },
-  ['Object.getOwnPropertyNames']: {
-    type: 'StaticMethod',
-    params: [['o', any()]],
+  ["Object.getOwnPropertyNames"]: {
+    type: "StaticMethod",
+    params: [["o", any()]],
     returns: arr(str()),
     inherits: [],
   },
-  ['Object.getOwnPropertySymbols']: {
-    type: 'StaticMethod',
-    params: [['o', obj()]],
+  ["Object.getOwnPropertySymbols"]: {
+    type: "StaticMethod",
+    params: [["o", obj()]],
     returns: arr(sym()),
     inherits: [],
   },
-  ['Object.getPrototypeOf']: {
-    type: 'StaticMethod',
-    params: [['o', obj()]],
+  ["Object.getPrototypeOf"]: {
+    type: "StaticMethod",
+    params: [["o", obj()]],
     returns: obj(),
     inherits: [],
   },
-  ['Object.groupBy']: {
-    type: 'StaticMethod',
+  ["Object.groupBy"]: {
+    type: "StaticMethod",
     params: [
-      ['items', iter(any())],
-      ['keySelector', fn()], // (item: T, index: number) => K
+      ["items", iter(any())],
+      ["keySelector", fn()], // (item: T, index: number) => K
     ],
     returns: obj(
       any(),
@@ -3804,76 +3809,76 @@ const objectBuiltin: Builtins = {
     ),
     inherits: [],
   },
-  ['Object.hasOwn']: {
-    type: 'StaticMethod',
+  ["Object.hasOwn"]: {
+    type: "StaticMethod",
     params: [
-      ['o', obj()],
+      ["o", obj()],
       [
-        'v',
+        "v",
         or(str(), num(), num()),
       ],
     ],
     returns: bool(),
     inherits: [],
   },
-  ['Object.is']: {
-    type: 'StaticMethod',
+  ["Object.is"]: {
+    type: "StaticMethod",
     params: [
-      ['value1', any()],
-      ['value2', any()],
+      ["value1", any()],
+      ["value2", any()],
     ],
     returns: bool(),
     inherits: [],
   },
-  ['Object.isExtensible']: {
-    type: 'StaticMethod',
-    params: [['o', any()]],
+  ["Object.isExtensible"]: {
+    type: "StaticMethod",
+    params: [["o", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Object.isFrozen']: {
-    type: 'StaticMethod',
-    params: [['o', any()]],
+  ["Object.isFrozen"]: {
+    type: "StaticMethod",
+    params: [["o", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Object.isSealed']: {
-    type: 'StaticMethod',
-    params: [['o', any()]],
+  ["Object.isSealed"]: {
+    type: "StaticMethod",
+    params: [["o", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Object.keys']: {
-    type: 'StaticMethod',
-    params: [['o', obj()]],
+  ["Object.keys"]: {
+    type: "StaticMethod",
+    params: [["o", obj()]],
     returns: arr(str()),
     inherits: [],
   },
-  ['Object.preventExtensions']: {
-    type: 'StaticMethod',
-    params: [['o', any()]],
+  ["Object.preventExtensions"]: {
+    type: "StaticMethod",
+    params: [["o", any()]],
     returns: any(),
     inherits: [],
   },
-  ['Object.seal']: {
-    type: 'StaticMethod',
-    params: [['o', any()]],
+  ["Object.seal"]: {
+    type: "StaticMethod",
+    params: [["o", any()]],
     returns: any(),
     inherits: [],
   },
-  ['Object.setPrototypeOf']: {
-    type: 'StaticMethod',
+  ["Object.setPrototypeOf"]: {
+    type: "StaticMethod",
     params: [
-      ['o', any()],
-      ['proto', or(obj(), nil())],
+      ["o", any()],
+      ["proto", or(obj(), nil())],
     ],
     returns: any(),
     inherits: [],
   },
-  ['Object.values']: {
-    type: 'StaticMethod',
+  ["Object.values"]: {
+    type: "StaticMethod",
     params: [[
-      'o',
+      "o",
       or(
         obj(str(), any()),
         arr(),
@@ -3900,26 +3905,26 @@ const objectBuiltin: Builtins = {
   //   returnValue: bool(),
   //   inheritedFrom: [BuiltinObject.None],
   // },
-  ['Object.prototype.toLocaleString']: {
-    type: 'InstanceMethod',
+  ["Object.prototype.toLocaleString"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Object.prototype.toString']: {
-    type: 'InstanceMethod',
+  ["Object.prototype.toString"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['Object.prototype.valueOf']: {
-    type: 'InstanceMethod',
+  ["Object.prototype.valueOf"]: {
+    type: "InstanceMethod",
     params: [],
     returns: obj(),
     inherits: [],
   },
-  ['Object.prototype.constructor']: {
-    type: 'InstanceProperty',
+  ["Object.prototype.constructor"]: {
+    type: "InstanceProperty",
     params: [],
     returns: fn(),
     inherits: [],
@@ -3929,43 +3934,43 @@ const objectBuiltin: Builtins = {
 // MARK: ✅ PROMISE
 
 const promiseBuiltin: Builtins = {
-  ...inheritFunction('Promise'),
+  ...inheritFunction("Promise"),
 
-  ['Promise.new']: {
-    type: 'Constructor',
+  ["Promise.new"]: {
+    type: "Constructor",
     params: [[
-      'executor',
+      "executor",
       fn(), // (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void)
     ]],
     returns: promise(any()),
     inherits: [],
   },
-  ['Promise.all']: {
-    type: 'StaticMethod',
-    params: [['values', arr()]],
+  ["Promise.all"]: {
+    type: "StaticMethod",
+    params: [["values", arr()]],
     returns: promise(
       obj(str(), any()),
     ),
     inherits: [],
   },
-  ['Promise.allSettled']: {
-    type: 'StaticMethod',
-    params: [['values', arr()]],
+  ["Promise.allSettled"]: {
+    type: "StaticMethod",
+    params: [["values", arr()]],
     returns: promise(
       obj(str(), any()),
     ),
     inherits: [],
   },
-  ['Promise.any']: {
-    type: 'StaticMethod',
-    params: [['values', arr()]],
+  ["Promise.any"]: {
+    type: "StaticMethod",
+    params: [["values", arr()]],
     returns: promise(any()),
     inherits: [],
   },
-  ['Promise.race']: {
-    type: 'StaticMethod',
+  ["Promise.race"]: {
+    type: "StaticMethod",
     params: [[
-      'values',
+      "values",
       or(
         iter(any()),
         promise(any()),
@@ -3974,22 +3979,22 @@ const promiseBuiltin: Builtins = {
     returns: promise(any()),
     inherits: [],
   },
-  ['Promise.reject']: {
-    type: 'StaticMethod',
-    params: [['reason', any()]],
+  ["Promise.reject"]: {
+    type: "StaticMethod",
+    params: [["reason", any()]],
     returns: promise(any()),
     inherits: [],
   },
-  ['Promise.resolve']: {
-    type: 'StaticMethod',
-    params: [['value', any()]],
+  ["Promise.resolve"]: {
+    type: "StaticMethod",
+    params: [["value", any()]],
     returns: promise(any()),
     inherits: [],
   },
-  ['Promise.prototype.catch']: {
-    type: 'InstanceMethod',
+  ["Promise.prototype.catch"]: {
+    type: "InstanceMethod",
     params: [[
-      'onRejected',
+      "onRejected",
       or(
         fn(), // (reason: any) => TResult | PromiseLike<TResult2>
         undef(),
@@ -3999,20 +4004,20 @@ const promiseBuiltin: Builtins = {
     returns: promise(any()),
     inherits: [],
   },
-  ['Promise.prototype.finally']: {
-    type: 'InstanceMethod',
+  ["Promise.prototype.finally"]: {
+    type: "InstanceMethod",
     params: [[
-      'onFinally',
+      "onFinally",
       or(fn(), /* () => void */ nil()),
     ]],
     returns: promise(any()),
     inherits: [],
   },
-  ['Promise.prototype.then']: {
-    type: 'InstanceMethod',
+  ["Promise.prototype.then"]: {
+    type: "InstanceMethod",
     params: [
       [
-        'onFulfilled',
+        "onFulfilled",
         or(
           fn(), // (value: T) => TResult | PromiseLike<TResult1>
           undef(),
@@ -4020,7 +4025,7 @@ const promiseBuiltin: Builtins = {
         ),
       ],
       [
-        'onRejected',
+        "onRejected",
         or(
           fn(), // (reason: any) => TResult | PromiseLike<TResult2>
           undef(),
@@ -4037,19 +4042,19 @@ const promiseBuiltin: Builtins = {
 
 const proxyBuiltin: Builtins = {
   [`Proxy.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
-      ['target', obj()],
-      ['handler', obj(str(), any())],
+      ["target", obj()],
+      ["handler", obj(str(), any())],
     ],
     returns: obj(),
     inherits: [],
   },
   [`Proxy.revocable`]: {
-    type: 'StaticMethod',
+    type: "StaticMethod",
     params: [
-      ['target', obj()],
-      ['handler', obj(str(), any())],
+      ["target", obj()],
+      ["handler", obj(str(), any())],
     ],
     returns: obj(str(), any()),
     inherits: [],
@@ -4059,51 +4064,51 @@ const proxyBuiltin: Builtins = {
 // MARK: ✅ REFLECT
 
 const reflectBuiltin: Builtins = {
-  ['Reflect.apply']: {
-    type: 'StaticMethod',
+  ["Reflect.apply"]: {
+    type: "StaticMethod",
     params: [
       [
-        'target',
+        "target",
         or(
           fn(),
           fn(), // (this: T, ...args: A) => R
         ),
       ],
-      ['thisArgument', any()],
-      ['argumentsList', arr()],
+      ["thisArgument", any()],
+      ["argumentsList", arr()],
     ],
     returns: any(),
     inherits: [],
   },
-  ['Reflect.construct']: {
-    type: 'StaticMethod',
+  ["Reflect.construct"]: {
+    type: "StaticMethod",
     params: [
-      ['target', ctor()],
-      ['argumentsList', arr()],
-      ['newTarget?', ctor()],
+      ["target", ctor()],
+      ["argumentsList", arr()],
+      ["newTarget?", ctor()],
     ],
     returns: any(),
     inherits: [],
   },
-  ['Reflect.defineProperty']: {
-    type: 'StaticMethod',
+  ["Reflect.defineProperty"]: {
+    type: "StaticMethod",
     params: [
-      ['o', obj()],
+      ["o", obj()],
       [
-        'property',
+        "property",
         or(str(), num(), num()),
       ],
-      ['descriptor', obj()],
+      ["descriptor", obj()],
     ],
     returns: any(),
     inherits: [],
   },
-  ['Reflect.deleteProperty']: {
-    type: 'StaticMethod',
+  ["Reflect.deleteProperty"]: {
+    type: "StaticMethod",
     params: [
-      ['target', obj()],
+      ["target", obj()],
       [
-        'propertyKey',
+        "propertyKey",
         or(str(), num(), num()),
       ],
       // ['attributes', PTPropertyDescriptor],
@@ -4111,89 +4116,89 @@ const reflectBuiltin: Builtins = {
     returns: bool(),
     inherits: [],
   },
-  ['Reflect.get']: {
-    type: 'StaticMethod',
+  ["Reflect.get"]: {
+    type: "StaticMethod",
     params: [
-      ['target', obj()],
+      ["target", obj()],
       [
-        'propertyKey',
+        "propertyKey",
         or(str(), num(), num()),
       ],
-      ['receiver?', any()],
+      ["receiver?", any()],
     ],
     returns: any(),
     inherits: [],
   },
-  ['Reflect.getOwnPropertyDescriptor']: {
-    type: 'StaticMethod',
+  ["Reflect.getOwnPropertyDescriptor"]: {
+    type: "StaticMethod",
     params: [
-      ['target', obj()],
+      ["target", obj()],
       [
-        'propertyKey',
+        "propertyKey",
         or(str(), num(), num()),
       ],
     ],
     returns: obj(str(), any()),
     inherits: [],
   },
-  ['Reflect.getPrototypeOf']: {
-    type: 'StaticMethod',
-    params: [['target', obj()]],
+  ["Reflect.getPrototypeOf"]: {
+    type: "StaticMethod",
+    params: [["target", obj()]],
     returns: or(obj(), nil()),
     inherits: [],
   },
-  ['Reflect.has']: {
-    type: 'StaticMethod',
+  ["Reflect.has"]: {
+    type: "StaticMethod",
     params: [
-      ['target', obj()],
+      ["target", obj()],
       [
-        'propertyKey',
+        "propertyKey",
         or(str(), num(), num()),
       ],
     ],
     returns: bool(),
     inherits: [],
   },
-  ['Reflect.isExtensible']: {
-    type: 'StaticMethod',
-    params: [['target', obj()]],
+  ["Reflect.isExtensible"]: {
+    type: "StaticMethod",
+    params: [["target", obj()]],
     returns: bool(),
     inherits: [],
   },
-  ['Reflect.ownKeys']: {
-    type: 'StaticMethod',
-    params: [['target', obj()]],
+  ["Reflect.ownKeys"]: {
+    type: "StaticMethod",
+    params: [["target", obj()]],
     returns: or(
       str(),
       arr(sym()),
     ),
     inherits: [],
   },
-  ['Reflect.preventExtensions']: {
-    type: 'StaticMethod',
-    params: [['target', obj()]],
+  ["Reflect.preventExtensions"]: {
+    type: "StaticMethod",
+    params: [["target", obj()]],
     returns: bool(),
     inherits: [],
   },
-  ['Reflect.set']: {
-    type: 'StaticMethod',
+  ["Reflect.set"]: {
+    type: "StaticMethod",
     params: [
-      ['target', obj()],
+      ["target", obj()],
       [
-        'propertyKey',
+        "propertyKey",
         or(str(), num(), num()),
       ],
-      ['value', any()],
-      ['receiver?', any()],
+      ["value", any()],
+      ["receiver?", any()],
     ],
     returns: bool(),
     inherits: [],
   },
-  ['Reflect.setPrototypeOf']: {
-    type: 'StaticMethod',
+  ["Reflect.setPrototypeOf"]: {
+    type: "StaticMethod",
     params: [
-      ['target', obj()],
-      ['proto', or(obj(), nil())],
+      ["target", obj()],
+      ["proto", or(obj(), nil())],
     ],
     returns: bool(),
     inherits: [],
@@ -4203,156 +4208,156 @@ const reflectBuiltin: Builtins = {
 // MARK: ✅ REGEXP
 
 const regexpBuiltin: Builtins = {
-  ...inheritFunction('RegExp'),
+  ...inheritFunction("RegExp"),
 
   [`RegExp`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
-      ['pattern', or(str(), regex())],
-      ['flags?', str()],
+      ["pattern", or(str(), regex())],
+      ["flags?", str()],
     ],
-    returns: ctor('RegExp'),
+    returns: ctor("RegExp"),
     inherits: [],
   },
   [`RegExp.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [
-      ['pattern', or(str(), regex())],
-      ['flags?', str()],
+      ["pattern", or(str(), regex())],
+      ["flags?", str()],
     ],
-    returns: ctor('RegExp'),
+    returns: ctor("RegExp"),
     inherits: [],
   },
-  ['RegExp.prototype.exec']: {
-    type: 'InstanceMethod',
-    params: [['string', str()]],
+  ["RegExp.prototype.exec"]: {
+    type: "InstanceMethod",
+    params: [["string", str()]],
     returns: obj(
       str(),
       obj(str(), str()),
     ),
     inherits: [],
   },
-  ['RegExp.prototype[Symbol.match]']: {
-    type: 'InstanceMethod',
-    params: [['string', str()]],
+  ["RegExp.prototype[Symbol.match]"]: {
+    type: "InstanceMethod",
+    params: [["string", str()]],
     returns: obj(
       str(),
       obj(str(), str()),
     ),
     inherits: [],
   },
-  ['RegExp.prototype[Symbol.matchAll]']: {
-    type: 'InstanceMethod',
-    params: [['string', str()]],
+  ["RegExp.prototype[Symbol.matchAll]"]: {
+    type: "InstanceMethod",
+    params: [["string", str()]],
     returns: obj(
       str(),
       obj(str(), str()),
     ),
     inherits: [],
   },
-  ['RegExp.prototype[Symbol.replace]']: [
+  ["RegExp.prototype[Symbol.replace]"]: [
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['string', str()],
-        ['replaceValue', str()],
+        ["string", str()],
+        ["replaceValue", str()],
       ],
       returns: str(),
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['string', str()],
-        ['replaceValue', fn()], // (substring: string, ...args: any[]) => string
+        ["string", str()],
+        ["replaceValue", fn()], // (substring: string, ...args: any[]) => string
       ],
       returns: str(),
       inherits: [],
     },
   ],
-  ['RegExp.prototype[Symbol.search]']: {
-    type: 'InstanceMethod',
-    params: [['string', str()]],
+  ["RegExp.prototype[Symbol.search]"]: {
+    type: "InstanceMethod",
+    params: [["string", str()]],
     returns: num(),
     inherits: [],
   },
-  ['RegExp.prototype[Symbol.split]']: {
-    type: 'InstanceMethod',
+  ["RegExp.prototype[Symbol.split]"]: {
+    type: "InstanceMethod",
     params: [
-      ['string', str()],
-      ['limit?', num()],
+      ["string", str()],
+      ["limit?", num()],
     ],
     returns: arr(str()),
     inherits: [],
   },
-  ['RegExp.prototype.test']: {
-    type: 'InstanceMethod',
-    params: [['string', str()]],
+  ["RegExp.prototype.test"]: {
+    type: "InstanceMethod",
+    params: [["string", str()]],
     returns: bool(),
     inherits: [],
   },
-  ['RegExp.prototype.dotAll']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.dotAll"]: {
+    type: "InstanceProperty",
     params: [],
     returns: bool(),
     inherits: [],
   },
-  ['RegExp.prototype.flags']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.flags"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['RegExp.prototype.global']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.global"]: {
+    type: "InstanceProperty",
     params: [],
     returns: bool(),
     inherits: [],
   },
-  ['RegExp.prototype.hasIndices']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.hasIndices"]: {
+    type: "InstanceProperty",
     params: [],
     returns: bool(),
     inherits: [],
   },
-  ['RegExp.prototype.ignoreCase']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.ignoreCase"]: {
+    type: "InstanceProperty",
     params: [],
     returns: bool(),
     inherits: [],
   },
-  ['RegExp.prototype.lastIndex']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.lastIndex"]: {
+    type: "InstanceProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['RegExp.prototype.multiline']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.multiline"]: {
+    type: "InstanceProperty",
     params: [],
     returns: bool(),
     inherits: [],
   },
-  ['RegExp.prototype.source']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.source"]: {
+    type: "InstanceProperty",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['RegExp.prototype.sticky']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.sticky"]: {
+    type: "InstanceProperty",
     params: [],
     returns: bool(),
     inherits: [],
   },
-  ['RegExp.prototype.unicode']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.unicode"]: {
+    type: "InstanceProperty",
     params: [],
     returns: bool(),
     inherits: [],
   },
-  ['RegExp.prototype.unicodeSets']: {
-    type: 'InstanceProperty',
+  ["RegExp.prototype.unicodeSets"]: {
+    type: "InstanceProperty",
     params: [],
     returns: bool(),
     inherits: [],
@@ -4362,73 +4367,73 @@ const regexpBuiltin: Builtins = {
 // MARK: ✅ SET
 
 const setBuiltin: Builtins = {
-  ...inheritFunction('Set'),
+  ...inheritFunction("Set"),
 
   [`Set.new`]: {
-    type: 'Constructor',
-    params: [['iterable?', or(iter(any()), nil())]], // Iterable<T> | null
+    type: "Constructor",
+    params: [["iterable?", or(iter(any()), nil())]], // Iterable<T> | null
     returns: set(any()),
     inherits: [],
   },
-  ['Set.prototype.add']: {
-    type: 'InstanceMethod',
-    params: [['value', any()]],
+  ["Set.prototype.add"]: {
+    type: "InstanceMethod",
+    params: [["value", any()]],
     returns: set(any()),
     inherits: [],
   },
-  ['Set.prototype.clear']: {
-    type: 'InstanceMethod',
+  ["Set.prototype.clear"]: {
+    type: "InstanceMethod",
     params: [],
     returns: undef(), // void
     inherits: [],
   },
-  ['Set.prototype.delete']: {
-    type: 'InstanceMethod',
-    params: [['value', any()]],
+  ["Set.prototype.delete"]: {
+    type: "InstanceMethod",
+    params: [["value", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Set.prototype.entries']: {
-    type: 'InstanceMethod',
+  ["Set.prototype.entries"]: {
+    type: "InstanceMethod",
     params: [],
     returns: iter(tuple(any(), any())), // 'IterableIterator<[T, T]>'`;
     inherits: [],
   },
-  ['Set.prototype.forEach']: {
-    type: 'InstanceMethod',
+  ["Set.prototype.forEach"]: {
+    type: "InstanceMethod",
     params: [
-      ['callbackfn', fn()], // (value: T, value2: T, set: Set<T>) => void
-      ['thisArg?', any()],
+      ["callbackfn", fn()], // (value: T, value2: T, set: Set<T>) => void
+      ["thisArg?", any()],
     ],
     returns: undef(), // void
     inherits: [],
   },
-  ['Set.prototype.has']: {
-    type: 'InstanceMethod',
-    params: [['value', any()]],
+  ["Set.prototype.has"]: {
+    type: "InstanceMethod",
+    params: [["value", any()]],
     returns: bool(),
     inherits: [],
   },
-  ['Set.prototype.keys']: {
-    type: 'InstanceMethod',
+  ["Set.prototype.keys"]: {
+    type: "InstanceMethod",
     params: [],
     returns: iter(any()),
     inherits: [],
   },
-  ['Set.prototype.values']: {
-    type: 'InstanceMethod',
+  ["Set.prototype.values"]: {
+    type: "InstanceMethod",
     params: [],
     returns: iter(any()),
     inherits: [],
   },
-  ['Set.prototype[Symbol.iterator]']: {
-    type: 'InstanceMethod',
+  ["Set.prototype[Symbol.iterator]"]: {
+    type: "InstanceMethod",
     params: [],
     returns: iter(), // IterableIterator<T>
     inherits: [],
   },
-  ['Set.prototype.size']: {
-    type: 'InstanceProperty',
+  ["Set.prototype.size"]: {
+    type: "InstanceProperty",
     params: [],
     returns: num(),
     inherits: [],
@@ -4438,25 +4443,25 @@ const setBuiltin: Builtins = {
 // MARK: ✅ SHARED ARRAY BUFFER
 
 const sharedArrayBufferBuiltin: Builtins = {
-  ...inheritFunction('SharedArrayBuffer'),
+  ...inheritFunction("SharedArrayBuffer"),
 
   [`SharedArrayBuffer.new`]: {
-    type: 'Constructor',
-    params: [['byteLength', num()]],
-    returns: ctor('SharedArrayBuffer'),
+    type: "Constructor",
+    params: [["byteLength", num()]],
+    returns: ctor("SharedArrayBuffer"),
     inherits: [],
   },
-  ['SharedArrayBuffer.prototype.slice']: {
-    type: 'InstanceMethod',
+  ["SharedArrayBuffer.prototype.slice"]: {
+    type: "InstanceMethod",
     params: [
-      ['begin', num()],
-      ['end?', num()],
+      ["begin", num()],
+      ["end?", num()],
     ],
-    returns: ctor('SharedArrayBuffer'),
+    returns: ctor("SharedArrayBuffer"),
     inherits: [],
   },
-  ['SharedArrayBuffer.prototype.byteLength']: {
-    type: 'InstanceProperty',
+  ["SharedArrayBuffer.prototype.byteLength"]: {
+    type: "InstanceProperty",
     params: [],
     returns: num(),
     inherits: [],
@@ -4466,129 +4471,129 @@ const sharedArrayBufferBuiltin: Builtins = {
 // MARK: ✅ STRING
 
 const stringBuiltin: Builtins = {
-  ...inheritFunction('String'),
+  ...inheritFunction("String"),
 
   [`String`]: {
-    type: 'Constructor',
-    params: [['value?', any()]],
+    type: "Constructor",
+    params: [["value?", any()]],
     returns: str(),
     inherits: [],
   },
   [`String.new`]: {
-    type: 'Constructor',
-    params: [['value?', any()]],
+    type: "Constructor",
+    params: [["value?", any()]],
     returns: str(),
     inherits: [],
   },
-  ['String.fromCharCode']: {
-    type: 'StaticMethod',
-    params: [['...codeUnits', arr(num())]],
+  ["String.fromCharCode"]: {
+    type: "StaticMethod",
+    params: [["...codeUnits", arr(num())]],
     returns: str(),
     inherits: [],
   },
-  ['String.fromCodePoint']: {
-    type: 'StaticMethod',
-    params: [['...codePoints', arr(num())]],
+  ["String.fromCodePoint"]: {
+    type: "StaticMethod",
+    params: [["...codePoints", arr(num())]],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.at']: {
-    type: 'InstanceMethod',
-    params: [['index', num()]],
+  ["String.prototype.at"]: {
+    type: "InstanceMethod",
+    params: [["index", num()]],
     returns: or(str(), undef()),
     inherits: [],
   },
-  ['String.prototype.charAt']: {
-    type: 'InstanceMethod',
-    params: [['index', num()]],
+  ["String.prototype.charAt"]: {
+    type: "InstanceMethod",
+    params: [["index", num()]],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.charCodeAt']: {
-    type: 'InstanceMethod',
-    params: [['index', num()]],
+  ["String.prototype.charCodeAt"]: {
+    type: "InstanceMethod",
+    params: [["index", num()]],
     returns: num(),
     inherits: [],
   },
-  ['String.prototype.codePointAt']: {
-    type: 'InstanceMethod',
-    params: [['index', num()]],
+  ["String.prototype.codePointAt"]: {
+    type: "InstanceMethod",
+    params: [["index", num()]],
     returns: or(num(), undef()),
     inherits: [],
   },
-  ['String.prototype.concat']: {
-    type: 'InstanceMethod',
-    params: [['...strings', arr(str())]],
+  ["String.prototype.concat"]: {
+    type: "InstanceMethod",
+    params: [["...strings", arr(str())]],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.endsWith']: {
-    type: 'InstanceMethod',
+  ["String.prototype.endsWith"]: {
+    type: "InstanceMethod",
     params: [
-      ['searchString', str()],
-      ['length?', num()],
+      ["searchString", str()],
+      ["length?", num()],
     ],
     returns: bool(),
     inherits: [],
   },
-  ['String.prototype.includes']: {
-    type: 'InstanceMethod',
+  ["String.prototype.includes"]: {
+    type: "InstanceMethod",
     params: [
-      ['searchString', str()],
-      ['position?', num()],
+      ["searchString", str()],
+      ["position?", num()],
     ],
     returns: bool(),
     inherits: [],
   },
-  ['String.prototype.indexOf']: {
-    type: 'InstanceMethod',
+  ["String.prototype.indexOf"]: {
+    type: "InstanceMethod",
     params: [
-      ['searchString', str()],
-      ['position?', num()],
+      ["searchString", str()],
+      ["position?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['String.prototype.isWellFormed']: {
-    type: 'InstanceMethod',
+  ["String.prototype.isWellFormed"]: {
+    type: "InstanceMethod",
     params: [],
     returns: bool(),
     inherits: [],
   },
-  ['String.prototype.lastIndexOf']: {
-    type: 'InstanceMethod',
+  ["String.prototype.lastIndexOf"]: {
+    type: "InstanceMethod",
     params: [
-      ['searchString', str()],
-      ['position?', num()],
+      ["searchString", str()],
+      ["position?", num()],
     ],
     returns: num(),
     inherits: [],
   },
-  ['String.prototype.length']: {
-    type: 'InstanceProperty',
+  ["String.prototype.length"]: {
+    type: "InstanceProperty",
     params: [],
     returns: num(),
     inherits: [],
   },
-  ['String.prototype.localeCompare']: [
+  ["String.prototype.localeCompare"]: [
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['that', str()],
+        ["that", str()],
       ],
       returns: num(),
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['that', str()],
+        ["that", str()],
         [
-          'locales?',
+          "locales?",
           or(str(), arr(str())),
         ],
         [
-          'options',
+          "options",
           obj(
             str(),
             or(
@@ -4603,24 +4608,24 @@ const stringBuiltin: Builtins = {
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['that', str()],
+        ["that", str()],
         [
-          'locales?',
+          "locales?",
           or(
             str(),
-            ctor('Intl.Locale'),
+            ctor("Intl.Locale"),
             arr(
               or(
                 str(),
-                ctor('Intl.Locale'),
+                ctor("Intl.Locale"),
               ),
             ),
           ),
         ],
         [
-          'options?',
+          "options?",
           obj(
             str(),
             or(
@@ -4635,138 +4640,138 @@ const stringBuiltin: Builtins = {
       inherits: [],
     },
   ],
-  ['String.prototype.match']: {
-    type: 'InstanceMethod',
-    params: [['regexp', or(str(), regex())]],
+  ["String.prototype.match"]: {
+    type: "InstanceMethod",
+    params: [["regexp", or(str(), regex())]],
     returns: obj(
       str(),
       obj(str(), str()),
     ),
     inherits: [],
   },
-  ['String.prototype.matchAll']: {
-    type: 'InstanceMethod',
-    params: [['regexp', regex()]],
+  ["String.prototype.matchAll"]: {
+    type: "InstanceMethod",
+    params: [["regexp", regex()]],
     returns: obj(
       str(),
       obj(str(), str()),
     ),
     inherits: [],
   },
-  ['String.prototype.normalize']: {
-    type: 'InstanceMethod',
-    params: [['form?', str()]],
+  ["String.prototype.normalize"]: {
+    type: "InstanceMethod",
+    params: [["form?", str()]],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.padEnd']: {
-    type: 'InstanceMethod',
+  ["String.prototype.padEnd"]: {
+    type: "InstanceMethod",
     params: [
-      ['maxLength', num()],
-      ['fillString?', str()],
+      ["maxLength", num()],
+      ["fillString?", str()],
     ],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.padStart']: {
-    type: 'InstanceMethod',
+  ["String.prototype.padStart"]: {
+    type: "InstanceMethod",
     params: [
-      ['maxLength', num()],
-      ['fillString?', str()],
+      ["maxLength", num()],
+      ["fillString?", str()],
     ],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.repeat']: {
-    type: 'InstanceMethod',
-    params: [['count', num()]],
+  ["String.prototype.repeat"]: {
+    type: "InstanceMethod",
+    params: [["count", num()]],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.replace']: [
+  ["String.prototype.replace"]: [
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['string', or(str(), regex())],
-        ['replaceValue', str()],
+        ["string", or(str(), regex())],
+        ["replaceValue", str()],
       ],
       returns: str(),
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['string', or(str(), regex())],
-        ['replacer', fn()], // (substring: string, ...args: any[]) => string
+        ["string", or(str(), regex())],
+        ["replacer", fn()], // (substring: string, ...args: any[]) => string
       ],
       returns: str(),
       inherits: [],
     },
   ],
-  ['String.prototype.replaceAll']: [
+  ["String.prototype.replaceAll"]: [
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['string', or(str(), regex())],
-        ['replaceValue', str()],
+        ["string", or(str(), regex())],
+        ["replaceValue", str()],
       ],
       returns: str(),
       inherits: [],
     },
     {
-      type: 'InstanceMethod',
+      type: "InstanceMethod",
       params: [
-        ['string', or(str(), regex())],
-        ['replacer', fn()], // (substring: string, ...args: any[]) => string
+        ["string", or(str(), regex())],
+        ["replacer", fn()], // (substring: string, ...args: any[]) => string
       ],
       returns: str(),
       inherits: [],
     },
   ],
-  ['String.prototype.search']: {
-    type: 'InstanceMethod',
-    params: [['regexp', or(str(), regex())]],
+  ["String.prototype.search"]: {
+    type: "InstanceMethod",
+    params: [["regexp", or(str(), regex())]],
     returns: num(),
     inherits: [],
   },
-  ['String.prototype.slice']: {
-    type: 'InstanceMethod',
+  ["String.prototype.slice"]: {
+    type: "InstanceMethod",
     params: [
-      ['start?', num()],
-      ['end?', num()],
+      ["start?", num()],
+      ["end?", num()],
     ],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.split']: {
-    type: 'InstanceMethod',
+  ["String.prototype.split"]: {
+    type: "InstanceMethod",
     params: [
-      ['separator', or(str(), regex())],
-      ['limit?', num()],
+      ["separator", or(str(), regex())],
+      ["limit?", num()],
     ],
     returns: arr(str()),
     inherits: [],
   },
-  ['String.prototype.startsWith']: {
-    type: 'InstanceMethod',
+  ["String.prototype.startsWith"]: {
+    type: "InstanceMethod",
     params: [
-      ['searchString', str()],
-      ['position?', num()],
+      ["searchString", str()],
+      ["position?", num()],
     ],
     returns: bool(),
     inherits: [],
   },
-  ['String.prototype.toLocaleLowerCase']: {
-    type: 'InstanceMethod',
+  ["String.prototype.toLocaleLowerCase"]: {
+    type: "InstanceMethod",
     params: [[
-      'locales',
+      "locales",
       or(
         str(),
-        ctor('Intl.Locale'),
+        ctor("Intl.Locale"),
         arr(
           or(
             str(),
-            ctor('Intl.Locale'),
+            ctor("Intl.Locale"),
           ),
         ),
       ),
@@ -4774,17 +4779,17 @@ const stringBuiltin: Builtins = {
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.toLocaleUpperCase']: {
-    type: 'InstanceMethod',
+  ["String.prototype.toLocaleUpperCase"]: {
+    type: "InstanceMethod",
     params: [[
-      'locales',
+      "locales",
       or(
         str(),
-        ctor('Intl.Locale'),
+        ctor("Intl.Locale"),
         arr(
           or(
             str(),
-            ctor('Intl.Locale'),
+            ctor("Intl.Locale"),
           ),
         ),
       ),
@@ -4792,56 +4797,56 @@ const stringBuiltin: Builtins = {
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.toLowerCase']: {
-    type: 'InstanceMethod',
+  ["String.prototype.toLowerCase"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.toUpperCase']: {
-    type: 'InstanceMethod',
+  ["String.prototype.toUpperCase"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.toWellFormed']: {
-    type: 'InstanceMethod',
+  ["String.prototype.toWellFormed"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.trim']: {
-    type: 'InstanceMethod',
+  ["String.prototype.trim"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.trimEnd']: {
-    type: 'InstanceMethod',
+  ["String.prototype.trimEnd"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype.trimStart']: {
-    type: 'InstanceMethod',
+  ["String.prototype.trimStart"]: {
+    type: "InstanceMethod",
     params: [],
     returns: str(),
     inherits: [],
   },
-  ['String.prototype[Symbol.iterator]']: {
-    type: 'InstanceMethod',
+  ["String.prototype[Symbol.iterator]"]: {
+    type: "InstanceMethod",
     params: [],
     returns: iter(str()),
     inherits: [],
   },
-  ['String.raw']: {
-    type: 'StaticMethod',
+  ["String.raw"]: {
+    type: "StaticMethod",
     params: [
       [
-        'template',
+        "template",
         obj(str(), arr(str())),
       ],
-      ['...substitutions', arr()],
+      ["...substitutions", arr()],
     ],
     returns: str(),
     inherits: [],
@@ -4851,82 +4856,82 @@ const stringBuiltin: Builtins = {
 // MARK: ✅ SYMBOL
 
 const symbolBuiltin: Builtins = {
-  ...inheritFunction('Symbol'),
+  ...inheritFunction("Symbol"),
 
   [`Symbol`]: {
-    type: 'Constructor',
-    params: [['description?', or(str(), num())]],
+    type: "Constructor",
+    params: [["description?", or(str(), num())]],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.asyncIterator']: {
-    type: 'StaticProperty',
+  ["Symbol.asyncIterator"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.for']: {
-    type: 'StaticMethod',
-    params: [['key', str()]],
+  ["Symbol.for"]: {
+    type: "StaticMethod",
+    params: [["key", str()]],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.hasInstance']: {
-    type: 'StaticProperty',
+  ["Symbol.hasInstance"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.isConcatSpreadable']: {
-    type: 'StaticProperty',
+  ["Symbol.isConcatSpreadable"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.iterator']: {
-    type: 'StaticProperty',
+  ["Symbol.iterator"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.keyFor']: {
-    type: 'StaticMethod',
-    params: [['sym', sym()]],
+  ["Symbol.keyFor"]: {
+    type: "StaticMethod",
+    params: [["sym", sym()]],
     returns: or(str(), undef()),
     inherits: [],
   },
-  ['Symbol.match']: {
-    type: 'StaticProperty',
+  ["Symbol.match"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.matchAll']: {
-    type: 'StaticProperty',
+  ["Symbol.matchAll"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.prototype.description']: {
-    type: 'InstanceProperty',
+  ["Symbol.prototype.description"]: {
+    type: "InstanceProperty",
     params: [],
     returns: or(str(), undef()),
     inherits: [],
   },
-  ['Symbol.prototype[Symbol.toPrimitive]']: {
-    type: 'InstanceMethod',
-    params: [['hint', str()]],
+  ["Symbol.prototype[Symbol.toPrimitive]"]: {
+    type: "InstanceMethod",
+    params: [["hint", str()]],
     returns: any(),
     inherits: [],
   },
-  ['Symbol.replace']: {
-    type: 'StaticProperty',
+  ["Symbol.replace"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.search']: {
-    type: 'StaticProperty',
+  ["Symbol.search"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
@@ -4941,26 +4946,26 @@ const symbolBuiltin: Builtins = {
   //   returnValue: PTSymbol,
   //   inheritedFrom: [BaseObjects.None],
   // },
-  ['Symbol.split']: {
-    type: 'StaticProperty',
+  ["Symbol.split"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.toPrimitive']: {
-    type: 'StaticProperty',
+  ["Symbol.toPrimitive"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.toStringTag']: {
-    type: 'StaticProperty',
+  ["Symbol.toStringTag"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
   },
-  ['Symbol.unscopables']: {
-    type: 'StaticProperty',
+  ["Symbol.unscopables"]: {
+    type: "StaticProperty",
     params: [],
     returns: sym(),
     inherits: [],
@@ -4970,42 +4975,42 @@ const symbolBuiltin: Builtins = {
 // MARK: ✅ WEAK MAP
 
 const weakMapBuiltin: Builtins = {
-  ...inheritFunction('WeakMap'),
+  ...inheritFunction("WeakMap"),
 
   [`WeakMap.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [[
-      'entries?',
+      "entries?",
       iter(tuple(any(), any())),
     ]],
-    returns: ctor('WeakMap'),
+    returns: ctor("WeakMap"),
     inherits: [],
   },
-  ['WeakMap.prototype.delete']: {
-    type: 'InstanceMethod',
-    params: [['key', obj(str(), any())]],
+  ["WeakMap.prototype.delete"]: {
+    type: "InstanceMethod",
+    params: [["key", obj(str(), any())]],
     returns: bool(),
     inherits: [],
   },
-  ['WeakMap.prototype.get']: {
-    type: 'InstanceMethod',
-    params: [['key', obj(str(), any())]],
+  ["WeakMap.prototype.get"]: {
+    type: "InstanceMethod",
+    params: [["key", obj(str(), any())]],
     returns: or(any(), undef()),
     inherits: [],
   },
-  ['WeakMap.prototype.has']: {
-    type: 'InstanceMethod',
-    params: [['key', obj(str(), any())]],
+  ["WeakMap.prototype.has"]: {
+    type: "InstanceMethod",
+    params: [["key", obj(str(), any())]],
     returns: bool(),
     inherits: [],
   },
-  ['WeakMap.prototype.set']: {
-    type: 'InstanceMethod',
+  ["WeakMap.prototype.set"]: {
+    type: "InstanceMethod",
     params: [
-      ['key', obj(str(), any())],
-      ['value', any()],
+      ["key", obj(str(), any())],
+      ["value", any()],
     ],
-    returns: ctor('WeakMap'),
+    returns: ctor("WeakMap"),
     inherits: [],
   },
 };
@@ -5013,16 +5018,16 @@ const weakMapBuiltin: Builtins = {
 // MARK: ✅ WEAK REF
 
 const weakRefBuiltin: Builtins = {
-  ...inheritFunction('WeakRef'),
+  ...inheritFunction("WeakRef"),
 
   [`WeakRef.new`]: {
-    type: 'Constructor',
-    params: [['target', obj(str(), any())]],
-    returns: ctor('WeakRef'),
+    type: "Constructor",
+    params: [["target", obj(str(), any())]],
+    returns: ctor("WeakRef"),
     inherits: [],
   },
-  ['WeakRef.prototype.deref']: {
-    type: 'InstanceMethod',
+  ["WeakRef.prototype.deref"]: {
+    type: "InstanceMethod",
     params: [],
     returns: or(any(), undef()),
     inherits: [],
@@ -5032,36 +5037,36 @@ const weakRefBuiltin: Builtins = {
 // MARK: ✅ WEAK SET
 
 const weakSetBuiltin: Builtins = {
-  ...inheritFunction('WeakSet'),
+  ...inheritFunction("WeakSet"),
 
   [`WeakSet.new`]: {
-    type: 'Constructor',
+    type: "Constructor",
     params: [[
-      'values',
+      "values",
       arr(
         or(
           arr(or(any(), nil())),
         ),
       ),
     ]],
-    returns: ctor('WeakSet'),
+    returns: ctor("WeakSet"),
     inherits: [],
   },
-  ['WeakSet.prototype.add']: {
-    type: 'InstanceMethod',
-    params: [['value', obj(str(), any())]],
-    returns: ctor('WeakSet'),
+  ["WeakSet.prototype.add"]: {
+    type: "InstanceMethod",
+    params: [["value", obj(str(), any())]],
+    returns: ctor("WeakSet"),
     inherits: [],
   },
-  ['WeakSet.prototype.delete']: {
-    type: 'InstanceMethod',
-    params: [['value', obj(str(), any())]],
+  ["WeakSet.prototype.delete"]: {
+    type: "InstanceMethod",
+    params: [["value", obj(str(), any())]],
     returns: bool(),
     inherits: [],
   },
-  ['WeakSet.prototype.has']: {
-    type: 'InstanceMethod',
-    params: [['value', obj(str(), any())]],
+  ["WeakSet.prototype.has"]: {
+    type: "InstanceMethod",
+    params: [["value", obj(str(), any())]],
     returns: bool(),
     inherits: [],
   },
@@ -5071,58 +5076,58 @@ const weakSetBuiltin: Builtins = {
 
 const builtInGlobalFunctions: Builtins = {
   decodeURI: {
-    type: 'StaticMethod',
-    params: [['encodedURI', str()]],
+    type: "StaticMethod",
+    params: [["encodedURI", str()]],
     returns: str(),
     inherits: [],
   },
   decodeURIComponent: {
-    type: 'StaticMethod',
-    params: [['encodedURIComponent', str()]],
+    type: "StaticMethod",
+    params: [["encodedURIComponent", str()]],
     returns: str(),
     inherits: [],
   },
   encodeURI: {
-    type: 'StaticMethod',
-    params: [['uri', str()]],
+    type: "StaticMethod",
+    params: [["uri", str()]],
     returns: str(),
     inherits: [],
   },
   encodeURIComponent: {
-    type: 'StaticMethod',
-    params: [['uriComponent', str()]],
+    type: "StaticMethod",
+    params: [["uriComponent", str()]],
     returns: str(),
     inherits: [],
   },
   eval: {
-    type: 'StaticMethod',
-    params: [['x', str()]],
+    type: "StaticMethod",
+    params: [["x", str()]],
     returns: any(),
     inherits: [],
   },
   isFinite: {
-    type: 'StaticMethod',
-    params: [['number', num()]],
+    type: "StaticMethod",
+    params: [["number", num()]],
     returns: bool(),
     inherits: [],
   },
   isNaN: {
-    type: 'StaticMethod',
-    params: [['number', str()]],
+    type: "StaticMethod",
+    params: [["number", str()]],
     returns: str(),
     inherits: [],
   },
   parseFloat: {
-    type: 'StaticMethod',
-    params: [['string', str()]],
+    type: "StaticMethod",
+    params: [["string", str()]],
     returns: num(),
     inherits: [],
   },
   parseInt: {
-    type: 'StaticMethod',
+    type: "StaticMethod",
     params: [
-      ['string', str()],
-      ['radix?', num()],
+      ["string", str()],
+      ["radix?", num()],
     ],
     returns: str(),
     inherits: [],

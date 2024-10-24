@@ -1,19 +1,31 @@
-import ts from 'npm:typescript@5.5.3';
-import { libs } from '../lib/mod.ts';
-import { Generator } from '../src/generator.ts';
-import { SerializedAst } from '../src/types.ts';
-import { AppCache } from '../src/cache.ts';
+/**
+ * Generates a JSON object that represents the source file or libs.
+ * @file
+ */
 
-const libFiles = libs.map((file) => `./lib/${file}`);
-const program = ts.createProgram(libFiles, { noLib: true });
+import ts from "typescript";
 
-const cache = new AppCache(program);
-const generator = new Generator(program, cache);
-const result = generator.generate();
+import { Parser } from "../src/parser.ts";
+import { TypeResolver } from "../src/type_resolver.ts";
 
-// For regular serialized:
-const obj: Record<string, SerializedAst[]> = {};
-for (const [k, v] of Object.entries(result)) {
-    obj[k] = v.map((x) => x.serialize());
+function main(files: string[] = ["es5"], options: ts.CompilerOptions = {}) {
+  const program = ts.createProgram(files, options);
+  const typeResolver = new TypeResolver(program);
+  const parser = new Parser(program, typeResolver);
+  const globalDeclarations = parser.parse();
+
+  try {
+    const json = JSON.stringify(globalDeclarations, null, 2);
+    console.log(json);
+  } catch (e) {
+    console.log(e);
+  }
 }
-console.log(JSON.stringify(obj, null, 2));
+
+if (import.meta.main) {
+  if (Deno.args.length) {
+    main(Deno.args, { noLib: true });
+  } else {
+    main();
+  }
+}

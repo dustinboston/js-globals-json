@@ -1,3 +1,0 @@
-[submodule "tslib"]
-	path = tslib
-	url = https://github.com/microsoft/TypeScript.git

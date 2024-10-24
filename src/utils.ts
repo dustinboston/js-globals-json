@@ -1,92 +1,148 @@
-import ts from 'npm:typescript@5.5.3';
-import { Meta, metaValues } from './types.ts';
-import type { ContainerDeclaration, DeclarationWithConstructor, DeclarationWithName, DeclarationWithType } from './types.ts';
+import ts from "typescript";
+import type {
+  BooleanMetaValues,
+  ContainerDeclaration,
+  DeclarationWithConstructor,
+  DeclarationWithName,
+} from "./types.ts";
 
-/**
- * A set of valid meta values, which are members of the `metaValues` array.
- * These values represent boolean meta values and are stored in a set for O(1) lookup.
- */
-export const validMetaValues = new Set(metaValues);
+export const metaModifierKinds = [
+  ts.SyntaxKind.AbstractKeyword,
+  ts.SyntaxKind.AccessorKeyword,
+  ts.SyntaxKind.AsyncKeyword,
+  ts.SyntaxKind.ConstKeyword,
+  ts.SyntaxKind.DeclareKeyword,
+  ts.SyntaxKind.DefaultKeyword,
+  ts.SyntaxKind.ExportKeyword,
+  ts.SyntaxKind.InKeyword,
+  ts.SyntaxKind.PrivateKeyword,
+  ts.SyntaxKind.ProtectedKeyword,
+  ts.SyntaxKind.PublicKeyword,
+  ts.SyntaxKind.ReadonlyKeyword,
+  ts.SyntaxKind.OutKeyword,
+  ts.SyntaxKind.OverrideKeyword,
+  ts.SyntaxKind.StaticKeyword,
+];
 
-/**
- * Checks if the provided `kind` value is a valid meta value.
- *
- * @param kind - The value to check.
- * @returns `true` if the `kind` is a valid meta value, `false` otherwise.
- */
-export function isValidMeta(kind: number): kind is Meta {
-    return validMetaValues.has(kind);
+export const metaTokenKinds = [ts.SyntaxKind.DotDotDotToken, ts.SyntaxKind.QuestionToken];
+
+/** Checks if the provided `kind` value is a boolean meta value. */
+export function isBooleanMetaValue(kind: ts.SyntaxKind): kind is BooleanMetaValues {
+  if (metaModifierKinds.includes(kind)) return true;
+  if (metaTokenKinds.includes(kind)) return true;
+  return false;
 }
 
-/**
- * Formats a unique identifier for a global object or property.
- *
- * If the `id` is enclosed in square brackets (`[` and `]`), it is treated as a symbol and the `globalPrefix` is prepended to it.
- * Otherwise, if `globalPrefix` is provided, it is prepended to the `id` with a dot (`.`) separator.
- * If `globalPrefix` is not provided, the `id` is returned as-is.
- *
- * @param id The unique identifier to format.
- * @param globalPrefix An optional prefix to prepend to the `id`.
- * @returns The formatted identifier.
- */
-export function formatId(id: string, globalPrefix = '') {
-    if (id.startsWith('[') && id.endsWith(']')) { // This is a symbol
-        return `${globalPrefix}${id}`;
-    } else if (globalPrefix) {
-        return `${globalPrefix}.${id}`;
-    } else {
-        return id;
-    }
+export function getBooleanMetaValue(kind: ts.SyntaxKind): string | undefined {
+  return ts.tokenToString(kind);
 }
 
-/**
- * Formats an AST name
- *
- * If the `name` is enclosed in square brackets (`[` and `]`), it is treated as a symbol and the `globalPrefix` is prepended to it.
- * Otherwise, if `globalPrefix` is provided, it is prepended to the `name` with a dot (`.`) separator.
- * If `globalPrefix` is not provided, the `name` is returned as-is.
- *
- * @param name The unique identifier to format.
- * @param globalPrefix An optional prefix to prepend to the `name`.
- * @returns The formatted identifier.
- */
-export function formatName(name: string, globalPrefix = '') {
-    let prefix = globalPrefix;
-    if (name === 'prototype' && globalPrefix.endsWith('.prototype')) {
-        prefix = globalPrefix.replace(/\.prototype/g, '');
-    }
-
-    if (name.startsWith('[') && name.endsWith(']')) { // This is a symbol
-        return `${prefix}${name}`;
-    } else if (prefix) {
-        return `${prefix}.${name}`;
-    } else {
-        return name;
-    }
+export function formatId(id: string, globalPrefix = "") {
+  if (id === "prototype" && globalPrefix.endsWith(".prototype")) {
+    globalPrefix = globalPrefix.slice(0, -10);
+  }
+  // return isSymbol(id) ? `${globalPrefix}${id}` : globalPrefix ? `${globalPrefix}.${id}` : id;
+  return isSymbol(id) ? `${globalPrefix}${id}` : globalPrefix ? `${globalPrefix}.${id}` : id;
 }
 
-export function getDeclarationName(node: DeclarationWithName, sourceFile: ts.SourceFile, globalPrefix = ''): string {
-    return formatName(node.name.getText(sourceFile), globalPrefix);
+export function formatName(name: string, globalPrefix = "") {
+  if (name === "prototype" && globalPrefix.endsWith(".prototype")) {
+    globalPrefix = globalPrefix.slice(0, -10);
+  }
+  return isSymbol(name) ? `${globalPrefix}${name}` : globalPrefix ? `${globalPrefix}.${name}` : name;
 }
 
-export function isDeclarationWithName(node: ts.Node): node is DeclarationWithName {
-    return (
-        (ts.isFunctionDeclaration(node) && node.name !== undefined) ||
-        ts.isInterfaceDeclaration(node) ||
-        ts.isVariableDeclaration(node) ||
-        ts.isModuleDeclaration(node)
-    );
+/** Checks if a method or property has symbol notation, e.g. Foo[Symbol.bar] */
+export function isSymbol(id: string) {
+  return id.startsWith("[") && id.endsWith("]");
 }
 
-export function hasConstructSignature(node: ts.Node): node is DeclarationWithConstructor {
-    return ts.isInterfaceDeclaration(node) && node.members.some(ts.isConstructSignatureDeclaration);
+export function getDeclarationName(
+  node: DeclarationWithName,
+  sourceFile: ts.SourceFile,
+  globalPrefix = "",
+): string {
+  return formatName(node.name.getText(sourceFile), globalPrefix);
 }
 
-export function isContainerDeclaration(node: ts.Node): node is ContainerDeclaration {
-    return (ts.isInterfaceDeclaration(node) || ts.isModuleDeclaration(node));
+export function isDeclarationWithName(
+  node: ts.Node,
+): node is DeclarationWithName {
+  return (
+    (ts.isFunctionDeclaration(node) && node.name !== undefined) ||
+    ts.isInterfaceDeclaration(node) ||
+    ts.isVariableDeclaration(node) ||
+    ts.isModuleDeclaration(node) ||
+    ts.isTypeAliasDeclaration(node)
+  );
 }
 
-export function hasDeclarationWithType(node: ts.Node): node is DeclarationWithType {
-    return (ts.isVariableDeclaration(node) || ts.isFunctionDeclaration(node)) && node.type !== undefined &&
-        (ts.isTypeReferenceNode(node.type) || ts.isToken(node.type)) && node.name !== undefined;
+export function hasConstructSignature(
+  node: ts.Node,
+): node is DeclarationWithConstructor {
+  return ts.isInterfaceDeclaration(node) &&
+    node.members.some(ts.isConstructSignatureDeclaration);
+}
+
+export function isContainerDeclaration(
+  node: ts.Node,
+): node is ContainerDeclaration {
+  return (ts.isInterfaceDeclaration(node) || ts.isModuleDeclaration(node));
+}
+
+export function getKindName(kind: number) {
+  switch (ts.SyntaxKind[kind ?? 0]) {
+    case "FirstAssignment":
+      return "EqualsToken"; // 64
+    case "LastPunctuation":
+    case "LastAssignment":
+    case "LastCompoundAssignment":
+    case "LastBinaryOperator":
+      return "CaretEqualsToken"; // 79
+    case "LastToken":
+    case "LastKeyword":
+    case "FirstCompoundAssignment":
+      return "PlusEqualsToken"; // 65
+    case "FirstKeyword":
+    case "FirstReservedWord":
+      return "BreakKeyword"; // 83
+    case "LastReservedWord":
+    case "LastTemplateToken":
+      return "TemplateTail"; // 18
+    case "FirstPunctuation":
+    case "FirstFutureReservedWord":
+      return "OpenBraceToken"; // 19
+    case "FirstJSDocTagNode":
+    case "LastFutureReservedWord":
+      return "SemicolonToken"; // 27
+    case "FirstTypeNode":
+      return "FirstTypeNode"; // 82
+    case "LastTypeNode":
+      return "WhitespaceTrivia"; // 05
+    case "FirstToken":
+      return "Unknown"; // 0
+    case "FirstTriviaToken":
+      return "SingleLineCommentTrivia"; // 2
+    case "LastTriviaToken":
+      return "ConflictMarkerTrivia"; // 7
+    case "FirstJSDocNode":
+    case "FirstLiteralToken":
+      return "NumericLiteral"; // 9
+    case "LastLiteralToken":
+    case "FirstTemplateToken":
+      return "NoSubstitutionTemplateLiteral"; // 15
+    case "FirstBinaryOperator":
+      return "LessThanToken"; // 30
+    case "FirstStatement": // 243
+      return "VariableStatement"; // 243
+    case "LastStatement":
+      return "ColonToken"; // 59
+    case "FirstNode":
+      return "MinusEqualsToken"; // 66
+    case "LastJSDocNode":
+    case "LastJSDocTagNode":
+      return "AmpersandToken"; // 51
+    default:
+      return ts.SyntaxKind[kind ?? 0];
+  }
 }

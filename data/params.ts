@@ -1,16 +1,16 @@
-import { htmlTags, mathMlTags, svgTags, type BaseObjects } from './types.ts';
+import { type BaseObjects, htmlTags, mathMlTags, svgTags } from "./types.ts";
 
 /** A record of built-in definitions indexed by string keys. */
 export type Builtins = Record<string, (BuiltinDefn | BuiltinDefn[])>;
 
 /** Categorizes different types of definitions such as constructors, static methods, etc */
 export type DefnType =
-  | 'Constructor'
-  | 'StaticMethod'
-  | 'StaticProperty'
-  | 'InstanceMethod'
-  | 'InstanceProperty'
-  | 'Event';
+  | "Constructor"
+  | "StaticMethod"
+  | "StaticProperty"
+  | "InstanceMethod"
+  | "InstanceProperty"
+  | "Event";
 
 /** Represents a tuple of a param name and its type. */
 export type NamedParam = [name: string, type: ParamType];
@@ -73,31 +73,31 @@ export interface ParamVisitor {
 
 export class JsVisitor implements ParamVisitor {
   visitAnd(param: AndParam): string {
-    return param.types.map((t) => t.accept(this)).join(' & ');
+    return param.types.map((t) => t.accept(this)).join(" & ");
   }
   visitAny(_param: AnyParam): string {
-    return 'any';
+    return "any";
   }
   visitArr(param: ArrParam): string {
     return `Array<${param.type.accept(this)}>`;
   }
   visitArrBuff(_param: ArrBuffParam): string {
-    return 'ArrayBuffer';
+    return "ArrayBuffer";
   }
   visitBigInt(_param: BigIntParam): string {
-    return 'bigint';
+    return "bigint";
   }
   visitBool(_param: BooleanParameter): string {
-    return 'boolean';
+    return "boolean";
   }
   visitCtor(param: CtorParam): string {
-    return param.builtin ?? 'Function';
+    return param.builtin ?? "Function";
   }
   visitErr(_param: ErrParam): string {
-    return 'Error';
+    return "Error";
   }
   visitFn(_param: FnParam): string {
-    return 'Function';
+    return "Function";
   }
   visitIter(param: IterParam): string {
     return `Iterable<${param.type.accept(this)}>`;
@@ -106,40 +106,40 @@ export class JsVisitor implements ParamVisitor {
     return `Map<${param.key.accept(this)}, ${param.value.accept(this)}>`;
   }
   visitNull(_param: NullParam): string {
-    return 'null';
+    return "null";
   }
   visitNum(_param: Num): string {
-    return 'number';
+    return "number";
   }
   visitObj(param: ObjParam): string {
-    return (param.key && param.value) ? `Record<${param.key.accept(this)}, ${param.value.accept(this)}>` : 'object';
+    return (param.key && param.value) ? `Record<${param.key.accept(this)}, ${param.value.accept(this)}>` : "object";
   }
   visitPromise(param: PromiseParam): string {
     return `Promise<${param.type.accept(this)}>`;
   }
   visitRegex(param: RegexParam): string {
-    return param.pattern ?? 'RegExp';
+    return param.pattern ?? "RegExp";
   }
   visitSet(param: SetParam): string {
     return `Set<${param.type.accept(this)}>`;
   }
   visitStr(param: StrParam): string {
-    return (param.literal) ? `"${param.literal}"` : 'string';
+    return (param.literal) ? `"${param.literal}"` : "string";
   }
   visitSym(_Param: SymParam): string {
-    return 'symbol';
+    return "symbol";
   }
   visitTuple(param: TupleParam): string {
-    return `[${param.types.map((t) => t.accept(this)).join(', ')}]`;
+    return `[${param.types.map((t) => t.accept(this)).join(", ")}]`;
   }
   visitTypedArr(param: TypedArrParam): string {
     return param.type;
   }
   visitUndef(_param: UndefParam): string {
-    return 'undefined';
+    return "undefined";
   }
   visitOr(param: OrParam): string {
-    return param.types.map((t) => t.accept(this)).join(' | ');
+    return param.types.map((t) => t.accept(this)).join(" | ");
   }
 }
 /**
@@ -148,7 +148,7 @@ export class JsVisitor implements ParamVisitor {
 
 export class EnsembleVisitor implements ParamVisitor {
   visitAnd(param: AndParam): string {
-    return `types.JsNode<${param.types.map((t) => t.accept(this)).join(' & ')}>`;
+    return `types.JsNode<${param.types.map((t) => t.accept(this)).join(" & ")}>`;
   }
   visitAny(_param: AnyParam): string {
     return `types.AstNode`;
@@ -157,19 +157,19 @@ export class EnsembleVisitor implements ParamVisitor {
     return `types.VectorNode<${param.type.accept(this)}>`;
   }
   visitArrBuff(_param: ArrBuffParam): string {
-    return 'types.JsNode<ArrayBuffer>'; // this.AtomNode(ArrayBuffer)
+    return "types.JsNode<ArrayBuffer>"; // this.AtomNode(ArrayBuffer)
   }
   visitBigInt(_param: BigIntParam): string {
-    return 'types.NumberNode';
+    return "types.NumberNode";
   }
   visitBool(_param: BooleanParameter): string {
-    return 'types.BooleanNode';
+    return "types.BooleanNode";
   }
   visitCtor(param: CtorParam): string {
     return param.builtin ? `types.JsNode<${param.builtin}>` : `types.FunctionNode`;
   }
   visitErr(_param: ErrParam): string {
-    return 'types.ErrorNode';
+    return "types.ErrorNode";
   }
   visitFn(_param: FnParam): string {
     return `types.FunctionNode`;
@@ -181,15 +181,15 @@ export class EnsembleVisitor implements ParamVisitor {
     return `types.MapNode<${param.key.accept(this)}, ${param.value.accept(this)}>`;
   }
   visitNull(_param: NullParam): string {
-    return 'types.NilNode';
+    return "types.NilNode";
   }
   visitNum(_param: Num): string {
-    return 'types.NumberNode';
+    return "types.NumberNode";
   }
   visitObj(param: ObjParam): string {
     return (param.key && param.value)
       ? `types.MapNode<${param.key.accept(this)}, ${param.value.accept(this)}>`
-      : 'types.MapNode';
+      : "types.MapNode";
   }
   // TODO: Promise
   visitPromise(param: PromiseParam): string {
@@ -197,29 +197,29 @@ export class EnsembleVisitor implements ParamVisitor {
   }
   // TODO: RegExp
   visitRegex(param: RegexParam): string {
-    return `types.JsNode<${param.pattern ? `"${param.pattern}"` : 'RegExp'}>`;
+    return `types.JsNode<${param.pattern ? `"${param.pattern}"` : "RegExp"}>`;
   }
   visitSet(param: SetParam): string {
     return `types.VectorNode<${param.type.accept(this)}>`;
   }
   visitStr(param: StrParam): string {
-    return (param.literal) ? `types.StringNode<"${param.literal}">` : 'types.StringNode';
+    return (param.literal) ? `types.StringNode<"${param.literal}">` : "types.StringNode";
   }
   visitSym(_param: SymParam): string {
-    return 'types.SymbolNode';
+    return "types.SymbolNode";
   }
   visitTuple(param: TupleParam): string {
-    return `types.VectorNode<[${param.types.map((t) => t.accept(this)).join(', ')}]>`;
+    return `types.VectorNode<[${param.types.map((t) => t.accept(this)).join(", ")}]>`;
   }
   // TODO: TypedArray
   visitTypedArr(param: TypedArrParam): string {
     return `types.JsNode<${param.type}>`;
   }
   visitUndef(_param: UndefParam): string {
-    return 'types.NilNode';
+    return "types.NilNode";
   }
   visitOr(param: OrParam): string {
-    return param.types.map((t) => t.accept(this)).join(' | ');
+    return param.types.map((t) => t.accept(this)).join(" | ");
   }
 }
 
@@ -261,7 +261,7 @@ export class BooleanParameter extends ParamType {
 }
 
 export class CtorParam extends ParamType {
-  constructor(public builtin: BaseObjects = 'Function') {
+  constructor(public builtin: BaseObjects = "Function") {
     super();
   }
   accept(visitor: ParamVisitor) {
@@ -291,7 +291,10 @@ export class IterParam extends ParamType {
 }
 
 export class MapParam extends ParamType {
-  constructor(public key: ParamType = new StrParam(), public value: ParamType = new AnyParam()) {
+  constructor(
+    public key: ParamType = new StrParam(),
+    public value: ParamType = new AnyParam(),
+  ) {
     super();
   }
   accept(visitor: ParamVisitor) {
@@ -378,18 +381,19 @@ export class TupleParam extends ParamType {
 
 export class TypedArrParam extends ParamType {
   constructor(
-    public type: 'BigInt64Array' |
-      'BigUint64Array' |
-      'Float32Array' |
-      'Float64Array' |
-      'Int16Array' |
-      'Int32Array' |
-      'Int8Array' |
-      'Uint16Array' |
-      'Uint32Array' |
-      'Uint8Array' |
-      'Uint8ClampedArray' |
-      'number' = 'number'
+    public type:
+      | "BigInt64Array"
+      | "BigUint64Array"
+      | "Float32Array"
+      | "Float64Array"
+      | "Int16Array"
+      | "Int32Array"
+      | "Int8Array"
+      | "Uint16Array"
+      | "Uint32Array"
+      | "Uint8Array"
+      | "Uint8ClampedArray"
+      | "number" = "number",
   ) {
     super();
   }
@@ -479,7 +483,7 @@ export function bool(): BooleanParameter {
  * @returns A new instance of ConstructorFunctionParameter.
  */
 
-export function ctor(builtin: BaseObjects = 'Function'): CtorParam {
+export function ctor(builtin: BaseObjects = "Function"): CtorParam {
   return new CtorParam(builtin);
 }
 /**
@@ -519,7 +523,10 @@ export function iter(type: ParamType = new AnyParam()): IterParam {
  * @returns A new instance of MapParameter.
  */
 
-export function map(key: ParamType = new StrParam(), value: ParamType = new AnyParam()): MapParam {
+export function map(
+  key: ParamType = new StrParam(),
+  value: ParamType = new AnyParam(),
+): MapParam {
   return new MapParam(key, value);
 }
 /**
@@ -618,18 +625,19 @@ export function tuple(...types: ParamType[]): TupleParam {
  */
 
 export function typedArr(
-  type: 'BigInt64Array' |
-    'BigUint64Array' |
-    'Float32Array' |
-    'Float64Array' |
-    'Int16Array' |
-    'Int32Array' |
-    'Int8Array' |
-    'Uint16Array' |
-    'Uint32Array' |
-    'Uint8Array' |
-    'Uint8ClampedArray' |
-    'number' = 'number'
+  type:
+    | "BigInt64Array"
+    | "BigUint64Array"
+    | "Float32Array"
+    | "Float64Array"
+    | "Int16Array"
+    | "Int32Array"
+    | "Int8Array"
+    | "Uint16Array"
+    | "Uint32Array"
+    | "Uint8Array"
+    | "Uint8ClampedArray"
+    | "number" = "number",
 ): TypedArrParam {
   return new TypedArrParam(type);
 }
@@ -657,14 +665,19 @@ export function and(...types: ParamType[]): AndParam {
   return new AndParam(...types);
 }
 
-
 // MARK: TYPE HELPERS
 export const mathMlTagStrs = () => or(...Array.from(mathMlTags).map((t) => ctor(t as BaseObjects)));
 export const svgEls = () =>
-  or(...Array.from(svgInterfaces).filter((i) => i.endsWith('Element')).map((i) => ctor(i as BaseObjects)));
+  or(
+    ...Array.from(svgInterfaces).filter((i) => i.endsWith("Element")).map((i) => ctor(i as BaseObjects)),
+  );
 export const svgTagStrs = () => or(...Array.from(svgTags).map((tag) => str(tag)));
 export const htmlCollection = arr;
-export const elOrNil = () => or(ctor('Element'), nil());
+export const elOrNil = () => or(ctor("Element"), nil());
 export const htmlTagStrs = () => or(...Array.from(htmlTags).map((tag) => str(tag)));
 export const htmlEls = () =>
-  or(...Array.from(htmlDomInterfaces).filter((el) => el.startsWith('HTML')).map((el) => ctor(el as BaseObjects)));
+  or(
+    ...Array.from(htmlDomInterfaces).filter((el) => el.startsWith("HTML")).map((
+      el,
+    ) => ctor(el as BaseObjects)),
+  );
