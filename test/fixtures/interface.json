@@ -1,0 +1,167 @@
+{
+  "DancingPhoton.byteLength": [
+    {
+      "id": "DancingPhoton.byteLength",
+      "kind": "PropertySignature",
+      "name": "DancingPhoton.byteLength",
+      "generics": [],
+      "meta": [
+        "readonly"
+      ],
+      "params": [],
+      "returns": [
+        {
+          "id": "_1",
+          "kind": "NumberKeyword",
+          "name": "_1",
+          "generics": [],
+          "meta": [],
+          "params": [],
+          "returns": [],
+          "text": "number"
+        }
+      ],
+      "text": null
+    }
+  ],
+  "DancingPhoton.slice": [
+    {
+      "id": "DancingPhoton.slice",
+      "kind": "MethodSignature",
+      "name": "DancingPhoton.slice",
+      "generics": [],
+      "meta": [],
+      "params": [
+        {
+          "id": "begin",
+          "kind": "Parameter",
+          "name": "begin",
+          "generics": [],
+          "meta": [
+            "optional"
+          ],
+          "params": [],
+          "returns": [
+            {
+              "id": "_2",
+              "kind": "NumberKeyword",
+              "name": "_2",
+              "generics": [],
+              "meta": [],
+              "params": [],
+              "returns": [],
+              "text": "number"
+            }
+          ],
+          "text": null
+        },
+        {
+          "id": "end",
+          "kind": "Parameter",
+          "name": "end",
+          "generics": [],
+          "meta": [
+            "optional"
+          ],
+          "params": [],
+          "returns": [
+            {
+              "id": "_3",
+              "kind": "NumberKeyword",
+              "name": "_3",
+              "generics": [],
+              "meta": [],
+              "params": [],
+              "returns": [],
+              "text": "number"
+            }
+          ],
+          "text": null
+        }
+      ],
+      "returns": [
+        {
+          "id": "DancingPhoton",
+          "kind": "TypeReference",
+          "name": "DancingPhoton",
+          "generics": [],
+          "meta": [],
+          "params": [],
+          "returns": [],
+          "text": null
+        }
+      ],
+      "text": null
+    }
+  ],
+  "DancingPhoton.new": [
+    {
+      "id": "DancingPhoton.new",
+      "kind": "ConstructSignature",
+      "name": "DancingPhoton.new",
+      "generics": [],
+      "meta": [],
+      "params": [
+        {
+          "id": "byteLength",
+          "kind": "Parameter",
+          "name": "byteLength",
+          "generics": [],
+          "meta": [],
+          "params": [],
+          "returns": [
+            {
+              "id": "_4",
+              "kind": "NumberKeyword",
+              "name": "_4",
+              "generics": [],
+              "meta": [],
+              "params": [],
+              "returns": [],
+              "text": "number"
+            }
+          ],
+          "text": null
+        }
+      ],
+      "returns": [
+        {
+          "id": "DancingPhoton",
+          "kind": "TypeReference",
+          "name": "DancingPhoton",
+          "generics": [],
+          "meta": [],
+          "params": [],
+          "returns": [],
+          "text": null
+        }
+      ],
+      "text": null
+    }
+  ],
+  "DancingPhoton.prototype": [
+    {
+      "id": "DancingPhoton.prototype",
+      "kind": "PropertySignature",
+      "name": "DancingPhoton.prototype",
+      "generics": [],
+      "meta": [
+        "readonly"
+      ],
+      "params": [],
+      "returns": [
+        {
+          "id": "DancingPhoton",
+          "kind": "TypeReference",
+          "name": "DancingPhoton",
+          "generics": [],
+          "meta": [],
+          "params": [],
+          "returns": [],
+          "text": null
+        }
+      ],
+      "text": null
+    }
+  ]
+}
