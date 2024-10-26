@@ -105,6 +105,10 @@ Deno.test("Test Int8Array exists", () => {
   assert(Object.hasOwn(json, "Int8Array"));
 });
 
+Deno.test("Test Intl does NOT exist (Intl is a namespace)", () => {
+  assert(Object.hasOwn(json, "Intl"));
+});
+
 Deno.test("Test isFinite exists", () => {
   assert(Object.hasOwn(json, "isFinite"));
 });
@@ -159,6 +163,10 @@ Deno.test("Test RangeError exists", () => {
 
 Deno.test("Test ReferenceError exists", () => {
   assert(Object.hasOwn(json, "ReferenceError"));
+});
+
+Deno.test("Test Reflect does NOT exist", () => {
+  assert(Object.hasOwn(json, "Reflect"));
 });
 
 Deno.test("Test RegExp exists", () => {
@@ -255,16 +263,8 @@ Deno.test("Test GeneratorFunction DOES not exist", () => {
   assert(!Object.hasOwn(json, "GeneratorFunction"));
 });
 
-Deno.test("Test Intl does NOT exist (Intl is a namespace)", () => {
-  assert(!Object.hasOwn(json, "Intl"));
-});
-
 Deno.test("Test Iterator does NOT exist", () => {
   assert(!Object.hasOwn(json, "Iterator"));
-});
-
-Deno.test("Test Reflect does NOT exist", () => {
-  assert(!Object.hasOwn(json, "Reflect"));
 });
 
 Deno.test("Test TypedArray does NOT exist", () => {

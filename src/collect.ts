@@ -8,10 +8,12 @@
 // of the files being parsed. To keep things simple, _for_ loops are also used instead of
 // maps, flatMaps, and reducers. Don't try to "fix" this with functional style methods.
 //
-// TODO: Modify processVariable to get global variables such as NaN and Infinity
+// TODO: Verify that all children are hoisted up to the root
+// TODO: Remove interfaces that are just types, and not globals
 // TODO: Include type information as a string (untouched)
 // TODO: Reduce parsed types to their most basic primitive form
-//
+// TODO: Move data back into the ast class to make minification easier
+// TODO: Minify ASTs by removing unneceesary properties
 
 import {
   ArrayTypeNode,
@@ -59,7 +61,6 @@ import {
   UnionTypeNode,
   VariableDeclaration,
 } from "ts-morph";
-import { isToken, isTokenKind, type Token, type TokenSyntaxKind } from "typescript";
 
 export { Project } from "ts-morph";
 
@@ -105,25 +106,29 @@ export class Collector {
     const builtins = this.processTopLevelDeclarations();
 
     for (const builtin of builtins) {
-      if (builtin.name === "globalThis") {
-        for (const member of builtin.children) {
-          groupedAsts[member.name] = member;
+      if (builtin.name === "__EMPTY__") {
+        if (builtin.children.length) {
+          for (const member of builtin.children) {
+            groupedAsts[member.name] = member;
+          }
         }
       } else {
         if (!groupedAsts[builtin.name]) {
           groupedAsts[builtin.name] = builtin;
-        } else {
-          for (const member of builtin.children) {
-            groupedAsts[builtin.name].children.push(member);
-          }
         }
+        // Flatten the result by hoisting child nodes to the top level
+        for (const member of builtin.children) {
+          groupedAsts[member.name] = member;
+        }
+        // Since the children are now in the root, clear the children array.
+        groupedAsts[builtin.name].children = [];
       }
     }
     return groupedAsts;
   }
 
-  private globalThisAst(children: Ast[] = []): Ast {
-    return this.createAst("globalThis", "GlobalThis", {
+  private emptyAst(children: Ast[] = []): Ast {
+    return this.createAst("__EMPTY__", "__EMPTY__", {
       children,
     });
   }
@@ -166,20 +171,46 @@ export class Collector {
     return builtins;
   }
 
-  private processVariable(declaration: VariableDeclaration): Ast[] {
+  private processVariable(declaration: VariableDeclaration, parentName = ""): Ast[] {
     const nameNode = declaration.getNameNode();
     const typeNode = declaration.getTypeNode();
 
-    if (typeNode === undefined || isTokenKind(typeNode.getKind())) {
-      return [this.processBasicVariable(nameNode, typeNode)];
+    if (typeNode === undefined || ts.isTokenKind(typeNode.getKind())) {
+      return [this.processBasicVariable(nameNode, typeNode, parentName)];
     }
 
-    return this.collectInterfaces(nameNode, typeNode);
+    // TODO: Make this faster by...
+    // 1) pre-caching unparsed initerfaces and
+    // 2) using a map to look them up by name
+    // private collectInterfaces(bindingNameNode: BindingName, typeNode?: TypeNode, parentName = ""): Ast[] {
+    const builtins: Ast[] = [];
+    const bindingName = nameNode.getText();
+    const typeName = typeNode ? typeNode.getText() : null;
+
+    // Look for interfaces that match the binding name or type name
+    for (const sourceFile of this.sourceFiles) {
+      for (const interfaceDeclaration of sourceFile.getInterfaces()) {
+        // Don't format the name because processInterface needs it separately to do its checks.
+        if (interfaceDeclaration.getName() === bindingName) {
+          const processed = this.processInterface(interfaceDeclaration, bindingName, typeName, parentName);
+          builtins.push(processed);
+        } else if (typeName && interfaceDeclaration.getName() === typeName) {
+          const processed = this.processInterface(interfaceDeclaration, bindingName, typeName, parentName);
+          builtins.push(processed);
+        }
+      }
+    }
+
+    if (builtins.length === 0) {
+      return [this.processBasicVariable(nameNode, typeNode, parentName)];
+    }
+
+    return builtins;
   }
 
-  private processBasicVariable(nameNode: BindingName, typeNode: TypeNode | undefined) {
+  private processBasicVariable(nameNode: BindingName, typeNode: TypeNode | undefined, parentName = "") {
     const name = nameNode.getText();
-    return this.createAst(name, "VariableDeclaration", {
+    return this.createAst(this.formatName(name, parentName), "VariableDeclaration", {
       returns: [typeNode ? this.resolveType(typeNode) : this.createUndefinedKeywordAst()],
     });
   }
@@ -190,63 +221,76 @@ export class Collector {
     });
   }
 
-  private processFunction(declaration: FunctionDeclaration): Ast {
-    return this.globalThisAst([this.processMethod(declaration, "")]);
+  private processFunction(declaration: FunctionDeclaration, parentName = ""): Ast {
+    return this.processMethod(declaration, parentName);
   }
 
-  // TODO: Add generics?
-  // const generics = decl.getTypeParameters().map((tp) => this.resolveTypeParameter(tp)), // Generics
-  private processClass(declaration: ClassDeclaration): Ast {
+  private processClass(declaration: ClassDeclaration, parentName = ""): Ast {
     const nameNode = declaration.getNameNode();
-    if (!nameNode) return this.globalThisAst(); // Classes can be anonymous, but top-level classes should always have a name.
+    if (!nameNode) return this.emptyAst(); // Classes can be anonymous, but top-level classes should always have a name.
 
-    const className = nameNode.getText();
+    const classNameWithAncestry = this.formatName(nameNode.getText(), parentName);
     const extendsExpression = declaration.getExtends();
     const extendsName = extendsExpression ? [extendsExpression.getText()] : [];
 
-    const builtin = this.createAst(className, declaration.getKindName(), { extends: extendsName });
+    const builtin = this.createAst(classNameWithAncestry, declaration.getKindName(), { extends: extendsName });
+
     for (const ctor of declaration.getConstructors()) {
-      const processed = this.processConstructor(ctor, className);
+      const processed = this.processConstructor(ctor, classNameWithAncestry);
       builtin.children.push(processed);
     }
 
-    for (const prop of this.processProperties(declaration, className)) {
+    for (const typeParameter of declaration.getTypeParameters()) {
+      builtin.generics.push(this.handleTypeParameter(typeParameter));
+    }
+
+    for (const prop of this.processProperties(declaration, classNameWithAncestry)) {
       builtin.children.push(prop);
     }
 
-    for (const method of this.processMethods(declaration, className)) {
+    for (const method of this.processMethods(declaration, classNameWithAncestry)) {
       builtin.children.push(method);
     }
 
     return builtin;
   }
 
-  private processModule(declaration: ModuleDeclaration): Ast {
-    const builtin = this.createAst(declaration.getName(), declaration.getKindName(), {});
+  private processModule(moduleDeclaration: ModuleDeclaration, parentName = ""): Ast {
+    const previouslyParsed: Set<DeclarationTypes> = new Set();
+    const moduleNameWithAncestry = this.formatName(moduleDeclaration.getName(), parentName);
+    const ast = this.createAst(moduleNameWithAncestry, moduleDeclaration.getKindName(), {});
 
-    for (const f of declaration.getFunctions()) {
-      const processedFunction = this.processFunction(f);
-      builtin.children.push(processedFunction);
-    }
-
-    for (const m of declaration.getModules()) {
-      const processedModule = this.processModule(m);
-      builtin.children.push(processedModule);
-    }
-
-    for (const c of declaration.getClasses()) {
-      const processedClass = this.processClass(c);
-      builtin.children.push(processedClass);
-    }
-
-    for (const v of declaration.getVariableDeclarations()) {
-      const processedVariables = this.processVariable(v);
-      for (const processed of processedVariables) {
-        builtin.children.push(processed);
+    for (const declaration of moduleDeclaration.getVariableDeclarations()) {
+      if (previouslyParsed.has(declaration)) continue;
+      const processed = this.processVariable(declaration, moduleNameWithAncestry);
+      for (const builtin of processed) {
+        ast.children.push(builtin);
       }
+      previouslyParsed.add(declaration);
     }
 
-    return builtin;
+    for (const declaration of moduleDeclaration.getFunctions()) {
+      if (previouslyParsed.has(declaration)) continue;
+      const processed = this.processFunction(declaration, moduleNameWithAncestry);
+      ast.children.push(processed);
+      previouslyParsed.add(declaration);
+    }
+
+    for (const declaration of moduleDeclaration.getModules()) {
+      if (previouslyParsed.has(declaration)) continue;
+      const processed = this.processModule(declaration, moduleNameWithAncestry);
+      ast.children.push(processed);
+      previouslyParsed.add(declaration);
+    }
+
+    for (const declaration of moduleDeclaration.getClasses()) {
+      if (previouslyParsed.has(declaration)) continue;
+      const processed = this.processClass(declaration, moduleNameWithAncestry);
+      ast.children.push(processed);
+      previouslyParsed.add(declaration);
+    }
+
+    return ast;
   }
 
   private isStaticInterface(interfaceName: string, bindingName: string, typeName: string | null) {
@@ -261,74 +305,43 @@ export class Collector {
     return typeName !== null && interfaceName === typeName;
   }
 
-  // TODO: Make this faster by...
-  // 1) pre-caching unparsed initerfaces and
-  // 2) using a map to look them up by name
-  private collectInterfaces(bindingNameNode: BindingName, typeNode?: TypeNode): Ast[] {
-    const builtins: Ast[] = [];
-    const bindingName = bindingNameNode.getText();
-    const typeName = typeNode ? typeNode.getText() : null;
-
-    if (typeNode && isToken(typeNode.getType())) {
-      //
-      if (typeNode?.getKind() === SyntaxKind.TypeReference) {
-      }
-    }
-
-    for (const sourceFile of this.sourceFiles) {
-      for (const interfaceDeclaration of sourceFile.getInterfaces()) {
-        const processed = this.processInterface(interfaceDeclaration, bindingName, typeName);
-        builtins.push(processed);
-      }
-    }
-
-    return builtins;
-  }
-
-  private processInterface(declaration: InterfaceDeclaration, bindingName: string, typeName: string | null): Ast {
+  private processInterface(
+    declaration: InterfaceDeclaration,
+    bindingName: string,
+    typeName: string | null,
+    parentName = "",
+  ): Ast {
     const interfaceName = declaration.getName();
+    const bindingNameWithAncestry = this.formatName(bindingName, parentName);
 
     if (this.isStaticInterface(interfaceName, bindingName, typeName)) {
-      return this.processStaticInterface(declaration, bindingName);
+      return this.processStaticInterface(declaration, bindingNameWithAncestry);
     }
 
     if (this.isInstanceInterface(interfaceName, bindingName)) {
-      return this.processInstanceInterface(interfaceName, bindingName, declaration);
+      return this.processInstanceInterface(interfaceName, bindingNameWithAncestry, declaration);
     }
 
     if (this.isConstructorInterface(interfaceName, typeName)) {
-      return this.processConstructorInterface(declaration, bindingName);
+      return this.processConstructorInterface(declaration, bindingNameWithAncestry);
     }
 
-    return this.globalThisAst();
+    return this.emptyAst();
   }
 
-  private processConstructorInterface(interfaceDeclaration: InterfaceDeclaration, bindingName: string): Ast {
-    const builtin = this.createAst(bindingName, "InterfaceDeclaration", {});
+  private processStaticInterface(
+    interfaceDeclaration: InterfaceDeclaration,
+    bindingNameWithAncestry: string,
+  ): Ast {
+    const builtin = this.createAst(bindingNameWithAncestry, "InterfaceDeclaration", {});
 
-    for (const extendsExpression of interfaceDeclaration.getExtends()) {
-      builtin.extends.push(extendsExpression.getText());
-    }
-
-    const constructSignatures = interfaceDeclaration.getConstructSignatures();
-    const processedConstructSignatures = this.processConstructSignatures(constructSignatures, bindingName);
-    for (const constructSignature of processedConstructSignatures) {
-      builtin.children.push(constructSignature);
-    }
-
-    const callSignatures = interfaceDeclaration.getCallSignatures();
-    const processedCallSignatures = this.processCallSignatures(callSignatures, bindingName);
-    for (const callSignature of processedCallSignatures) {
-      builtin.children.push(callSignature);
-    }
-
-    const processedProperties = this.processProperties(interfaceDeclaration, bindingName);
-    for (const property of processedProperties) {
+    const properties = this.processProperties(interfaceDeclaration, bindingNameWithAncestry);
+    for (const property of properties) {
       builtin.children.push(property);
     }
 
-    const processedMethods = this.processMethods(interfaceDeclaration, bindingName);
-    for (const method of processedMethods) {
+    const methods = this.processMethods(interfaceDeclaration, bindingNameWithAncestry);
+    for (const method of methods) {
       builtin.children.push(method);
     }
 
@@ -337,11 +350,11 @@ export class Collector {
 
   private processInstanceInterface(
     interfaceName: string,
-    bindingName: string,
+    bindingNameWithAncestry: string,
     declaration: InterfaceDeclaration,
   ): Ast {
-    const formattedName = this.formatInstanceName(interfaceName, bindingName);
-    const builtin = this.createAst(bindingName, "InterfaceDeclaration", {});
+    const formattedName = this.formatInstanceName(interfaceName, bindingNameWithAncestry);
+    const builtin = this.createAst(bindingNameWithAncestry, "InterfaceDeclaration", {});
 
     const extendsList = declaration.getExtends();
     for (const extendedType of extendsList) {
@@ -365,7 +378,7 @@ export class Collector {
       builtin.children.push(property);
     }
 
-    const methods = this.processMethods(declaration, bindingName);
+    const methods = this.processMethods(declaration, bindingNameWithAncestry);
     for (const method of methods) {
       builtin.children.push(method);
     }
@@ -373,16 +386,35 @@ export class Collector {
     return builtin;
   }
 
-  private processStaticInterface(interfaceDeclaration: InterfaceDeclaration, bindingName: string): Ast {
-    const builtin = this.createAst(bindingName, "InterfaceDeclaration", {});
+  private processConstructorInterface(
+    interfaceDeclaration: InterfaceDeclaration,
+    bindingNameWithAncestry: string,
+  ): Ast {
+    const builtin = this.createAst(bindingNameWithAncestry, interfaceDeclaration.getKindName(), {});
 
-    const properties = this.processProperties(interfaceDeclaration, bindingName);
-    for (const property of properties) {
+    for (const extendsExpression of interfaceDeclaration.getExtends()) {
+      builtin.extends.push(extendsExpression.getText());
+    }
+
+    const constructSignatures = interfaceDeclaration.getConstructSignatures();
+    const processedConstructSignatures = this.processConstructSignatures(constructSignatures, bindingNameWithAncestry);
+    for (const constructSignature of processedConstructSignatures) {
+      builtin.children.push(constructSignature);
+    }
+
+    const callSignatures = interfaceDeclaration.getCallSignatures();
+    const processedCallSignatures = this.processCallSignatures(callSignatures, bindingNameWithAncestry);
+    for (const callSignature of processedCallSignatures) {
+      builtin.children.push(callSignature);
+    }
+
+    const processedProperties = this.processProperties(interfaceDeclaration, bindingNameWithAncestry);
+    for (const property of processedProperties) {
       builtin.children.push(property);
     }
 
-    const methods = this.processMethods(interfaceDeclaration, bindingName);
-    for (const method of methods) {
+    const processedMethods = this.processMethods(interfaceDeclaration, bindingNameWithAncestry);
+    for (const method of processedMethods) {
       builtin.children.push(method);
     }
 
@@ -415,17 +447,6 @@ export class Collector {
       });
       astArray.push(ast);
     }
-    return astArray;
-  }
-
-  private processConstructors(constructors: ConstructorDeclaration[], parentName: string): Ast[] {
-    const astArray: Ast[] = [];
-
-    for (const ctor of constructors) {
-      const processedConstructor = this.processConstructor(ctor, parentName);
-      astArray.push(processedConstructor);
-    }
-
     return astArray;
   }
 
@@ -750,11 +771,10 @@ export class Collector {
     }
 
     return this.createAst(
-      typeParameter.getName(), // TODO: Format name
+      typeParameter.getName(),
       typeParameter.getKindName(),
       constraint
         ? {
-          // TODO: Verify that this is what we want
           meta: modifiers,
           text: typeParameter.getText(),
           returns: defaultType ? [this.resolveType(defaultType)] : [],
@@ -948,75 +968,75 @@ if (import.meta.main) {
   });
 
   const col = new Collector(project, [
-    "./tslib/decorators.d.ts",
-    "./tslib/decorators.legacy.d.ts",
-    "./tslib/dom.generated.d.ts",
-    "./tslib/es2015.symbol.d.ts",
-    "./tslib/es2015.iterable.d.ts",
-    "./tslib/es5.d.ts",
-    "./tslib/es2015.symbol.wellknown.d.ts",
-    "./tslib/es2015.symbol.d.ts",
-    "./tslib/es2015.reflect.d.ts",
-    "./tslib/es2015.proxy.d.ts",
-    "./tslib/es2015.promise.d.ts",
-    "./tslib/es2015.iterable.d.ts",
-    "./tslib/es2015.generator.d.ts",
-    "./tslib/es2015.core.d.ts",
-    "./tslib/es2015.collection.d.ts",
-    "./tslib/es2015.d.ts",
-    "./tslib/es2016.array.include.d.ts",
-    "./tslib/es2016.intl.d.ts",
-    "./tslib/es2015.iterable.d.ts",
-    "./tslib/es2016.d.ts",
-    "./tslib/es2017.arraybuffer.d.ts",
-    "./tslib/es2017.date.d.ts",
-    "./tslib/es2017.intl.d.ts",
-    "./tslib/es2017.object.d.ts",
-    "./tslib/es2017.sharedmemory.d.ts",
-    "./tslib/es2017.string.d.ts",
-    "./tslib/es2017.typedarrays.d.ts",
-    "./tslib/es2017.d.ts",
-    "./tslib/es2018.asyncgenerator.d.ts",
-    "./tslib/es2018.asynciterable.generated.d.ts",
-    "./tslib/es2018.intl.d.ts",
-    "./tslib/es2018.promise.d.ts",
-    "./tslib/es2018.regexp.d.ts",
-    "./tslib/es2018.d.ts",
-    "./tslib/es2019.array.d.ts",
-    "./tslib/es2019.intl.d.ts",
-    "./tslib/es2019.object.d.ts",
-    "./tslib/es2019.string.d.ts",
-    "./tslib/es2019.symbol.d.ts",
-    "./tslib/es2019.d.ts",
-    "./tslib/es2020.bigint.d.ts",
-    "./tslib/es2020.intl.d.ts",
-    "./tslib/es2020.symbol.wellknown.d.ts",
-    "./tslib/es2020.date.d.ts",
-    "./tslib/es2020.number.d.ts",
-    "./tslib/es2020.promise.d.ts",
-    "./tslib/es2020.sharedmemory.d.ts",
-    "./tslib/es2020.string.d.ts",
-    "./tslib/es2020.d.ts",
-    "./tslib/es2021.intl.d.ts",
-    "./tslib/es2021.promise.d.ts",
-    "./tslib/es2021.string.d.ts",
-    "./tslib/es2021.weakref.d.ts",
-    "./tslib/es2021.d.ts",
-    "./tslib/es2022.array.d.ts",
-    "./tslib/es2022.error.d.ts",
-    "./tslib/es2022.intl.d.ts",
-    "./tslib/es2022.object.d.ts",
-    "./tslib/es2022.regexp.d.ts",
-    "./tslib/es2022.string.d.ts",
-    "./tslib/es2022.d.ts",
-    "./tslib/es2023.array.d.ts",
-    "./tslib/es2023.collection.d.ts",
-    "./tslib/es2023.intl.d.ts",
-    "./tslib/dom.asynciterable.generated.d.ts",
-    "./tslib/dom.iterable.generated.d.ts",
-    "./tslib/scripthost.d.ts",
-    "./tslib/webworker.importscripts.d.ts",
-    "./tslib/es2023.d.ts",
+    "./tslib/decorators.txt",
+    "./tslib/decorators.legacy.txt",
+    "./tslib/dom.generated.txt",
+    "./tslib/es2015.symbol.txt",
+    "./tslib/es2015.iterable.txt",
+    "./tslib/es5.txt",
+    "./tslib/es2015.symbol.wellknown.txt",
+    "./tslib/es2015.symbol.txt",
+    "./tslib/es2015.reflect.txt",
+    "./tslib/es2015.proxy.txt",
+    "./tslib/es2015.promise.txt",
+    "./tslib/es2015.iterable.txt",
+    "./tslib/es2015.generator.txt",
+    "./tslib/es2015.core.txt",
+    "./tslib/es2015.collection.txt",
+    "./tslib/es2015.txt",
+    "./tslib/es2016.array.include.txt",
+    "./tslib/es2016.intl.txt",
+    "./tslib/es2015.iterable.txt",
+    "./tslib/es2016.txt",
+    "./tslib/es2017.arraybuffer.txt",
+    "./tslib/es2017.date.txt",
+    "./tslib/es2017.intl.txt",
+    "./tslib/es2017.object.txt",
+    "./tslib/es2017.sharedmemory.txt",
+    "./tslib/es2017.string.txt",
+    "./tslib/es2017.typedarrays.txt",
+    "./tslib/es2017.txt",
+    "./tslib/es2018.asyncgenerator.txt",
+    "./tslib/es2018.asynciterable.generated.txt",
+    "./tslib/es2018.intl.txt",
+    "./tslib/es2018.promise.txt",
+    "./tslib/es2018.regexp.txt",
+    "./tslib/es2018.txt",
+    "./tslib/es2019.array.txt",
+    "./tslib/es2019.intl.txt",
+    "./tslib/es2019.object.txt",
+    "./tslib/es2019.string.txt",
+    "./tslib/es2019.symbol.txt",
+    "./tslib/es2019.txt",
+    "./tslib/es2020.bigint.txt",
+    "./tslib/es2020.intl.txt",
+    "./tslib/es2020.symbol.wellknown.txt",
+    "./tslib/es2020.date.txt",
+    "./tslib/es2020.number.txt",
+    "./tslib/es2020.promise.txt",
+    "./tslib/es2020.sharedmemory.txt",
+    "./tslib/es2020.string.txt",
+    "./tslib/es2020.txt",
+    "./tslib/es2021.intl.txt",
+    "./tslib/es2021.promise.txt",
+    "./tslib/es2021.string.txt",
+    "./tslib/es2021.weakref.txt",
+    "./tslib/es2021.txt",
+    "./tslib/es2022.array.txt",
+    "./tslib/es2022.error.txt",
+    "./tslib/es2022.intl.txt",
+    "./tslib/es2022.object.txt",
+    "./tslib/es2022.regexp.txt",
+    "./tslib/es2022.string.txt",
+    "./tslib/es2022.txt",
+    "./tslib/es2023.array.txt",
+    "./tslib/es2023.collection.txt",
+    "./tslib/es2023.intl.txt",
+    "./tslib/dom.asynciterable.generated.txt",
+    "./tslib/dom.iterable.generated.txt",
+    "./tslib/scripthost.txt",
+    "./tslib/webworker.importscripts.txt",
+    "./tslib/es2023.txt",
   ]);
   const globals = col.collectGlobals();
   console.log(JSON.stringify(globals, null, 2));
