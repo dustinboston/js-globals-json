@@ -1,5 +1,17 @@
-// TODO: Get global variables such as NaN and Infinity
-// Will have to modify the processVariable function so that it doesn't exclude them
+// The goal of this script is to collect all of the built-in objects, properties, methods,
+// and events from the TypeScript declaration files and ouput them in a SIMPLE format.
+// To that end, unparsed type information is included, but the parsed types are simplified
+// to the closest primitive.
+//
+// NOTE: Use only _for_ loops instead of spread operators. Spreading values from a large
+// array (e.g. `b.push(...oneBillionValues)`) will cause a stack overflow due to the size
+// of the files being parsed. To keep things simple, _for_ loops are also used instead of
+// maps, flatMaps, and reducers. Don't try to "fix" this with functional style methods.
+//
+// TODO: Modify processVariable to get global variables such as NaN and Infinity
+// TODO: Include type information as a string (untouched)
+// TODO: Reduce parsed types to their most basic primitive form
+//
 
 import {
   ArrayTypeNode,
@@ -47,6 +59,7 @@ import {
   UnionTypeNode,
   VariableDeclaration,
 } from "ts-morph";
+import { isToken, isTokenKind, type Token, type TokenSyntaxKind } from "typescript";
 
 export { Project } from "ts-morph";
 
@@ -59,13 +72,8 @@ export type Ast = {
   params: Ast[];
   returns: Ast[];
   text: string | null;
-};
-
-export type Builtin = {
-  name: string;
-  kind: string;
-  members: (Ast | Builtin)[];
   extends: string[];
+  children: Ast[];
 };
 
 type DeclarationTypes =
@@ -87,114 +95,154 @@ export class Collector {
   private sourceFiles: SourceFile[];
   private idCounter = 0;
 
-  // Track processed declarations to prevent infinite recursion
-  private processedDeclarations: Set<DeclarationTypes> = new Set();
-
   public constructor(private project: Project, paths: string[]) {
     this.project.addSourceFilesAtPaths(paths);
     this.sourceFiles = this.project.getSourceFiles();
   }
 
-  public collectGlobals(): Record<string, Builtin> {
-    const groupedBuiltins: Record<string, Builtin> = {};
+  public collectGlobals(): Record<string, Ast> {
+    const groupedAsts: Record<string, Ast> = {};
     const builtins = this.processTopLevelDeclarations();
 
     for (const builtin of builtins) {
-      if (!groupedBuiltins[builtin.name]) {
-        groupedBuiltins[builtin.name] = builtin;
+      if (builtin.name === "globalThis") {
+        for (const member of builtin.children) {
+          groupedAsts[member.name] = member;
+        }
       } else {
-        groupedBuiltins[builtin.name].members.push(...builtin.members);
+        if (!groupedAsts[builtin.name]) {
+          groupedAsts[builtin.name] = builtin;
+        } else {
+          for (const member of builtin.children) {
+            groupedAsts[builtin.name].children.push(member);
+          }
+        }
       }
     }
-    return groupedBuiltins;
+    return groupedAsts;
   }
 
-  private globalThisBuiltin(members: Ast[] = []) {
-    return this.createBuiltin("globalThis", "GlobalThis", {
-      members,
+  private globalThisAst(children: Ast[] = []): Ast {
+    return this.createAst("globalThis", "GlobalThis", {
+      children,
     });
   }
 
-  // Use for loop to push the variables onto the builtins array to avoid blowing the stack.
-  // Note: spreading values from a large array (e.g. `b.push(...oneBillionValues)`) can cause a stack overflow.
-  private processTopLevelDeclarations(): Builtin[] {
-    const builtins: Builtin[] = [];
+  private processTopLevelDeclarations(): Ast[] {
+    const builtins: Ast[] = [];
+    const previouslyParsed: Set<DeclarationTypes> = new Set();
+
     for (const file of this.sourceFiles) {
       for (const declaration of file.getVariableDeclarations()) {
+        if (previouslyParsed.has(declaration)) continue;
         const processed = this.processVariable(declaration);
         for (const builtin of processed) {
           builtins.push(builtin);
         }
+        previouslyParsed.add(declaration);
       }
 
       for (const declaration of file.getFunctions()) {
+        if (previouslyParsed.has(declaration)) continue;
         const processed = this.processFunction(declaration);
         builtins.push(processed);
+        previouslyParsed.add(declaration);
       }
 
       for (const declaration of file.getModules()) {
+        if (previouslyParsed.has(declaration)) continue;
         const processed = this.processModule(declaration);
         builtins.push(processed);
+        previouslyParsed.add(declaration);
       }
 
       for (const declaration of file.getClasses()) {
+        if (previouslyParsed.has(declaration)) continue;
         const processed = this.processClass(declaration);
         builtins.push(processed);
+        previouslyParsed.add(declaration);
       }
     }
     return builtins;
   }
 
-  private processVariable(declaration: VariableDeclaration): Builtin[] {
-    if (this.processedDeclarations.has(declaration)) return [];
-    this.processedDeclarations.add(declaration);
-    return this.collectInterfaces(declaration.getNameNode(), declaration.getTypeNode());
-  }
-
-  private processFunction(declaration: FunctionDeclaration): Builtin {
-    return this.globalThisBuiltin([this.processMethod(declaration, "")]);
-  }
-
-  private processClass(declaration: ClassDeclaration): Builtin {
+  private processVariable(declaration: VariableDeclaration): Ast[] {
     const nameNode = declaration.getNameNode();
-    if (!nameNode) return this.globalThisBuiltin(); // Classes can be anonymous, but top-level classes should always have a name.
+    const typeNode = declaration.getTypeNode();
+
+    if (typeNode === undefined || isTokenKind(typeNode.getKind())) {
+      return [this.processBasicVariable(nameNode, typeNode)];
+    }
+
+    return this.collectInterfaces(nameNode, typeNode);
+  }
+
+  private processBasicVariable(nameNode: BindingName, typeNode: TypeNode | undefined) {
+    const name = nameNode.getText();
+    return this.createAst(name, "VariableDeclaration", {
+      returns: [typeNode ? this.resolveType(typeNode) : this.createUndefinedKeywordAst()],
+    });
+  }
+
+  private createUndefinedKeywordAst() {
+    return this.createAst(this.getNextId(), "UndefinedKeyword", {
+      text: "undefined",
+    });
+  }
+
+  private processFunction(declaration: FunctionDeclaration): Ast {
+    return this.globalThisAst([this.processMethod(declaration, "")]);
+  }
+
+  // TODO: Add generics?
+  // const generics = decl.getTypeParameters().map((tp) => this.resolveTypeParameter(tp)), // Generics
+  private processClass(declaration: ClassDeclaration): Ast {
+    const nameNode = declaration.getNameNode();
+    if (!nameNode) return this.globalThisAst(); // Classes can be anonymous, but top-level classes should always have a name.
 
     const className = nameNode.getText();
     const extendsExpression = declaration.getExtends();
     const extendsName = extendsExpression ? [extendsExpression.getText()] : [];
 
-    // TODO: Add generics?
-    // const generics = decl.getTypeParameters().map((tp) => this.resolveTypeParameter(tp)), // Generics
-    const builtin = this.createBuiltin(className, declaration.getKindName(), { extends: extendsName });
-    this.processConstructors(declaration.getConstructors(), className).forEach((ctor) => builtin.members.push(ctor));
-    this.processProperties(declaration, className).forEach((prop) => builtin.members.push(prop));
-    this.processMethods(declaration, className).forEach((method) => builtin.members.push(method));
+    const builtin = this.createAst(className, declaration.getKindName(), { extends: extendsName });
+    for (const ctor of declaration.getConstructors()) {
+      const processed = this.processConstructor(ctor, className);
+      builtin.children.push(processed);
+    }
+
+    for (const prop of this.processProperties(declaration, className)) {
+      builtin.children.push(prop);
+    }
+
+    for (const method of this.processMethods(declaration, className)) {
+      builtin.children.push(method);
+    }
 
     return builtin;
   }
 
-  private processModule(declaration: ModuleDeclaration): Builtin {
-    const builtin = this.createBuiltin(declaration.getName(), declaration.getKindName(), {});
+  private processModule(declaration: ModuleDeclaration): Ast {
+    const builtin = this.createAst(declaration.getName(), declaration.getKindName(), {});
 
     for (const f of declaration.getFunctions()) {
       const processedFunction = this.processFunction(f);
-      builtin.members.push(processedFunction);
+      builtin.children.push(processedFunction);
     }
 
     for (const m of declaration.getModules()) {
       const processedModule = this.processModule(m);
-      builtin.members.push(processedModule);
+      builtin.children.push(processedModule);
     }
 
     for (const c of declaration.getClasses()) {
       const processedClass = this.processClass(c);
-      builtin.members.push(processedClass);
+      builtin.children.push(processedClass);
     }
 
     for (const v of declaration.getVariableDeclarations()) {
       const processedVariables = this.processVariable(v);
       for (const processed of processedVariables) {
-        builtin.members.push(processed);
+        builtin.children.push(processed);
       }
     }
 
@@ -213,10 +261,19 @@ export class Collector {
     return typeName !== null && interfaceName === typeName;
   }
 
-  private collectInterfaces(bindingNameNode: BindingName, typeNode?: TypeNode): Builtin[] {
-    const builtins: Builtin[] = [];
+  // TODO: Make this faster by...
+  // 1) pre-caching unparsed initerfaces and
+  // 2) using a map to look them up by name
+  private collectInterfaces(bindingNameNode: BindingName, typeNode?: TypeNode): Ast[] {
+    const builtins: Ast[] = [];
     const bindingName = bindingNameNode.getText();
     const typeName = typeNode ? typeNode.getText() : null;
+
+    if (typeNode && isToken(typeNode.getType())) {
+      //
+      if (typeNode?.getKind() === SyntaxKind.TypeReference) {
+      }
+    }
 
     for (const sourceFile of this.sourceFiles) {
       for (const interfaceDeclaration of sourceFile.getInterfaces()) {
@@ -228,30 +285,26 @@ export class Collector {
     return builtins;
   }
 
-  private processInterface(
-    interfaceDeclaration: InterfaceDeclaration,
-    bindingName: string,
-    typeName: string | null,
-  ): Builtin {
-    const interfaceName = interfaceDeclaration.getName();
+  private processInterface(declaration: InterfaceDeclaration, bindingName: string, typeName: string | null): Ast {
+    const interfaceName = declaration.getName();
 
     if (this.isStaticInterface(interfaceName, bindingName, typeName)) {
-      return this.processStaticInterface(interfaceDeclaration, bindingName);
+      return this.processStaticInterface(declaration, bindingName);
     }
 
     if (this.isInstanceInterface(interfaceName, bindingName)) {
-      return this.processInstanceInterface(interfaceName, bindingName, interfaceDeclaration);
+      return this.processInstanceInterface(interfaceName, bindingName, declaration);
     }
 
     if (this.isConstructorInterface(interfaceName, typeName)) {
-      return this.processConstructorInterface(interfaceDeclaration, bindingName);
+      return this.processConstructorInterface(declaration, bindingName);
     }
 
-    return this.globalThisBuiltin();
+    return this.globalThisAst();
   }
 
-  private processConstructorInterface(interfaceDeclaration: InterfaceDeclaration, bindingName: string): Builtin {
-    const builtin = this.createBuiltin(bindingName, "InterfaceDeclaration", {});
+  private processConstructorInterface(interfaceDeclaration: InterfaceDeclaration, bindingName: string): Ast {
+    const builtin = this.createAst(bindingName, "InterfaceDeclaration", {});
 
     for (const extendsExpression of interfaceDeclaration.getExtends()) {
       builtin.extends.push(extendsExpression.getText());
@@ -260,23 +313,23 @@ export class Collector {
     const constructSignatures = interfaceDeclaration.getConstructSignatures();
     const processedConstructSignatures = this.processConstructSignatures(constructSignatures, bindingName);
     for (const constructSignature of processedConstructSignatures) {
-      builtin.members.push(constructSignature);
+      builtin.children.push(constructSignature);
     }
 
     const callSignatures = interfaceDeclaration.getCallSignatures();
     const processedCallSignatures = this.processCallSignatures(callSignatures, bindingName);
     for (const callSignature of processedCallSignatures) {
-      builtin.members.push(callSignature);
+      builtin.children.push(callSignature);
     }
 
     const processedProperties = this.processProperties(interfaceDeclaration, bindingName);
     for (const property of processedProperties) {
-      builtin.members.push(property);
+      builtin.children.push(property);
     }
 
     const processedMethods = this.processMethods(interfaceDeclaration, bindingName);
     for (const method of processedMethods) {
-      builtin.members.push(method);
+      builtin.children.push(method);
     }
 
     return builtin;
@@ -286,9 +339,9 @@ export class Collector {
     interfaceName: string,
     bindingName: string,
     declaration: InterfaceDeclaration,
-  ): Builtin {
+  ): Ast {
     const formattedName = this.formatInstanceName(interfaceName, bindingName);
-    const builtin = this.createBuiltin(bindingName, "InterfaceDeclaration", {});
+    const builtin = this.createAst(bindingName, "InterfaceDeclaration", {});
 
     const extendsList = declaration.getExtends();
     for (const extendedType of extendsList) {
@@ -298,39 +351,39 @@ export class Collector {
     const constructSignatures = declaration.getConstructSignatures();
     const processedConstructSignatures = this.processConstructSignatures(constructSignatures, formattedName);
     for (const constructSignature of processedConstructSignatures) {
-      builtin.members.push(constructSignature);
+      builtin.children.push(constructSignature);
     }
 
     const callSignatures = declaration.getCallSignatures();
     const processedCallSignatures = this.processCallSignatures(callSignatures, formattedName);
     for (const callSignature of processedCallSignatures) {
-      builtin.members.push(callSignature);
+      builtin.children.push(callSignature);
     }
 
     const properties = this.processProperties(declaration, interfaceName);
     for (const property of properties) {
-      builtin.members.push(property);
+      builtin.children.push(property);
     }
 
     const methods = this.processMethods(declaration, bindingName);
     for (const method of methods) {
-      builtin.members.push(method);
+      builtin.children.push(method);
     }
 
     return builtin;
   }
 
-  private processStaticInterface(interfaceDeclaration: InterfaceDeclaration, bindingName: string): Builtin {
-    const builtin = this.createBuiltin(bindingName, "InterfaceDeclaration", {});
+  private processStaticInterface(interfaceDeclaration: InterfaceDeclaration, bindingName: string): Ast {
+    const builtin = this.createAst(bindingName, "InterfaceDeclaration", {});
 
     const properties = this.processProperties(interfaceDeclaration, bindingName);
     for (const property of properties) {
-      builtin.members.push(property);
+      builtin.children.push(property);
     }
 
     const methods = this.processMethods(interfaceDeclaration, bindingName);
     for (const method of methods) {
-      builtin.members.push(method);
+      builtin.children.push(method);
     }
 
     return builtin;
@@ -497,24 +550,13 @@ export class Collector {
       params: [],
       returns: [],
       text: null,
+      children: [],
+      extends: [],
     };
   }
 
   private createAst(id: string, kind: string, ast: Omit<Partial<Ast>, "id" | "name" | "kind"> = {}): Ast {
     return Object.assign({}, this.getAstDefaults(), ast, { id, kind, name: id });
-  }
-
-  private getBuiltinDefaults() {
-    return {
-      extends: [],
-      kind: "Unknown",
-      members: [],
-      name: "",
-    };
-  }
-
-  private createBuiltin(name: string, kind: string, builtin: Omit<Partial<Builtin>, "name" | "kind"> = {}): Builtin {
-    return Object.assign({}, this.getBuiltinDefaults(), builtin, { name, kind });
   }
 
   private getMeta(param: ParameterDeclaration): string[] {
@@ -625,6 +667,8 @@ export class Collector {
         ast.returns.push(resolvedType);
       }
     }
+
+    return ast;
   }
 
   private handleArrayType(node: ArrayTypeNode): Ast {
