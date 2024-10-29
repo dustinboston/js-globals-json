@@ -20,7 +20,7 @@ import * as assertions from "./assertions.ts";
 import * as types from "./types.ts";
 import { jsInterfaces } from "../data/interfaces.ts";
 
-export class Collector {
+export class TsLibParser {
   private sourceFiles: tsMorph.SourceFile[];
   private idCounter = 0;
   private variableNames: Set<string> = jsInterfaces;
@@ -37,7 +37,7 @@ export class Collector {
     this.sourceFiles = this.project.getSourceFiles();
   }
 
-  public collectGlobals(): Record<string, types.Ast[]> {
+  public transpileToGlobalsJson(): Record<string, types.Ast[]> {
     const groupedAsts: Record<string, types.Ast[]> = {};
     this.findAllVariableNames();
 
@@ -1208,101 +1208,4 @@ export class Collector {
 }
 
 if (import.meta.main) {
-  const project = new tsMorph.Project({
-    compilerOptions: { noLib: true },
-  });
-
-  const col = new Collector(project, [
-    "./tslib/decorators.txt",
-    "./tslib/decorators.legacy.txt",
-    "./tslib/dom.generated.txt",
-    "./tslib/es2015.symbol.txt",
-    "./tslib/es2015.iterable.txt",
-    "./tslib/es5.txt",
-    "./tslib/es2015.symbol.wellknown.txt",
-    "./tslib/es2015.symbol.txt",
-    "./tslib/es2015.reflect.txt",
-    "./tslib/es2015.proxy.txt",
-    "./tslib/es2015.promise.txt",
-    "./tslib/es2015.iterable.txt",
-    "./tslib/es2015.generator.txt",
-    "./tslib/es2015.core.txt",
-    "./tslib/es2015.collection.txt",
-    "./tslib/es2015.txt",
-    "./tslib/es2016.array.include.txt",
-    "./tslib/es2016.intl.txt",
-    "./tslib/es2015.iterable.txt",
-    "./tslib/es2016.txt",
-    "./tslib/es2017.arraybuffer.txt",
-    "./tslib/es2017.date.txt",
-    "./tslib/es2017.intl.txt",
-    "./tslib/es2017.object.txt",
-    "./tslib/es2017.sharedmemory.txt",
-    "./tslib/es2017.string.txt",
-    "./tslib/es2017.typedarrays.txt",
-    "./tslib/es2017.txt",
-    "./tslib/es2018.asyncgenerator.txt",
-    "./tslib/es2018.asynciterable.generated.txt",
-    "./tslib/es2018.intl.txt",
-    "./tslib/es2018.promise.txt",
-    "./tslib/es2018.regexp.txt",
-    "./tslib/es2018.txt",
-    "./tslib/es2019.array.txt",
-    "./tslib/es2019.intl.txt",
-    "./tslib/es2019.object.txt",
-    "./tslib/es2019.string.txt",
-    "./tslib/es2019.symbol.txt",
-    "./tslib/es2019.txt",
-    "./tslib/es2020.bigint.txt",
-    "./tslib/es2020.intl.txt",
-    "./tslib/es2020.symbol.wellknown.txt",
-    "./tslib/es2020.date.txt",
-    "./tslib/es2020.number.txt",
-    "./tslib/es2020.promise.txt",
-    "./tslib/es2020.sharedmemory.txt",
-    "./tslib/es2020.string.txt",
-    "./tslib/es2020.txt",
-    "./tslib/es2021.intl.txt",
-    "./tslib/es2021.promise.txt",
-    "./tslib/es2021.string.txt",
-    "./tslib/es2021.weakref.txt",
-    "./tslib/es2021.txt",
-    "./tslib/es2022.array.txt",
-    "./tslib/es2022.error.txt",
-    "./tslib/es2022.intl.txt",
-    "./tslib/es2022.object.txt",
-    "./tslib/es2022.regexp.txt",
-    "./tslib/es2022.string.txt",
-    "./tslib/es2022.txt",
-    "./tslib/es2023.array.txt",
-    "./tslib/es2023.collection.txt",
-    "./tslib/es2023.intl.txt",
-    "./tslib/dom.asynciterable.generated.txt",
-    "./tslib/dom.iterable.generated.txt",
-    "./tslib/scripthost.txt",
-    "./tslib/webworker.importscripts.txt",
-    "./tslib/es2023.txt",
-    // ES2024
-    "./tslib/es2024.arraybuffer.txt",
-    "./tslib/es2024.collection.txt",
-    "./tslib/es2024.object.txt",
-    "./tslib/es2024.promise.txt",
-    "./tslib/es2024.regexp.txt",
-    "./tslib/es2024.sharedmemory.txt",
-    "./tslib/es2024.string.txt",
-    "./tslib/es2024.txt",
-    // ESNext
-    "./tslib/esnext.intl.txt",
-    "./tslib/esnext.decorators.txt",
-    "./tslib/esnext.disposable.txt",
-    "./tslib/esnext.collection.txt",
-    "./tslib/esnext.array.txt",
-    "./tslib/esnext.iterator.txt",
-    // Webworkers
-    "./tslib/webworker.generated.txt",
-    "./tslib/webworker.asynciterable.generated.txt",
-    "./tslib/webworker.iterable.generated.txt",
-  ]);
-  const globals = col.collectGlobals();
-  console.log(JSON.stringify(globals, null, 2));
 }

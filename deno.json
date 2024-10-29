@@ -1,7 +1,7 @@
 {
   "ignore": ["tslib/*"],
   "tasks": {
-    "json": "deno run -A ./src/collect.ts > globals.json",
+    "transpile-tslib": "deno run -A ./bin/transpile_tslib.ts > globals.json",
     "test": "deno test --parallel"
   },
   "imports": {

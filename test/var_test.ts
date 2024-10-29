@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import ts from "typescript";
 import { assertEquals } from "@std/assert";
-import { Parser } from "../src/parser.ts";
+import { TsLibParser } from "../src/tslib_parser.ts";
 import { TypeResolver } from "../src/type_resolver.ts";
 
 import _varEmptyJson from "./fixtures/var_empty.json" with { type: "json" };
@@ -14,18 +14,18 @@ const varNewJson = _varNewJson as any;
 
 Deno.test("Variable declaration with missing interfaces is an empty object", () => {
   const program = ts.createProgram(["./test/fixtures/var_missing.d.ts"], { noLib: true });
-  const result = new Parser(program, new TypeResolver(program)).parse();
+  const result = new TsLibParser(program, new TypeResolver(program)).parse();
   assertEquals(result, varMissingJson);
 });
 
 Deno.test("Variable declaration with empty interfaces is an empty object", () => {
   const program = ts.createProgram(["./test/fixtures/var_empty.d.ts"], { noLib: true });
-  const result = new Parser(program, new TypeResolver(program)).parse();
+  const result = new TsLibParser(program, new TypeResolver(program)).parse();
   assertEquals(result, varEmptyJson);
 });
 
 Deno.test("Variable declaration with a constructor has a 'new' method", () => {
   const program = ts.createProgram(["./test/fixtures/var_new.d.ts"], { noLib: true });
-  const result = new Parser(program, new TypeResolver(program)).parse();
+  const result = new TsLibParser(program, new TypeResolver(program)).parse();
   assertEquals(result, varNewJson);
 });
