@@ -11,7 +11,7 @@
     "typescript": "npm:typescript@^5.5.3"
   },
   "fmt": {
-    "lineWidth": 120,
+    "lineWidth": 160,
     "exclude": ["./data/*"]
   },
   "lint": {
