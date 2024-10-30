@@ -1,37 +1,4 @@
-import ts from "typescript";
-import type { BooleanMetaValues } from "./types.ts";
-import { getBooleanMetaValue, getKindName, isBooleanMetaValue } from "./utils.ts";
-//import { jsInterfaces } from "../data/interfaces.ts";
-
-//const dontExpandInterfaces = new Set([
-//  "A",
-//  "B",
-//  "C",
-//  "D",
-//  "E",
-//  "F",
-//  "G",
-//  "H",
-//  "I",
-//  "J",
-//  "K",
-//  "L",
-//  "M",
-//  "N",
-//  "O",
-//  "P",
-//  "Q",
-//  "R",
-//  "S",
-//  "T",
-//  "U",
-//  "V",
-//  "W",
-//  "X",
-//  "Y",
-//  "Z",
-//  ...jsInterfaces,
-//]);
+import * as tsMorph from "ts-morph";
 
 export type MemberKind =
   | "Constructor"
@@ -69,50 +36,26 @@ export type MinifiedAst = {
  * A builder class for constructing a serialized ast.
  */
 export class Ast {
-  /**
-   * The id of the object. This is used to uniquely identify the object.
-   * Prefixing it with an ~ lets us know not to add it to the globals (there are no global values that start with ~)
-   */
-  private id: string = "";
-
-  /** The kind of the object. This is used to determine the type of the object. This is a simplied version of the TypeScript API's `SyntaxKinds` */
-  private kind: ts.SyntaxKind;
-
-  /**
-   * Meta information about the object, as boolean flags (if present it's true, absent is false) This includes
-   * metadata about the object such as whether it is a declaration, extends another object, or is read-only. This is a list of the available types:
-   */
-  private meta: Set<BooleanMetaValues> = new Set();
-
-  /** The name of the objects and properties such as `String`, `ArrayConstructor`, and `encodeURI`. */
   private name: string;
-
-  /** An array of `Ast` objects that represent function/method parameters, OR members of an object. */
+  private kind: tsMorph.SyntaxKind;
+  private meta: Set<string> = new Set();
   private params: Ast[] = [];
-
-  /** Actual text of a language-defined keyword or token value, such as `string`, `await`. */
   private text?: string;
-
-  /** An array of `Ast` objects that represent the type(s) of an object, property, function return, etc. */
   private returns: Ast[] = [];
-
-  /** An array of `Ast` objects that represent the type parameters of a generic type like `T`, `U`, etc. */
   private generics: Ast[] = [];
 
-  constructor(id: string, name: string, kind: number) {
-    if (!id) throw new TypeError("Ast requires an id");
+  constructor(name: string, kind: tsMorph.SyntaxKind) {
     if (!name) throw new TypeError("Ast requires a name");
     if (!kind) throw new TypeError("Ast requires a kind");
 
-    this.id = id;
     this.name = name;
     this.kind = kind;
   }
 
   public serialize() {
     const obj: SerializedAst = {
-      id: this.id,
-      kind: getKindName(this.kind),
+      id: this.name,
+      kind: this.kind.getKindName(),
       meta: [],
       name: this.name,
       params: [],
@@ -141,7 +84,7 @@ export class Ast {
     }
 
     if (this.meta.size) {
-      obj.meta = Array.from(this.meta).map((m) => getBooleanMetaValue(m)).filter((v) => v !== undefined);
+      obj.meta = Array.from(this.meta);
     }
 
     obj.text = (this.text) ? this.text : null;
@@ -162,7 +105,7 @@ export class Ast {
     //}
 
     // Unminified id
-    obj.id = this.id;
+    obj.id = this.name;
 
     // Minified id
     //if (this.id && this.id !== this.name && !this.id.startsWith("~")) {
@@ -220,10 +163,10 @@ export class Ast {
     //}
 
     if (this.meta.size) {
-      if (this.meta.has(ts.SyntaxKind.DotDotDotToken)) {
+      if (this.meta.has("rest")) {
         obj.name = `...${obj.name ?? obj.id ?? ""}`;
       }
-      if (this.meta.has(ts.SyntaxKind.QuestionToken)) {
+      if (this.meta.has("optional")) {
         obj.name = `${obj.name ?? obj.id ?? ""}?`;
       }
     }
@@ -269,38 +212,10 @@ export class Ast {
       this.name = this.name.replaceAll(fromOldPrefix, toNewPrefix);
     }
 
-    if (this.id.startsWith(fromOldPrefix)) {
-      const newId = this.id.replaceAll(fromOldPrefix, toNewPrefix);
-      this.id = newId;
+    if (this.name.startsWith(fromOldPrefix)) {
+      const newId = this.name.replaceAll(fromOldPrefix, toNewPrefix);
+      this.name = newId;
     }
-  }
-
-  /**
-   * Sets the unique identifier for this object.
-   * @param id The new identifier for this object.
-   * @returns A reference to this object for method chaining.
-   */
-  public setId(id?: string): this {
-    if (id) {
-      this.id = id;
-    }
-    return this;
-  }
-
-  public getId(): string {
-    return this.id;
-  }
-
-  /**
-   * Sets the kind of the Ast instance.
-   * @param kind The new kind to set for this Ast.
-   * @returns A reference to this Ast instance for method chaining.
-   */
-  public setKind(kind: number) {
-    if (typeof kind === "number") {
-      this.kind = kind;
-    }
-    return this;
   }
 
   /**
@@ -316,13 +231,11 @@ export class Ast {
    * @param metaTypes - An array of meta types to set for this ast.
    * @returns A reference to this ast instance for method chaining.
    */
-  public setMeta(metaTypes?: ts.SyntaxKind[]) {
+  public setMeta(metaTypes?: string[]) {
     if (!metaTypes) return this;
 
     for (const meta of metaTypes) {
-      if (isBooleanMetaValue(meta)) {
-        this.meta.add(meta);
-      }
+      this.meta.add(meta);
     }
 
     return this;
@@ -330,90 +243,52 @@ export class Ast {
 
   public getGenericKind(): string {
     const prefix = this.name.includes(".prototype.") ? "Instance" : "Static";
-    const classPrefix = this.meta.has(ts.SyntaxKind.StaticKeyword) ? "Static" : "Instance";
+    const classPrefix = this.meta.has("static") ? "Static" : "Instance";
 
     switch (this.kind) {
-      case ts.SyntaxKind.GetAccessor:
-      case ts.SyntaxKind.SetAccessor:
-      case ts.SyntaxKind.PropertySignature: // could be a function
+      case "GetAccessor":
+      case "SetAccessor":
+      case "PropertySignature":
         return `${prefix}Property`;
-      case ts.SyntaxKind.PropertyDeclaration:
+      case "PropertyDeclaration":
         return `${classPrefix}Property`;
-      case ts.SyntaxKind.MethodSignature:
-      case ts.SyntaxKind.MethodDeclaration:
+      case "MethodSignature":
+      case "MethodDeclaration":
         return `${prefix}Method`;
-      case ts.SyntaxKind.CallSignature:
-      case ts.SyntaxKind.ConstructSignature:
-      case ts.SyntaxKind.Constructor:
+      case "CallSignature":
+      case "ConstructSignature":
+      case "Constructor":
         return "Constructor";
-      case ts.SyntaxKind.FunctionDeclaration: // Top-level
+      case "FunctionDeclaration":
         return "StaticMethod";
-
-      case ts.SyntaxKind.VariableDeclaration:
-      case ts.SyntaxKind.InterfaceDeclaration:
-      case ts.SyntaxKind.TypeAliasDeclaration:
-      case ts.SyntaxKind.ClassDeclaration:
-      case ts.SyntaxKind.ModuleDeclaration:
+      case "VariableDeclaration":
+      case "InterfaceDeclaration":
+      case "TypeAliasDeclaration":
+      case "ClassDeclaration":
+      case "ModuleDeclaration":
       default:
-        return getKindName(this.kind);
+        return this.kind.getKindName();
     }
   }
 
-  /**
-   * Adds a new meta type to the ast.
-   * @param metaType - The meta type to add to the ast.
-   * @returns A reference to this ast instance for method chaining.
-   */
-  public addMeta(metaKind: BooleanMetaValues | number) {
-    if (isBooleanMetaValue(metaKind)) {
-      this.meta.add(metaKind);
-    }
+  public addMeta(metaKind: string) {
+    this.meta.add(metaKind); // TODO: Validate input
     return this;
   }
 
-  /**
-   * Checks if the ast has the specified meta type.
-   * @param metaType - The meta type to check for.
-   * @returns `true` if the ast has the specified meta type, `false` otherwise.
-   */
-  public hasMeta(metaKind: BooleanMetaValues | number) {
+  public hasMeta(metaKind: string) {
     return this.meta.has(metaKind);
   }
 
-  /**
-   * Sets the name of the Ast instance.
-   * @param name - The new name to set for this Ast.
-   * @returns A reference to this Ast instance for method chaining.
-   */
-  public setName(name?: string) {
-    if (name) {
-      this.name = name;
-    }
-    return this;
-  }
-
-  /**
-   * Gets the name of the Ast instance.
-   * @returns The name of the Ast instance.
-   */
   public getName() {
     return this.name;
   }
 
-  /**
-   * Gets an array of serialized Ast instances representing the types of this Ast.
-   * @returns An array of serialized Ast instances.
-   */
-  public getType(): Ast[] {
+  public getReturns(): Ast[] {
     return this.returns;
   }
 
-  /**
-   * Adds a new type to the Ast instance.
-   * @param type - The type to add to the Ast.
-   * @returns A reference to this Ast instance for method chaining.
-   */
-  public addType(type?: Ast) {
+  public addReturns(type?: Ast) {
     if (type && type instanceof Ast) {
       this.returns.push(type);
     }
@@ -424,11 +299,6 @@ export class Ast {
     return this.params;
   }
 
-  /**
-   * Sets the parameters for this object.
-   * @param parameters - An array of ParameterBuilder instances to set as the parameters.
-   * @returns A reference to this Ast instance for method chaining.
-   */
   public setParameters(parameters: Ast[]) {
     if (parameters && Array.isArray(parameters)) {
       this.params = parameters;
@@ -436,11 +306,6 @@ export class Ast {
     return this;
   }
 
-  /**
-   * Adds a new parameter to the Ast instance.
-   * @param parameter - The ParameterBuilder instance to add as a parameter.
-   * @returns A reference to this Ast instance for method chaining.
-   */
   public addParameter(parameter: Ast) {
     if (parameter && parameter instanceof Ast) {
       this.params.push(parameter);
@@ -448,43 +313,24 @@ export class Ast {
     return this;
   }
 
-  /**
-   * Sets the type parameters for this Ast instance.
-   * @param typeParameters - An array of ParameterBuilder instances to set as the type parameters.
-   * @returns A reference to this Ast instance for method chaining.
-   */
-  public setTypeParameters(typeParameters: Ast[]) {
+  public setGenerics(typeParameters: Ast[]) {
     if (typeParameters && Array.isArray(typeParameters)) {
       this.generics = typeParameters;
     }
     return this;
   }
 
-  /**
-   * Gets the type parameters for this Ast instance.
-   * @returns An array of Ast instances representing the type parameters.
-   */
-  public getTypeParameters(): Ast[] {
+  public getGenerics(): Ast[] {
     return this.generics;
   }
 
-  /**
-   * Adds a new type parameter to the Ast instance.
-   * @param typeParameter - The ParameterBuilder instance to add as a type parameter.
-   * @returns A reference to this Ast instance for method chaining.
-   */
-  public addTypeParameter(typeParameter: Ast) {
+  public addGeneric(typeParameter: Ast) {
     if (typeParameter && typeParameter instanceof Ast) {
       this.generics.push(typeParameter);
     }
     return this;
   }
 
-  /**
-   * Sets the text property of this object.
-   * @param text - The new text value to set, or undefined to clear the text.
-   * @returns A reference to this Ast instance for method chaining.
-   */
   public setText(text?: string) {
     if (text) {
       this.text = text;

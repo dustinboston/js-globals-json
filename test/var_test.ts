@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import ts from "typescript";
 import { assertEquals } from "@std/assert";
-import { TsLibParser } from "../src/tslib_parser.ts";
+import { TsLibParser } from "../src/tslib_parser_working.ts";
 import { TypeResolver } from "../src/type_resolver.ts";
 
 import _varEmptyJson from "./fixtures/var_empty.json" with { type: "json" };

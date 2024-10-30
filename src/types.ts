@@ -1,5 +1,7 @@
 import * as tsMorph from "ts-morph";
 
+export type JsGlobals = Record<string, Ast[]>;
+
 export type DeclarationTypes =
   | tsMorph.ClassDeclaration
   | tsMorph.FunctionDeclaration

@@ -1456,4 +1456,4 @@ export const notInTsLibsYet = new Set([
   "XRWebGLDepthInformation",
   "XRWebGLLayer",
   "XRWebGLSubImage",
-]);
+] as const);
