@@ -2,7 +2,7 @@
   "ignore": ["tslib/*"],
   "tasks": {
     "transpile-tslib": "deno run -A ./bin/transpile_tslib.ts > globals.json",
-    "test": "deno test --parallel"
+    "test": "deno test -A --parallel"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.4",
@@ -16,5 +16,8 @@
   },
   "lint": {
     "exclude": ["./data/*"]
+  },
+  "test": {
+    "include": ["./test/basic_test.ts", "./test/access_test.ts"]
   }
 }
