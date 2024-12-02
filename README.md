@@ -1,4 +1,4 @@
-# Javascript Catalog
+# EcmaCat: ECMA/Javascript Catalog of Globals
 
 > A human-friendly, machine-readable list of standard JavaScript globals with type information.
 
