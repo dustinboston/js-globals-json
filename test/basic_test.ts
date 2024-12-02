@@ -1,7 +1,13 @@
 import { assert } from "@std/assert";
 import json from "../globals.json" with { type: "json" };
+import { SerializedAst } from "../src/Types.ts";
 
 const globalKeys = new Set(Object.keys(json));
+const globalThisKeys = new Set((json as any)["globalThis"].members.map((x: SerializedAst) => x.name));
+
+function getKeys() {
+  return { globalKeys, globalThisKeys };
+}
 
 // Verify that non-global interfaces and variables do NOT exist
 // =============================================================
@@ -22,24 +28,28 @@ Deno.test("Test undefined does NOT exist", () => {
   assert(!globalKeys.has("undefined"));
 });
 
+// TODO: This should be a "hidden" class, but if we want to use it as a type reference it has to be present in the JSON
+Deno.test("Test AsyncGenerator does NOT exist", () => {
+  assert(!globalKeys.has("AsyncGenerator"));
+});
+
+// TODO: This should be a "hidden" class, but if we want to use it as a type reference it has to be present in the JSON
+Deno.test("Test AsyncGeneratorFunction does NOT exist", () => {
+  assert(!globalKeys.has("AsyncGeneratorFunction"));
+});
+
+// TODO: This should be a "hidden" class, but if we want to use it as a type reference it has to be present in the JSON
+Deno.test("Test Generator does NOT exist", () => {
+  assert(!globalKeys.has("Generator"));
+});
+
+// TODO: This should be a "hidden" class, but if we want to use it as a type reference it has to be present in the JSON
+Deno.test("Test GeneratorFunction does NOT exist", () => {
+  assert(!globalKeys.has("GeneratorFunction"));
+});
+
 // Next, verify that the interfaces that SHOULD be defined, are.
 // =============================================================
-
-Deno.test("Test AsyncGenerator exists", () => {
-  assert(globalKeys.has("AsyncGenerator"));
-});
-
-Deno.test("Test AsyncGeneratorFunction exists", () => {
-  assert(globalKeys.has("AsyncGeneratorFunction"));
-});
-
-Deno.test("Test Generator exists", () => {
-  assert(globalKeys.has("Generator"));
-});
-
-Deno.test("Test GeneratorFunction exists", () => {
-  assert(globalKeys.has("GeneratorFunction"));
-});
 
 Deno.test("Test AbortController exists", () => {
   assert(globalKeys.has("AbortController"));
@@ -333,7 +343,7 @@ Deno.test("Test CryptoKey exists", () => {
   assert(globalKeys.has("CryptoKey"));
 });
 
-Deno.test("Test CSS exists", () => {
+Deno.test("Test CSS.highlights exists", () => {
   assert(globalKeys.has("CSS"));
 });
 
@@ -1242,7 +1252,7 @@ Deno.test("Test ImageData exists", () => {
 });
 
 Deno.test("Test Infinity exists", () => {
-  assert(globalKeys.has("Infinity"));
+  assert(getKeys().globalThisKeys.has("Infinity"));
 });
 
 Deno.test("Test InputDeviceInfo exists", () => {
@@ -1490,7 +1500,7 @@ Deno.test("Test NamedNodeMap exists", () => {
 });
 
 Deno.test("Test NaN exists", () => {
-  assert(globalKeys.has("NaN"));
+  assert(globalThisKeys.has("NaN"));
 });
 
 Deno.test("Test NavigationPreloadManager exists", () => {
@@ -2322,7 +2332,7 @@ Deno.test("Test SVGPatternElement exists", () => {
 });
 
 Deno.test("Test SVGPoint exists", () => {
-  assert(globalKeys.has("SVGPoint"));
+  assert(getKeys().globalThisKeys.has("SVGPoint"));
 });
 
 Deno.test("Test SVGPointList exists", () => {
@@ -2346,7 +2356,7 @@ Deno.test("Test SVGRadialGradientElement exists", () => {
 });
 
 Deno.test("Test SVGRect exists", () => {
-  assert(globalKeys.has("SVGRect"));
+  assert(getKeys().globalThisKeys.has("SVGRect"));
 });
 
 Deno.test("Test SVGRectElement exists", () => {

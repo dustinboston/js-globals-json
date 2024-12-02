@@ -1,0 +1,309 @@
+{
+  "Photon": {
+    "Photon::wavelength": [
+      {
+        "kind": "InstanceProperty",
+        "params": null,
+        "returns": "number"
+      }
+    ],
+    "Photon::getFrequency": [
+      {
+        "kind": "InstanceMethod",
+        "params": null,
+        "returns": "number"
+      }
+    ],
+    "Photon::getEnergy": [
+      {
+        "kind": "InstanceMethod",
+        "params": null,
+        "returns": "number"
+      },
+      {
+        "kind": "InstanceMethod",
+        "params": {
+          "unit": "(or 'J' 'eV')"
+        },
+        "returns": "number"
+      },
+      {
+        "kind": "InstanceMethod",
+        "params": null,
+        "returns": "number"
+      },
+      {
+        "kind": "InstanceMethod",
+        "params": {
+          "unit": "'J'"
+        },
+        "returns": "number"
+      },
+      {
+        "kind": "InstanceMethod",
+        "params": {
+          "unit": "'eV'"
+        },
+        "returns": "number"
+      }
+    ],
+    "Photon::getMomentum": [
+      {
+        "kind": "InstanceMethod",
+        "params": null,
+        "returns": "number"
+      }
+    ],
+    "Photon::getColor": [
+      {
+        "kind": "InstanceMethod",
+        "params": null,
+        "returns": "(or string null)"
+      }
+    ],
+    "Photon::isVisible": [
+      {
+        "kind": "InstanceMethod",
+        "params": null,
+        "returns": "boolean"
+      }
+    ],
+    "Photon::convertWavelength": [
+      {
+        "kind": "InstanceMethod",
+        "params": {
+          "unit": "Unit"
+        },
+        "returns": "(or Unit 'nm' number string)"
+      },
+      {
+        "kind": "InstanceMethod",
+        "params": {
+          "unit": "Unit"
+        },
+        "returns": "(or Unit 'nm' number string)"
+      }
+    ],
+    "Photon.new": [
+      {
+        "kind": "Constructor",
+        "params": {
+          "wavelength": "number"
+        },
+        "returns": "Photon"
+      },
+      {
+        "kind": "Constructor",
+        "params": {
+          "wavelength": "number",
+          "unit": "Unit"
+        },
+        "returns": "Photon"
+      }
+    ],
+    "Photon": [
+      {
+        "kind": "Constructor",
+        "params": {
+          "wavelength": "number"
+        },
+        "returns": "Photon"
+      },
+      {
+        "kind": "Constructor",
+        "params": {
+          "wavelength": "number",
+          "unit": "Unit"
+        },
+        "returns": "Photon"
+      }
+    ],
+    "Photon::": [
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "Photon"
+      }
+    ],
+    "Photon.speedOfLight": [
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "number"
+      },
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "number"
+      }
+    ],
+    "Photon.plancksConstant": [
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "number"
+      },
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "number"
+      }
+    ],
+    "Photon.electronVolt": [
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "number"
+      },
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "number"
+      }
+    ],
+    "Photon.convertEnergyToElectronVolts": [
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "energyInJoules": "number"
+        },
+        "returns": "number"
+      },
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "energyInJoules": "number"
+        },
+        "returns": "number"
+      }
+    ],
+    "Photon.calculateMomentum": [
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "energy": "number",
+          "speedOfLight": "number or undefined"
+        },
+        "returns": "number"
+      },
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "energy": "number",
+          "speedOfLight": "number or undefined"
+        },
+        "returns": "number"
+      }
+    ],
+    "Photon.fromWavelength": [
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "wavelength": "number"
+        },
+        "returns": "Photon"
+      },
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "wavelength": "number",
+          "unit": "Unit"
+        },
+        "returns": "Photon"
+      },
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "wavelength": "number"
+        },
+        "returns": "Photon"
+      },
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "wavelength": "number",
+          "unit": "Unit"
+        },
+        "returns": "Photon"
+      }
+    ],
+    "Photon.create": [
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "wavelength": "number",
+          "unit": "WavelengthUnit or undefined"
+        },
+        "returns": "(and Photon object)"
+      },
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "wavelength": "number",
+          "unit": "Unit or undefined"
+        },
+        "returns": "(and Photon object)"
+      }
+    ]
+  },
+  "charm": {
+    "charm.mass": [
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "number"
+      }
+    ],
+    "charm.charge": [
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "number"
+      }
+    ],
+    "charm.spin": [
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "number"
+      }
+    ],
+    "charm.symbol": [
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "string"
+      }
+    ],
+    "charm.colorCharge": [
+      {
+        "kind": "StaticProperty",
+        "params": null,
+        "returns": "(or 'red' 'green' 'blue')"
+      }
+    ],
+    "charm.calculateInteractionEnergy": [
+      {
+        "kind": "StaticMethod",
+        "params": {
+          "otherQuark": "object"
+        },
+        "returns": "number"
+      }
+    ],
+    "charm.toString": [
+      {
+        "kind": "StaticMethod",
+        "params": null,
+        "returns": "string"
+      }
+    ],
+    "charm.decay": [
+      {
+        "kind": "StaticMethod",
+        "params": null,
+        "returns": "Array"
+      }
+    ]
+  }
+}

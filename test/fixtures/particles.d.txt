@@ -1,0 +1,94 @@
+interface Photon {
+  wavelength: number;
+  
+  getFrequency(): number;
+  getEnergy(): number;
+  getEnergy(unit: 'J' | 'eV'): number;
+  getMomentum(): number;
+  getColor(): string | null;
+  isVisible(): boolean;
+  convertWavelength<Unit extends 'nm' | 'm'>(unit: Unit): Unit extends 'nm' ? number : string;
+}
+
+type WavelengthUnits = 'nm' | 'm';
+
+interface PhotonConstructor {
+  readonly prototype: Photon;
+
+  new (wavelength: number): Photon;
+  new <Unit extends WavelengthUnits>(wavelength: number, unit: Unit): Photon;
+
+  (wavelength: number): Photon;
+  <Unit extends WavelengthUnits>(wavelength: number, unit: Unit): Photon;
+
+  readonly speedOfLight: number;
+  readonly plancksConstant: number;
+  readonly electronVolt: number;
+
+  convertEnergyToElectronVolts(energyInJoules: number): number;
+  calculateMomentum(energy: number, speedOfLight?: number): number;
+
+  fromWavelength(wavelength: number): Photon;
+  fromWavelength<Unit extends WavelengthUnits>(wavelength: number, unit: Unit): Photon;
+
+  create<WavelengthUnit extends WavelengthUnits>(wavelength: number, unit?: WavelengthUnit): Photon & {
+    unit: WavelengthUnit;
+  };
+}
+
+declare var Photon: PhotonConstructor;
+
+interface Photon {
+  getEnergy(): number;
+  getEnergy(unit: 'J'): number;
+  getEnergy(unit: 'eV'): number;
+
+  convertWavelength<Unit extends WavelengthUnits>(unit: Unit): Unit extends 'nm' ? number : string;
+}
+
+interface PhotonConstructor {
+  readonly speedOfLight: number;
+  readonly plancksConstant: number;
+  readonly electronVolt: number;
+
+  convertEnergyToElectronVolts(energyInJoules: number): number;
+  calculateMomentum(energy: number, speedOfLight?: number): number;
+
+  fromWavelength(wavelength: number): Photon;
+  fromWavelength<Unit extends WavelengthUnits>(wavelength: number, unit: Unit): Photon;
+
+  create<Unit extends WavelengthUnits>(wavelength: number, unit?: Unit): Photon & {
+    unit: Unit;
+  };
+}
+
+// THIS INTERFACE SHOULD NOT APPEAR IN THE OUTPUT
+interface Antiparticle {
+  readonly mass: number;
+  readonly charge: number;
+  readonly spin: number;
+  readonly symbol: string;
+
+  canAnnihilateWith(particle: { mass: number; charge: number }): boolean;
+  getTotalEnergy(velocity: number): number;
+  getMomentum(velocity: number): number;
+}
+
+interface CharmQuark {
+  readonly mass: number; // Mass in MeV/c^2
+  readonly charge: number; // Charge in elementary charge units (e.g., +2/3)
+  readonly spin: number; // Spin in ħ units (e.g., 1/2 for quarks)
+  readonly symbol: string; // Symbolic representation (e.g., "c" for charm quark)
+  readonly colorCharge: "red" | "green" | "blue"; // Quantum Chromodynamics (QCD) color charge
+
+  // Calculate the interaction energy with another quark based on color charge
+  calculateInteractionEnergy(otherQuark: { colorCharge: "red" | "green" | "blue" }): number;
+
+  // Method to describe the quark’s properties in a string format
+  toString(): string;
+
+  // Method to decay the charm quark into possible daughter particles
+  decay(): Array<{ symbol: string; mass: number; charge: number }>;
+}
+
+declare var charm: CharmQuark;

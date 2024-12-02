@@ -1,12 +1,5 @@
-import * as tsMorph from "ts-morph";
-import { TsLibParser } from "../src/tslib_parser.ts";
-
-function tsLibToGlobalsJson() {
-  const project = new tsMorph.Project({
-    compilerOptions: { noLib: true },
-  });
-
-  const tsLibParser = new TsLibParser(project, [
+export default class Libraries {
+  public static typescriptLibraryPaths = [
     "./tslib/decorators.txt",
     "./tslib/decorators.legacy.txt",
     "./tslib/dom.generated.txt",
@@ -14,18 +7,15 @@ function tsLibToGlobalsJson() {
     "./tslib/es2015.iterable.txt",
     "./tslib/es5.txt",
     "./tslib/es2015.symbol.wellknown.txt",
-    "./tslib/es2015.symbol.txt",
     "./tslib/es2015.reflect.txt",
     "./tslib/es2015.proxy.txt",
     "./tslib/es2015.promise.txt",
-    "./tslib/es2015.iterable.txt",
     "./tslib/es2015.generator.txt",
     "./tslib/es2015.core.txt",
     "./tslib/es2015.collection.txt",
     "./tslib/es2015.txt",
     "./tslib/es2016.array.include.txt",
     "./tslib/es2016.intl.txt",
-    "./tslib/es2015.iterable.txt",
     "./tslib/es2016.txt",
     "./tslib/es2017.arraybuffer.txt",
     "./tslib/es2017.date.txt",
@@ -96,12 +86,9 @@ function tsLibToGlobalsJson() {
     "./tslib/webworker.generated.txt",
     "./tslib/webworker.asynciterable.generated.txt",
     "./tslib/webworker.iterable.generated.txt",
-  ]);
+  ];
 
-  const globals = tsLibParser.transpileToGlobalsJson();
-  console.log(JSON.stringify(globals, null, 2));
-}
-
-if (import.meta.main) {
-  tsLibToGlobalsJson();
+  public static getTypescriptLibraryPaths() {
+    return Libraries.typescriptLibraryPaths;
+  }
 }

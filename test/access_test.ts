@@ -1,11 +1,9 @@
-import { assert } from "@std/assert";
-import json from "../globals.json" with { type: "json" };
-import * as types from "../src/types.ts";
+import { assert, assertEquals } from "@std/assert";
+import globals from "../globals.json" with { type: "json" };
+import { AstKind } from "../src/AstKind.ts";
 
-type Globals = Record<string, types.Ast[]>;
-const globals: Globals = json as Globals;
-const allArrayKeys = globals.Array.map((item) => item.name);
-const uniqueArrayKeys = new Set(allArrayKeys);
+const array = globals["Array"];
+const keys = new Set(array.members.map((member) => member.name));
 
 /*
 interface Array<T> {
@@ -33,30 +31,31 @@ interface Array<T> {
 }
 */
 
-Deno.test('Instance property "Array.prototype.length" exists', () => {
-  assert(uniqueArrayKeys.has("Array.prototype.length"));
+Deno.test('Instance property "Array::length" exists', () => {
+  assert(keys.has("length"));
 });
 
-Deno.test('Instance method "Array.prototype.splice" exists', () => {
-  assert(uniqueArrayKeys.has("Array.prototype.splice"));
+Deno.test('Instance method "Array::splice" exists', () => {
+  assert(keys.has("splice"));
 });
 
 Deno.test('Constructor "Array.new" exists', () => {
-  assert(uniqueArrayKeys.has("Array.new"));
+  assert(keys.has("new"));
 });
 
 Deno.test('Constructor function "Array" exists', () => {
-  assert(uniqueArrayKeys.has("Array"));
+  const constructorFunctions = array.members.filter((member) => member.kind === AstKind[AstKind.Constructor] && member.name === undefined);
+  assertEquals(constructorFunctions.length, 3);
 });
 
-Deno.test('Static property "Array.prototype" exists', () => {
-  assert(uniqueArrayKeys.has("Array.prototype"));
+Deno.test('Static property "Array::" exists', () => {
+  assert(keys.has("prototype"));
 });
 
 Deno.test('Static property "Array[Symbol.species]" exists', () => {
-  assert(uniqueArrayKeys.has("Array[Symbol.species]"));
+  assert(keys.has("[Symbol.species]"));
 });
 
 Deno.test('Static method "Array.from" exists', () => {
-  assert(uniqueArrayKeys.has("Array.from"));
+  assert(keys.has("from"));
 });

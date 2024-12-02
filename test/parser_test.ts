@@ -2,14 +2,14 @@ import ts from "typescript";
 import { assert } from "@std/assert";
 import { assertSpyCall, spy } from "@std/testing/mock";
 
-import { TsLibParser } from "../src/tslib_parser.ts";
+import { Parser } from "../src/Parser.ts";
 import { createMockParser } from "./test_helpers.ts";
 
 const _ = undefined;
 
 function createMock<T extends ts.Node>(
   sourceCode: string,
-  spyOnFunction: keyof TsLibParser,
+  spyOnFunction: keyof Parser,
   node?: T,
 ) {
   const parser = createMockParser(sourceCode);

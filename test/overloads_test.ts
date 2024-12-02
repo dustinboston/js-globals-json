@@ -1,6 +1,6 @@
 import { assert, assertEquals } from "@std/assert";
 import globalsJson from "../globals.json" with { type: "json" };
-import { SerializedAst } from "../src/types.ts";
+import { SerializedAst } from "../src/Types.ts";
 
 Deno.test("new Array()", () => {
   const globalArray = globalsJson["Array.new"];
